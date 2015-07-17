@@ -10,13 +10,13 @@ angular.module('mldocsApp', [
     'search.service'
 ])
     .config(function($stateProvider, $urlRouterProvider, $locationProvider) {
-        $urlRouterProvider
+        /*$urlRouterProvider
             .when('/app/:api', ['$state',
                 function($state) {
                     $state.go('app.api');
                 }
             ]);
-
+        */
 
         $urlRouterProvider
             .otherwise('/');
@@ -24,14 +24,18 @@ angular.module('mldocsApp', [
         $stateProvider
             .state('app', {
                 url: '/',
+                data: {
+                    result: null
+                },
                 views: {
                     'search': {
                         templateUrl: 'app/main/search.html',
-                        controller: 'MainCtrl'
+                        controller: 'SearchCtrl',
+
                     },
-                    'results': {
-                        templateUrl: 'app/main/results.html',
-                        controller: 'ResultsCtrl'
+                    '': {
+                        templateUrl: 'app/main/main.html',
+                        controller: 'ResultCtrl',
                     },
                     'sidebar': {
                         templateUrl: 'app/main/sidebar.html',

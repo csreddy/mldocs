@@ -9,30 +9,37 @@ angular.module('mldocsApp')
                     url: 'api/{api}',
                     views: {
                         '@': {
-                            templateUrl: 'app/main/content.html',
-                            controller: 'ContentCtrl'
+                            templateUrl: 'app/main/detail.html',
+                            controller: 'SearchCtrl'
                         }
                     }
-                });
-
-               $stateProvider
+                })
                 .state('app.search', {
+                    url: 'search',
                     views: {
                         'search@': {
                             templateUrl: 'app/main/search.html',
-                            controller: 'MainCtrl'
+                            controller: 'SearchCtrl'
                         }
                     }
-                }); 
-
-                $stateProvider
-                .state('app.results', {
+                })
+                .state('app.content', {
+                    url:'content',
                     views: {
-                        'results@': {
-                            templateUrl: 'app/main/results.html',
-                            controller: 'ResultsCtrl'
+                        '@': {
+                            templateUrl: 'app/main/content.html',
+                            controller: 'ResultCtrl'
                         }
                     }
-                }); 
+                })
+                .state('app.content.detail', {
+                    url: 'detail',
+                    views: {
+                        '@': {
+                            templateUrl: 'app/main/detail.html',
+                            controller: 'SearchCtrl'
+                        }
+                    }
+                });
         }
     ]);

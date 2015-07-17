@@ -1,8 +1,20 @@
-<h1>content</h1>
-{{content}}
+<h1>Results</h1>
 
- <h3>current state name: <var>{{$state.current.name}}</var></h3>
+<md-list>
+  <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
+    <div class="md-list-item-text">
+      bucket: <b>{{item.module.bucket}}</b>
+      Module name:  <a ui-sref="app.content.detail"><b>{{item.module.name}}</b></a>
+      Category: <b>{{item.module.category}}</b>
+      <p>Summary: {{item.module.summary}}</p>
+    </div>
+  </md-list-item>
+</md-list>
+
+
+<!-- <h3>current state name: <var>{{$state.current.name}}</var></h3>
   
   state
   <pre>{{$state.current | json}}</pre>
   model
+  <pre>{{results | json}}</pre> -->

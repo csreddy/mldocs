@@ -2,7 +2,7 @@
 
 angular
     .module('mldocsApp')
-    .controller('MainCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state',
+    .controller('SearchCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state',
         function($scope, $timeout, $mdSidenav, $mdUtil, $log, Search, $state) {
 
             $scope.message = 'hello from mainctrl';
@@ -21,7 +21,8 @@ angular
                     // filter only documents which has 'module' as the root
                     $scope.results = _.filter($scope.results, 'module');
 
-                    $state.go('app.results', {results: $scope.results});
+                    $state.get('app.content').data.result = $scope.results;
+                    $state.go('app.content');
                     console.log('results', $scope.results);
 
                 }).error(function(error) {
@@ -50,12 +51,10 @@ angular
             };
 
         }
-    ]).controller('ContentCtrl', ['$scope',
-        function($scope) {
-            $scope.content = Math.random();
-        }
-    ]).controller('ResultsCtrl', ['$scope',
-        function($scope) {
-            //$scope.results = 'ResultsCtrl = ' + Math.random();
+    ])
+    .controller('ResultCtrl', ['$scope', '$state',
+        function($scope, $state) {
+              $scope.results = $state.get($state.current).data.result
+            //console.log('state.get',);
         }
     ]);
