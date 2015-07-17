@@ -1,0 +1,27 @@
+<!-- <md-input-container>
+  <label>Search</label>
+  <input type="text" ng-model="q" required>
+</md-input-container>
+<md-button class="md-raised md-mini" ng-click="search()"> Search </md-button> -->
+<br>
+Results: {{results.length}}
+
+<md-list>
+  <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
+    <div class="md-list-item-text">
+      bucket: <b>{{item.module.bucket}}</b>
+      Module name:  <a ui-sref="app.info"><b>{{item.module.name}}</b></a>
+      Category: <b>{{item.module.category}}</b>
+      <p>Summary: {{item.module.summary}}</p>
+    </div>
+  </md-list-item>
+</md-list>
+
+<hr>
+
+ <h3>current state name: <var>{{$state.current.name}}</var></h3>
+  
+  state
+  <pre>{{$state.current | json}}</pre>
+  model
+    {{results}}
