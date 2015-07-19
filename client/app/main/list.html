@@ -1,0 +1,12 @@
+<h4>List of APIs under <b>{{$state.params.lib}}</b></h4>
+
+<h4 ng-if="list">Count: (<b>{{list.length}}</b>)</h4>
+<md-list>
+  <md-list-item class="md-2-line" ng-repeat="item in list track by $index">
+    <div class="md-list-item-text">
+      <a href="/{{item.lib}}:{{item.apiName}}"><b>{{item.lib}}:{{item.apiName}}</b></a>
+     <!--  <small><em>(<a ui-sref="app.content.detail">{{item.bucket}}</a>)</em></small> -->
+      <!-- <p>Summary: {{item.summary}}</p> -->
+    </div>
+  </md-list-item>
+</md-list>

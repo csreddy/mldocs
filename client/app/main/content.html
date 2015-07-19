@@ -1,12 +1,11 @@
-<h1>Results</h1>
-
+<h4 ng-if="results">Results: (<b>{{results.length}}</b>)</h4>
 <md-list>
   <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
     <div class="md-list-item-text">
-      bucket: <b>{{item.module.bucket}}</b>
-      Module name:  <a ui-sref="app.content.detail"><b>{{item.module.name}}</b></a>
-      Category: <b>{{item.module.category}}</b>
-      <p>Summary: {{item.module.summary}}</p>
+      <a ui-sref="app.content.detail"><b>{{item.lib}}:{{item.apiName}}</b></a>
+      <small><em>(<a ui-sref="app.content.detail">{{item.bucket}}</a>)</em></small>
+     
+      <p>Summary: {{item.summary}}</p>
     </div>
   </md-list-item>
 </md-list>

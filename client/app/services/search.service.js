@@ -9,5 +9,13 @@ angular.module('search.service', []).service('Search', ['$http',
                 data: searchCriteria
             });
         };
+
+        this.get = function(url) {
+            return $http({
+                method: 'GET',
+                url: '/api/search/get?uri='+url
+            });
+        };
+
     }
 ]);

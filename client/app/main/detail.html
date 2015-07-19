@@ -1,8 +1,59 @@
-<h1>Detail Page</h1>
+<h4 class="md-headline"><a href="/list/{{api.lib}}">{{api.lib}}</a>:{{api.apiName}}()</h4>
+<md-card>
+    <md-card-content>
+        <h3 class="md-title">Usage</h3>
+        <p>
+            <pre style="max-width:500px">
+        <b>{{api.lib}}:{{api.apiName}}(){ </b>
+        <span ng-repeat="param in api.details.params.param">
+        <b>{{param.name}}</b> as <em>{{param.type}}</em>
+         </span>
+        <b>}</b> as <b>{{api.details.return}}</b>
+        </pre>
+        </p>
+        <h3 class="md-title">Summary</h3>
+        <md-content layout-padding>
+            {{api.summary}}
+        </md-content>
+        <h3 class="md-title">Parameters</h3>
+        <table>
+            <tr>
+                <th>
+                    <md-content layout-padding>
+                        Name
+                    </md-content>
+                </th>
+                <th>
+                    <md-content layout-padding>
+                        Required
+                    </md-content>
+                </th>
+                <th>
+                    <md-content layout-padding>
+                        Description
+                    </md-content>
+                </th>
+            </tr>
+            <tbody>
+                <tr ng-repeat="param in api.details.params.param">
+                    <td>
+                        <md-content layout-padding>
+                            <code>{{param.name}}</code>
+                        </md-content>
+                    </td>
+                    <td>
+                        <md-content layout-padding>
+                            {{param.optional}}
+                        </md-content>
+                    </td>
+                    <td>
+                        <md-content layout-padding>
+                            {{param.text}}
+                        </md-content>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </md-card-content>
+</md-card>
 
-<h3>current state name: <var>{{$state.current.name}}</var></h3>
-  
-  state
-  <pre>{{$state.current | json}}</pre>
-  model
-  <pre>{{results | json}}</pre>

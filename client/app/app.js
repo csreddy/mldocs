@@ -8,8 +8,10 @@ angular.module('mldocsApp', [
     'ui.bootstrap',
     'ngMaterial',
     'search.service'
-])
-    .config(function($stateProvider, $urlRouterProvider, $locationProvider) {
+]).config(['$mdThemingProvider', function($mdThemingProvider) {
+  //$mdThemingProvider.theme('default').dark();
+}])
+    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', function($stateProvider, $urlRouterProvider, $locationProvider) {
         /*$urlRouterProvider
             .when('/app/:api', ['$state',
                 function($state) {
@@ -46,9 +48,8 @@ angular.module('mldocsApp', [
 
 
         $locationProvider.html5Mode(true);
-    }).run(
-        ['$rootScope', '$state', '$stateParams',
-            function($rootScope, $state, $stateParams) {
+    }]).run(
+        ['$rootScope', '$state', '$stateParams', function($rootScope, $state, $stateParams) {
                 $rootScope.$state = $state;
                 $rootScope.$stateParams = $stateParams;
             }

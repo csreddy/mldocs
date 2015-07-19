@@ -5,12 +5,12 @@ angular.module('mldocsApp')
         function($stateProvider, $urlRouterProvider, $locationProvider) {
 
             $stateProvider
-                .state('app.api', {
-                    url: 'api/{api}',
+                .state('app.list', {
+                    url: 'list/{lib}',
                     views: {
                         '@': {
-                            templateUrl: 'app/main/detail.html',
-                            controller: 'SearchCtrl'
+                            templateUrl: 'app/main/list.html',
+                            controller: 'ListCtrl'
                         }
                     }
                 })
@@ -32,12 +32,12 @@ angular.module('mldocsApp')
                         }
                     }
                 })
-                .state('app.content.detail', {
-                    url: 'detail',
+                .state('app.detail', {
+                    url: '{detail}',
                     views: {
                         '@': {
                             templateUrl: 'app/main/detail.html',
-                            controller: 'SearchCtrl'
+                            controller: 'DetailCtrl'
                         }
                     }
                 });

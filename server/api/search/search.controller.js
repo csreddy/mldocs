@@ -13,18 +13,26 @@ exports.index = function(req, res) {
 
 
 exports.search = function(req, res) {
-    var facetOptions = [q.facet('module_category', q.pathIndex('/module/category')),
-        q.facet('module_name', q.pathIndex('/module/name')),
-    ]
-console.log('req.body', req.body);
+    var searchCriteria = [q.parsedFrom(req.body.q || ''), q.collection('docs')];
+    var facetOptions = [q.facet('lib', 'lib'), q.facet('bucket', 'bucket')]
+    var resultLimit = 20; // default
+    if (req.body.facetsOnly) {
+        resultLimit = 0;
+    }
+
+    if (req.body.collection) {
+        searchCriteria.push(q.collection(req.body.collection))
+    }
+
+    console.log('req.body', req.body);
     db.documents.query(
         q.where(
-            [q.parsedFrom(req.body.q || ''), q.directory('/docs/')]
+            searchCriteria
         )
         .calculate(
             facetOptions
         )
-        .slice(0, 20, q.snippet())
+        .slice(0, resultLimit, q.snippet())
         .withOptions({
             debug: true,
             queryPlan: true,
@@ -42,10 +50,30 @@ console.log('req.body', req.body);
             //  log.info('/search', result);
             // console.log("result count"+JSON.stringify(result[0].plan["query-plan"].result.estimate,null,2));
             //console.log("result count"+JSON.stringify(result,null,2));
-            res.status(200).json(result);
+            return res.status(200).json(result);
         }, function(error) {
-            res.status(error.statusCode).json({
+            return res.status(error.statusCode).json({
                 error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
             });
         });
+};
+
+
+
+exports.get = function(req, res) {
+    //console.log('req.params', req);
+    db.documents.read(req.query.uri).result(function(doc) {
+        if (doc[0]) {
+            if (doc[0].content) {
+                return res.status(200).json(doc[0].content)
+            }
+        } else {
+            return res.status(200).json({})
+        }
+
+    }, function(error) {
+        return res.status(error.statusCode).json({
+            error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
+        });
+    })
 };
