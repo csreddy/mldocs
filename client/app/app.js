@@ -21,7 +21,7 @@ angular.module('mldocsApp', [
     }
 ])
     .config(['$stateProvider', '$urlRouterProvider', '$locationProvider',
-        function($stateProvider, $urlRouterProvider, $locationProvider) {
+        function($stateProvider, $urlRouterProvider, $locationProvider, $state) {
             /*$urlRouterProvider
             .when('/app/:api', ['$state',
                 function($state) {
@@ -47,7 +47,7 @@ angular.module('mldocsApp', [
                         },
                         '': {
                             templateUrl: 'app/main/main.html',
-                            controller: 'ResultCtrl',
+                            controller: 'SearchCtrl',
                         },
                         'sidebar': {
                             templateUrl: 'app/main/sidebar.html',
@@ -55,7 +55,6 @@ angular.module('mldocsApp', [
                         }
                     }
                 });
-
 
             $locationProvider.html5Mode(true);
         }

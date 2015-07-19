@@ -1,6 +1,6 @@
-<h4 ng-if="results">Results: (<b>{{results.length}}</b>)</h4>
+<h4 ng-if="searchResults">Results: (<b>{{searchResults.length}}</b>)</h4>
 <md-list>
-  <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
+  <md-list-item class="md-2-line" ng-repeat="item in searchResults track by $index">
     <div class="md-list-item-text">
       <a href="/{{item.lib}}:{{item.apiName}}"><b>{{item.lib}}:{{item.apiName}}</b></a>
       <small><em>(<a href="/list/{{item.bucket}}">{{item.bucket}}</a>)</em></small>

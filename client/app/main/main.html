@@ -1,16 +1,19 @@
  <h2>Main Page</h2>
-<!--
-<md-list>
+
+<!-- <div ng-include="'app/main/content.html'"></div> -->
+
+
+<!-- <md-list>
   <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
     <div class="md-list-item-text">
-      bucket: <b>{{item.module.bucket}}</b>
-      Module name:  <a ui-sref="app.info"><b>{{item.module.name}}</b></a>
-      Category: <b>{{item.module.category}}</b>
-      <p>Summary: {{item.module.summary}}</p>
+      <a href="/{{item.lib}}:{{item.apiName}}"><b>{{item.lib}}:{{item.apiName}}</b></a>
+      <small><em>(<a href="/list/{{item.bucket}}">{{item.bucket}}</a>)</em></small>
+     
+      <p>Summary: {{item.summary}}</p>
     </div>
   </md-list-item>
-</md-list> -->
-
+</md-list>
+ -->
 <!-- <h3>current state name: <var>{{$state.current.name}}</var></h3>
   
   state

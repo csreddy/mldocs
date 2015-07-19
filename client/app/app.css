@@ -79,14 +79,12 @@ md-list .md-button {
 
 /* Primary content area */
 
-#content {
-  /*overflow: hidden;*/
-}
 
 #content  {
   padding-left: 40px;
   padding-right: 40px;
   padding-top: 5px;
+  padding-bottom: 50px
 }
 
 #content .md-button.contact {
@@ -168,3 +166,5 @@ span.name {
   font-size:1.1em;
   padding-left:5px;
 }
+
+

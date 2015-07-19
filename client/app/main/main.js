@@ -23,8 +23,8 @@ angular.module('mldocsApp')
                         }
                     }
                 })
-                .state('app.content', {
-                    // url:'content',
+                .state('app.results', {
+                    url:'results',
                     views: {
                         '@': {
                             templateUrl: 'app/main/content.html',
