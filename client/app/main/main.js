@@ -24,7 +24,7 @@ angular.module('mldocsApp')
                     }
                 })
                 .state('app.content', {
-                    url:'content',
+                    // url:'content',
                     views: {
                         '@': {
                             templateUrl: 'app/main/content.html',

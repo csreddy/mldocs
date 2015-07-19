@@ -8,11 +8,21 @@ angular.module('mldocsApp', [
     'ui.bootstrap',
     'ngMaterial',
     'search.service'
-]).config(['$mdThemingProvider', function($mdThemingProvider) {
-  //$mdThemingProvider.theme('default').dark();
-}])
-    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', function($stateProvider, $urlRouterProvider, $locationProvider) {
-        /*$urlRouterProvider
+]).config(['$mdThemingProvider', '$mdIconProvider',
+    function($mdThemingProvider, $mdIconProvider) {
+        
+        // app theme
+        //$mdThemingProvider.theme('default').dark();
+        
+        /// icons
+        $mdIconProvider
+            .iconSet('social', 'img/icons/sets/social-icons.svg', 24)
+            .defaultIconSet('img/icons/sets/core-icons.svg', 24);
+    }
+])
+    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider',
+        function($stateProvider, $urlRouterProvider, $locationProvider) {
+            /*$urlRouterProvider
             .when('/app/:api', ['$state',
                 function($state) {
                     $state.go('app.api');
@@ -20,36 +30,38 @@ angular.module('mldocsApp', [
             ]);
         */
 
-        $urlRouterProvider
-            .otherwise('/');
+            $urlRouterProvider
+                .otherwise('/');
 
-        $stateProvider
-            .state('app', {
-                url: '/',
-                data: {
-                    result: null
-                },
-                views: {
-                    'search': {
-                        templateUrl: 'app/main/search.html',
-                        controller: 'SearchCtrl',
+            $stateProvider
+                .state('app', {
+                    url: '/',
+                    data: {
+                        result: null
+                    },
+                    views: {
+                        'search': {
+                            templateUrl: 'app/main/search.html',
+                            controller: 'SearchCtrl',
 
-                    },
-                    '': {
-                        templateUrl: 'app/main/main.html',
-                        controller: 'ResultCtrl',
-                    },
-                    'sidebar': {
-                        templateUrl: 'app/main/sidebar.html',
-                        controller: 'SidebarCtrl'
+                        },
+                        '': {
+                            templateUrl: 'app/main/main.html',
+                            controller: 'ResultCtrl',
+                        },
+                        'sidebar': {
+                            templateUrl: 'app/main/sidebar.html',
+                            controller: 'SidebarCtrl'
+                        }
                     }
-                }
-            });
+                });
 
 
-        $locationProvider.html5Mode(true);
-    }]).run(
-        ['$rootScope', '$state', '$stateParams', function($rootScope, $state, $stateParams) {
+            $locationProvider.html5Mode(true);
+        }
+    ]).run(
+        ['$rootScope', '$state', '$stateParams',
+            function($rootScope, $state, $stateParams) {
                 $rootScope.$state = $state;
                 $rootScope.$stateParams = $stateParams;
             }

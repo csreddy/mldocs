@@ -1,21 +1,22 @@
-<h4 class="md-headline"><a href="/list/{{api.lib}}">{{api.lib}}</a>:{{api.apiName}}()</h4>
-<md-card>
-    <md-card-content>
-        <h3 class="md-title">Usage</h3>
-        <p>
-            <pre style="max-width:500px">
-        <b>{{api.lib}}:{{api.apiName}}(){ </b>
-        <span ng-repeat="param in api.details.params.param">
-        <b>{{param.name}}</b> as <em>{{param.type}}</em>
-         </span>
-        <b>}</b> as <b>{{api.details.return}}</b>
-        </pre>
-        </p>
-        <h3 class="md-title">Summary</h3>
+<h4 class="md-headline"><b><a href="/list/{{api.lib}}">{{api.lib}}</a>:{{api.apiName}}()</b></h4>
+<md-content layout-padding>
+ <h3 class="md-title"><b>Summary</b></h3>
         <md-content layout-padding>
             {{api.summary}}
         </md-content>
-        <h3 class="md-title">Parameters</h3>
+
+        <h3 class="md-title"><b>Usage</b></h3>
+        <p>
+            <pre style="max-width:500px">
+        <b>{{api.lib}}:{{api.apiName}}(){ </b>
+        <span ng-repeat="param in api.params">
+        <b>{{param.name}}</b> as <em>{{param.type}}</em>
+         </span>
+        <b>}</b> as <b>{{api.return}}</b>
+        </pre>
+        </p>
+        
+        <h3 class="md-title"><b>Parameters</b></h3>
         <table>
             <tr>
                 <th>
@@ -35,7 +36,7 @@
                 </th>
             </tr>
             <tbody>
-                <tr ng-repeat="param in api.details.params.param">
+                <tr ng-repeat="param in api.params">
                     <td>
                         <md-content layout-padding>
                             <code>{{param.name}}</code>
@@ -43,17 +44,88 @@
                     </td>
                     <td>
                         <md-content layout-padding>
-                            {{param.optional}}
+                            {{param.required}}
                         </md-content>
                     </td>
                     <td>
                         <md-content layout-padding>
-                            {{param.text}}
+                            {{param.description}}
                         </md-content>
                     </td>
                 </tr>
             </tbody>
         </table>
+
+   <h3 class="md-title"><b>Example</b></h3>
+    <md-whiteframe class="md-whiteframe-z5" layout layout-align="center center" ng-repeat="example in api.examples">
+    <pre>{{example}}</pre>
+  </md-whiteframe>
+</md-content>
+
+<!-- <md-card>
+    <md-card-content>
+    <h3 class="md-title"><b>Summary</b></h3>
+        <md-content layout-padding>
+            {{api.summary}}
+        </md-content>
+
+        <h3 class="md-title"><b>Usage</b></h3>
+        <p>
+            <pre style="max-width:500px">
+        <b>{{api.lib}}:{{api.apiName}}(){ </b>
+        <span ng-repeat="param in api.params">
+        <b>{{param.name}}</b> as <em>{{param.type}}</em>
+         </span>
+        <b>}</b> as <b>{{api.return}}</b>
+        </pre>
+        </p>
+        
+        <h3 class="md-title"><b>Parameters</b></h3>
+        <table>
+            <tr>
+                <th>
+                    <md-content layout-padding>
+                        Name
+                    </md-content>
+                </th>
+                <th>
+                    <md-content layout-padding>
+                        Required
+                    </md-content>
+                </th>
+                <th>
+                    <md-content layout-padding>
+                        Description
+                    </md-content>
+                </th>
+            </tr>
+            <tbody>
+                <tr ng-repeat="param in api.params">
+                    <td>
+                        <md-content layout-padding>
+                            <code>{{param.name}}</code>
+                        </md-content>
+                    </td>
+                    <td>
+                        <md-content layout-padding>
+                            {{param.required}}
+                        </md-content>
+                    </td>
+                    <td>
+                        <md-content layout-padding>
+                            {{param.description}}
+                        </md-content>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+   <h3 class="md-title"><b>Example</b></h3>
+    <md-whiteframe class="md-whiteframe-z5" layout layout-align="center center" ng-repeat="example in api.examples">
+    <pre>{{example}}</pre>
+  </md-whiteframe>
+    
+
     </md-card-content>
-</md-card>
+</md-card> -->
 
