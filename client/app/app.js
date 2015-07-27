@@ -10,10 +10,28 @@ angular.module('mldocsApp', [
     'search.service'
 ]).config(['$mdThemingProvider', '$mdIconProvider',
     function($mdThemingProvider, $mdIconProvider) {
-        
+
         // app theme
         //$mdThemingProvider.theme('default').dark();
-        
+        //$mdThemingProvider.theme('my').primaryPalette('red');
+        // $mdThemingProvider.setDefaultTheme('my');
+
+        var customBlueMap = $mdThemingProvider.extendPalette('light-blue', {
+            'contrastDefaultColor': 'light',
+            'contrastDarkColors': ['50'],
+            '50': 'ffffff'
+        });
+        $mdThemingProvider.definePalette('customBlue', customBlueMap);
+        $mdThemingProvider.theme('default')
+            .primaryPalette('customBlue', {
+                'default': '500',
+                'hue-1': '50'
+            })
+            .accentPalette('pink');
+        $mdThemingProvider.theme('input', 'default')
+            .primaryPalette('grey')
+
+
         /// icons
         $mdIconProvider
             .iconSet('social', 'img/icons/sets/social-icons.svg', 24)
@@ -36,22 +54,38 @@ angular.module('mldocsApp', [
             $stateProvider
                 .state('app', {
                     url: '/',
-                    data: {
-                        result: null
+                    resolve: {
+                        modules: function(Search) {
+                            return Search.search({
+                                q: '',
+                                facetsOnly: true
+                            }).success(function(result) {
+                                var facets = result[0].facets;
+                                _.forEach(facets, function(bucket, key) {
+                                    facets[key] = bucket.facetValues;
+                                });
+                                //  console.log('facets', facets);
+                                return facets;
+                            }).error(function(error) {
+                                console.error('ERROR with facets', error);
+                            });
+                        },
+                        apiList: function(Search) {
+                            return Search.all().success(function(result) {
+                                return result;
+                            }).error(function(error) {
+                                console.log('error', error);
+                            });
+                        }
                     },
                     views: {
-                        'search': {
-                            templateUrl: 'app/main/search.html',
-                            controller: 'SearchCtrl',
-
-                        },
                         '': {
                             templateUrl: 'app/main/main.html',
-                            controller: 'SearchCtrl',
+                            controller: 'MainCtrl',
                         },
                         'sidebar': {
                             templateUrl: 'app/main/sidebar.html',
-                            controller: 'SidebarCtrl'
+                            controller: 'MainCtrl'
                         }
                     }
                 });

@@ -2,15 +2,87 @@
 
 angular
     .module('mldocsApp')
-    .controller('SearchCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state',
-        function($scope, $timeout, $mdSidenav, $mdUtil, $log, Search, $state) {
+    .controller('MainCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList',
+        function($scope, $timeout, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList) {
 
             $scope.message = 'hello from mainctrl';
             $scope.results = [];
+            $scope.modules = modules.data[0].facets;
+            $scope.apiList = apiList.data;
+            // remove lib to make suggestion data compatible between normal suggest and fuzzy-suggest
+            var modifiedApiList = $scope.apiList.map(function(item) {
+                return item.apiName;
+            });
 
-            $scope.search = function() {
+            // for sidebar toggling
+            $scope.toggleSideBar = function() {
+                console.log('toggling...');
+                $mdSidenav('left').toggle();
+            };
+
+            $scope.query = {
+                q: '',
+                fuzzy: false,
+                strict: true,
+                suggestions: [],
+                strictSuggest: function(text) {
+                    Search.suggest({
+                        q: text,
+                        facetsOnly: false
+                    }).success(function(results) {
+                        $scope.query.suggestions = _.compact(results);
+                    }).error(function(error) {
+                        console.log('error', error);
+                    });
+                },
+                fuzzySuggest: function(text) {
+                    var options = {
+                        keys: ['lib', 'apiName']
+                    };
+
+                    var f = new Fuse(modifiedApiList, options);
+                    $scope.query.suggestions = f.search(text);
+                },
+                suggest: function(text) {
+                    var fuzzySuggestions = [];
+                    var strictSuggestions = [];
+                    try {
+                        var f = new Fuse(modifiedApiList);
+                        fuzzySuggestions = f.search(text); // this returns indexes
+                        fuzzySuggestions = fuzzySuggestions.map(function(index) {
+                            return modifiedApiList[index];
+                        });
+                    } catch (e) {
+                        console.log(e.message);
+                    }
+
+                    //console.log('fuzzySuggestions', fuzzySuggestions);
+                    Search.suggest({
+                        q: text,
+                        facetsOnly: false
+                    }).success(function(results) {
+                        strictSuggestions = _.compact(results);
+                        //console.log('strictSuggestions', strictSuggestions);
+                        $scope.query.suggestions = _.uniq(_.flatten([strictSuggestions, fuzzySuggestions], true));
+                        //console.log('suggestions', $scope.suggestions);
+                    }).error(function(error) {
+                        console.log('error', error);
+                    });
+                },
+
+                selectedApi: function() {
+                    console.log('selectedApi');
+                }
+            };
+
+
+            // for search
+            $scope.search = function(text, fromSuggest) {
+
+                $scope.query.q = text || $scope.query.q;
+                var prefix = (fromSuggest) ? 'api:' : '';
                 Search.search({
-                    q: $scope.q,
+                    q: prefix + $scope.query.q,
                     facetsOnly: false
                 }).success(function(response) {
 
@@ -20,76 +92,50 @@ angular
                     // pluck only 'contents' 
                     $scope.results = _.pluck($scope.results, 'content');
 
-                    console.log('current state in SearchCtrl:', $state.current);
-
-
-                    $state.get('app.results').data.result = $scope.results;
-                    $state.go('app.results', null, { reload: true });
-
-                    console.log('results', $scope.results);
+                    // console.log('search results', $scope.results);
 
                 }).error(function(error) {
                     console.error('Error', error);
                 });
             };
-        }
-    ])
-    .controller('ResultCtrl', ['$scope', '$state',
-        function($scope, $state) {
-            console.log('in ResultCtrl..');
-            console.log('current state in ResultCtrl:', $state.current);
 
-            $scope.searchResults = $state.get($state.current).data.result;
-            $scope.$watch('searchResults', function() {
-              console.log('searchResults updated');
-            });
 
-            console.log('searchResults', $scope.searchResults);
-        }
-    ])
-    .controller('SidebarCtrl', ['$scope', '$http', '$timeout', '$mdSidenav', '$log', '$state', 'Search',
-        function($scope, $http, $timeout, $mdSidenav, $log, $state, Search) {
-
-            Search.search({
-                q: $scope.q,
-                facetsOnly: true
-            }).success(function(result) {
-                $scope.facets = result[0].facets;
-                _.forEach($scope.facets, function(bucket, key) {
-                    $scope.facets[key] = bucket.facetValues;
+            // for displaying api documentation
+            $scope.details = function() {
+                var url = '/' + $state.params.detail.replace(':', '/') + '.json';
+                Search.get(url).success(function(doc) {
+                    $scope.api = doc;
+                    console.log('api', $scope.api);
+                }).error(function(error) {
+                    console.error('error', error);
                 });
-                console.log('facets', $scope.facets);
-
-            }).error(function(error) {
-                console.error('ERROR with facets', error);
-            });
+            };
 
         }
     ])
+    .controller('ListCtrl', ['$scope', '$state', 'Search',
+        function($scope, $state, Search) {
+            console.log($state);
+            $scope.getList = function(name) {
+                Search.search({
+                    collection: name
+                }).success(function(result) {
+                    $scope.list = result;
+                    // remove first item from array
+                    $scope.list = _.rest(result);
 
-.controller('ListCtrl', ['$scope', '$state', 'Search',
-    function($scope, $state, Search) {
-        console.log($state);
-        $scope.getList = function(name) {
-            Search.search({
-                collection: name
-            }).success(function(result) {
-                $scope.list = result;
-                // remove first item from array
-                $scope.list = _.rest(result);
+                    // pluck only 'contents' 
+                    $scope.list = _.pluck($scope.list, 'content');
 
-                // pluck only 'contents' 
-                $scope.list = _.pluck($scope.list, 'content');
+                    console.log('list', $scope.list);
+                }).error(function(error) {
+                    console.error('Error in list', error);
+                });
+            };
 
-                console.log('list', $scope.list);
-            }).error(function(error) {
-                console.error('Error in list', error);
-            });
-        };
-
-        $scope.getList($state.params.lib);
-    }
-])
+            $scope.getList($state.params.lib);
+        }
+    ])
     .controller('DetailCtrl', ['$scope', '$state', 'Search',
         function($scope, $state, Search) {
             console.log('$state', $state);

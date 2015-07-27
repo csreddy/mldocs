@@ -7,6 +7,8 @@ var router = express.Router();
 
 router.get('/', controller.index);
 router.post('/', controller.search);
+router.post('/suggest', controller.suggest);
 router.get('/get', controller.get);
+router.get('/all', controller.all);
 
 module.exports = router; 

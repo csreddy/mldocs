@@ -14,24 +14,6 @@ angular.module('mldocsApp')
                         }
                     }
                 })
-                .state('app.search', {
-                    url: 'search',
-                    views: {
-                        'search@': {
-                            templateUrl: 'app/main/search.html',
-                            controller: 'SearchCtrl'
-                        }
-                    }
-                })
-                .state('app.results', {
-                    url:'results',
-                    views: {
-                        '@': {
-                            templateUrl: 'app/main/content.html',
-                            controller: 'ResultCtrl'
-                        }
-                    }
-                })
                 .state('app.detail', {
                     url: '{detail}',
                     views: {

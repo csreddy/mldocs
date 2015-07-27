@@ -1,22 +1,43 @@
- <h2>Main Page</h2>
+<h2>Main Page</h2>
+<md-button ng-click="toggleSideBar()">Side bar</md-button>
+<!-- <md-input-container>
+    <label>Search</label>
+    <input type="text" ng-model="query.q" required>
+</md-input-container>
+<md-button class="md-raised md-mini md-primary" md-ripple-size="full" ng-click="search()"> Search </md-button>
+<hr> -->
+<form ng-submit="$event.preventDefault()">
+    <md-autocomplete 
+    md-selected-item="query.selectedApi" 
+    md-search-text-change="query.suggest(query.q)" 
+    md-search-text="query.q" 
+    md-selected-item-change="search(suggest, true)" 
+    md-items="suggest in query.suggestions" 
+    md-min-length="0" 
+    md-autoselect="true"
+    md-autofocus="true"
+    placeholder="search marklogic apis">
+        <md-item-template>
+            <span md-highlight-text="query.q" md-highlight-flags="^i">{{suggest}}</span>
+        </md-item-template>
+        <md-not-found>
+            No matches found for "{{query.q}}".
+        </md-not-found>
+    </md-autocomplete>
+    <!--  <md-checkbox ng-model="query.strict">Strict Search</md-checkbox>
+      <md-checkbox ng-model="query.fuzzy">Fuzzy Search</md-checkbox>
+   -->
+    
+    <md-button class="md-raised md-mini md-primary" md-ripple-size="full" ng-click="search()"> Search </md-button>
 
-<!-- <div ng-include="'app/main/content.html'"></div> -->
+    <h4 ng-if="results">Results: (<b>{{results.length}}</b>)</h4>
+    <md-list>
+        <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
+            <div class="md-list-item-text">
+                <a href="/{{item.lib}}:{{item.apiName}}"><b>{{item.lib}}:{{item.apiName}}</b></a>
+                <small><em>(<a href="/list/{{item.bucket}}">{{item.bucket}}</a>)</em></small>
+                <p>Summary: {{item.summary}}</p>
+            </div>
+        </md-list-item>
+    </md-list>
 
-
-<!-- <md-list>
-  <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
-    <div class="md-list-item-text">
-      <a href="/{{item.lib}}:{{item.apiName}}"><b>{{item.lib}}:{{item.apiName}}</b></a>
-      <small><em>(<a href="/list/{{item.bucket}}">{{item.bucket}}</a>)</em></small>
-     
-      <p>Summary: {{item.summary}}</p>
-    </div>
-  </md-list-item>
-</md-list>
- -->
-<!-- <h3>current state name: <var>{{$state.current.name}}</var></h3>
-  
-  state
-  <pre>{{$state.current | json}}</pre>
-  model
-  <pre>{{results | json}}</pre> -->

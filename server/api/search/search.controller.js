@@ -13,18 +13,26 @@ exports.index = function(req, res) {
 
 
 exports.search = function(req, res) {
-    var searchCriteria = [q.parsedFrom(req.body.q || ''), q.collection('docs')];
+    var searchCriteria = [q.collection('docs')];
     var facetOptions = [q.facet('lib', 'lib'), q.facet('bucket', 'bucket')]
-    var resultLimit = 20; // default
+    var resultLimit = 100; // default
     if (req.body.facetsOnly) {
         resultLimit = 0;
     }
+    console.log('req.body', req.body);
+    var queryStr = (req.body.q) ? req.body.q : '';
+    searchCriteria.push(q.parsedFrom(
+        queryStr,
+        q.parseBindings(
+            q.range('apiName', q.bind('api'))
+        )))
+
 
     if (req.body.collection) {
         searchCriteria.push(q.collection(req.body.collection))
     }
 
-    console.log('req.body', req.body);
+
     db.documents.query(
         q.where(
             searchCriteria
@@ -41,15 +49,6 @@ exports.search = function(req, res) {
         })
     )
         .result(function(result) {
-            //   log.info('\n------------------------------------------');
-            _.transform(result, function(result, item, index) {
-                if (item.content) delete item.content.changeHistory
-                result[index] = item;
-            })
-
-            //  log.info('/search', result);
-            // console.log("result count"+JSON.stringify(result[0].plan["query-plan"].result.estimate,null,2));
-            //console.log("result count"+JSON.stringify(result,null,2));
             return res.status(200).json(result);
         }, function(error) {
             return res.status(error.statusCode).json({
@@ -58,6 +57,83 @@ exports.search = function(req, res) {
         });
 };
 
+exports.suggest = function(req, res) {
+    var searchCriteria = [q.collection('docs')];
+    var facetOptions = [q.facet('lib', 'lib'), q.facet('bucket', 'bucket')]
+    var resultLimit = 20; // default
+    if (req.body.facetsOnly) {
+        resultLimit = 0;
+    }
+    console.log('req.body', req.body);
+    var queryStr = (req.body.q) ? req.body.q : '';
+    searchCriteria.push(q.parsedFrom(
+        queryStr,
+        q.parseBindings(
+            q.range('apiName', q.bindDefault())
+        )))
+
+
+    if (req.body.collection) {
+        searchCriteria.push(q.collection(req.body.collection))
+    }
+
+
+    db.documents.suggest(queryStr,
+        q.where(
+            q.parsedFrom(
+                '',
+                q.parseBindings(
+                    q.range('apiName', q.bindDefault())
+                ))
+        )
+        .calculate(
+            facetOptions
+        )
+        .slice(0, resultLimit, q.snippet())
+        .withOptions({
+            debug: true,
+            queryPlan: true,
+            metrics: true,
+            categories: ['content']
+        })
+    )
+        .result(function(result) {
+            return res.status(200).json(result);
+        }, function(error) {
+            return res.status(error.statusCode).json({
+                error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
+            });
+        });
+};
+
+// returns list of api names
+exports.all = function(req, res) {
+    var resultLimit = 100; // default
+    console.log('req.body', req.body);
+
+    db.documents.query(
+        q.where(
+           q.collection('docs')
+        )
+        .slice(0, resultLimit, q.extract(['/lib', '/apiName']))
+    )
+        .result(function(result) {
+            result = result.map(function(item) {
+                if (item.content) {
+                    return {
+                       lib: item.content.extracted[1].lib,
+                       apiName: item.content.extracted[0].apiName
+                    }
+                }
+            })
+            result = _.compact(result);
+            return res.status(200).json(result);
+        }, function(error) {
+            return res.status(error.statusCode).json({
+                error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
+            });
+        });
+};
 
 
 exports.get = function(req, res) {

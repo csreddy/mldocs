@@ -1,15 +1,12 @@
-<md-list ng-repeat="(name, bucket)  in facets">
-<md-list-item class="md-2-line">
+<md-list ng-repeat="(name, bucket) in modules">
+<md-list class="md-2-line">
 <b>{{name | uppercase }}</b>
       	<md-list>
-
-        <!-- <b>{{name | uppercase }}</b> -->
-
         <md-list-item class="md-2-line" ng-repeat="facet in bucket">
             <div class="md-list-item-text">
-                <a href="/list/{{facet.name}}">{{facet.name}} ({{facet.count}})</a>
+                <a href="/list/{{facet.name}}">{{facet.name}} ({{facet.count}})</a> 
             </div>
         </md-list-item> 
        </md-list>
-    </md-list-item>
+    </md-list>
 </md-list>
