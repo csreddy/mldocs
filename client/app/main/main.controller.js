@@ -14,12 +14,6 @@ angular
                 return item.apiName;
             });
 
-            // for sidebar toggling
-            $scope.toggleSideBar = function() {
-                console.log('toggling...');
-                $mdSidenav('left').toggle();
-            };
-
             $scope.query = {
                 q: '',
                 fuzzy: false,
@@ -105,7 +99,7 @@ angular
                 var url = '/' + $state.params.detail.replace(':', '/') + '.json';
                 Search.get(url).success(function(doc) {
                     $scope.api = doc;
-                    console.log('api', $scope.api);
+                   // console.log('api', $scope.api);
                 }).error(function(error) {
                     console.error('error', error);
                 });
@@ -127,7 +121,7 @@ angular
                     // pluck only 'contents' 
                     $scope.list = _.pluck($scope.list, 'content');
 
-                    console.log('list', $scope.list);
+                  //  console.log('list', $scope.list);
                 }).error(function(error) {
                     console.error('Error in list', error);
                 });
@@ -142,10 +136,23 @@ angular
             var url = '/' + $state.params.detail.replace(':', '/') + '.json';
             Search.get(url).success(function(doc) {
                 $scope.api = doc;
-                console.log('api', $scope.api);
+               // console.log('api', $scope.api);
             }).error(function(error) {
                 console.error('error', error);
             });
+        }
+    ])
+    .controller('NavCtrl', ['$scope', '$mdSidenav',
+        function($scope, $mdSidenav) {
+            $scope.showSidebar = function() {
+                return !$mdSidenav('left').isLockedOpen();
+            }.call();
+
+            // for sidebar toggling
+            $scope.toggleSideBar = function() {
+                console.log('toggling...');
+                $mdSidenav('left').toggle();
+            };
         }
     ])
     .controller('RightCtrl', function($scope, $timeout, $mdSidenav, $log) {

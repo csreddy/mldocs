@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
     <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css({.tmp,client}) app/app.css -->
@@ -35,24 +36,29 @@
     <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
-    <div flex layout="column">
+    <div flex layout="column" style="max-height:150%">
         <section layout="row" flex>
             <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
-                <md-toolbar>
+                <md-toolbar class="md-hue-2">
                     <h1 class="md-toolbar-tools">Modules</h1>
                 </md-toolbar>
                 <div ui-view="sidebar"></div>
             </md-sidenav>
             <md-content flex>
-             <md-toolbar>
-                    <h1 class="md-toolbar-tools">ML Man</h1>
-                </md-toolbar>
-                <div layout="column" id="content" layout-fill layout-align="top center">
+                <!-- <md-toolbar class="md-hue-2">
+                    <h1 class="md-toolbar-tools"><header><a href="/">ML Man</a></header></h1>
+                </md-toolbar> -->
+                <div ui-view="navbar"></div>
+                <div layout="column" id="content" layout-padding layout-align="top center">
                     <div ui-view=""></div>
                 </div>
-                <div flex></div>
             </md-content>
         </section>
+     <md-toolbar flex> 
+            <div layout="row" layout-align="center end">
+                <div>footer</div>
+            </div>
+      </md-toolbar>
     </div>
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->

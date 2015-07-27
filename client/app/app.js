@@ -32,10 +32,8 @@ angular.module('mldocsApp', [
             .primaryPalette('grey')
 
 
-        /// icons
-        $mdIconProvider
-            .iconSet('social', 'img/icons/sets/social-icons.svg', 24)
-            .defaultIconSet('img/icons/sets/core-icons.svg', 24);
+            // icons
+        //    $mdIconProvider.fontSet('fa', 'fontawesome');
     }
 ])
     .config(['$stateProvider', '$urlRouterProvider', '$locationProvider',
@@ -86,6 +84,10 @@ angular.module('mldocsApp', [
                         'sidebar': {
                             templateUrl: 'app/main/sidebar.html',
                             controller: 'MainCtrl'
+                        },
+                        'navbar':{
+                            templateUrl: 'app/main/navbar.html',
+                            controller: 'NavCtrl'
                         }
                     }
                 });

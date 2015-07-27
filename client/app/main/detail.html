@@ -1,4 +1,5 @@
 <h4 class="md-headline"><b><a href="/list/{{api.lib}}">{{api.lib}}</a>:{{api.apiName}}()</b></h4>
+
 <md-content layout-padding>
  <h3 class="md-title"><b>Summary</b></h3>
         <md-content layout-padding>
@@ -15,7 +16,8 @@
         <b>}</b> as <b>{{api.return}}</b>
         </pre>
         </p>
-        
+
+        <div ng-if="api.params.length > 0">
         <h3 class="md-title"><b>Parameters</b></h3>
         <table>
             <tr>
@@ -55,6 +57,7 @@
                 </tr>
             </tbody>
         </table>
+        </div>
 
    <h3 class="md-title"><b>Example</b></h3>
 <div ng-repeat="example in api.examples">
