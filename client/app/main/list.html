@@ -14,7 +14,7 @@
 			    <a href="/{{item.lib}}:{{item.apiName}}"><b>{{item.lib}}:{{item.apiName}}</b></a>
 			</md-content></td>
 			<td><md-content layout-padding>
-			    {{item.summary}}
+			    {{item.summary | cut:true:150 }}
 			</md-content></td>
 		</tr>
 	</tbody>

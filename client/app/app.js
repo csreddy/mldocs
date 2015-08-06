@@ -32,7 +32,7 @@ angular.module('mldocsApp', [
             .primaryPalette('grey')
 
 
-            // icons
+        // icons
         //    $mdIconProvider.fontSet('fa', 'fontawesome');
     }
 ])
@@ -85,7 +85,7 @@ angular.module('mldocsApp', [
                             templateUrl: 'app/main/sidebar.html',
                             controller: 'MainCtrl'
                         },
-                        'navbar':{
+                        'navbar': {
                             templateUrl: 'app/main/navbar.html',
                             controller: 'NavCtrl'
                         }
@@ -94,7 +94,27 @@ angular.module('mldocsApp', [
 
             $locationProvider.html5Mode(true);
         }
-    ]).run(
+    ])
+    .filter('cut', function() {
+        return function(value, wordwise, max, tail) {
+            if (!value) return '';
+
+            max = parseInt(max, 10);
+            if (!max) return value;
+            if (value.length <= max) return value;
+
+            value = value.substr(0, max);
+            if (wordwise) {
+                var lastspace = value.lastIndexOf(' ');
+                if (lastspace != -1) {
+                    value = value.substr(0, lastspace);
+                }
+            }
+
+            return value + (tail || ' …');
+        };
+    })
+    .run(
         ['$rootScope', '$state', '$stateParams',
             function($rootScope, $state, $stateParams) {
                 $rootScope.$state = $state;
