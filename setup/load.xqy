@@ -57,7 +57,7 @@ let $desc := if(fn:empty($tag-name)) then
             let $name := if(fn:empty($name)) then "" else text {$name}
             let $type := text {$p/@type}
             let $type := if(fn:empty($type)) then "" else text {$type}
-            let $required := boolean-node {fn:not($p/@optional)}
+            let $required := if(fn:not(fn:empty($p/@optional/text()))) then boolean-node {fn:not($p/@optional)} else fn:true()
             let $desc := text {$p}
             return object-node{
             "name": $name,
