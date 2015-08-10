@@ -40,7 +40,7 @@ exports.search = function(req, res) {
         .calculate(
             facetOptions
         )
-        .slice(0, resultLimit, q.snippet())
+        .slice(0, resultLimit)
         .withOptions({
             debug: true,
             queryPlan: true,
@@ -49,6 +49,14 @@ exports.search = function(req, res) {
         })
     )
         .result(function(result) {
+            result = result.map(function(res) {
+                if (res.content) {
+                    var uri = res.uri
+                    res = res.content
+                    res.uri = uri;
+                }
+                return res
+            });
             return res.status(200).json(result);
         }, function(error) {
             return res.status(error.statusCode).json({

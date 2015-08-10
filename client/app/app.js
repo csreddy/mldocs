@@ -79,16 +79,20 @@ angular.module('mldocsApp', [
                     views: {
                         '': {
                             templateUrl: 'app/main/main.html',
-                            controller: 'MainCtrl',
+                            controller: 'SearchCtrl',
                         },
                         'sidebar': {
                             templateUrl: 'app/main/sidebar.html',
-                            controller: 'MainCtrl'
+                            controller: 'SearchCtrl'
                         },
                         'navbar': {
                             templateUrl: 'app/main/navbar.html',
                             controller: 'NavCtrl'
-                        }
+                        },
+                       /* '': {
+                            templateUrl: 'app/main/result.html',
+                            controller: 'ResultCtrl'
+                        }*/
                     }
                 });
 

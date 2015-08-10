@@ -13,7 +13,7 @@
     md-search-text="query.q" 
     md-selected-item-change="search(suggest, true)" 
     md-items="suggest in query.suggestions" 
-    md-min-length="0" 
+    md-min-length="3" 
     md-autoselect="true"
     md-autofocus="true"
     placeholder="search marklogic apis">
@@ -37,9 +37,9 @@
     <md-list>
         <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
             <div class="md-list-item-text">
-                <a href="/{{item.lib}}:{{item.apiName}}"><b>{{item.lib}}:{{item.apiName}}</b></a>
+                <a ui-sref="app.detail({uri:item.uri})"><b>{{item.lib}}:{{item.apiName}}</b></a>
                 <small><em>(<a href="/list/{{item.bucket}}">{{item.bucket}}</a>)</em></small>
-                <p>Summary: {{item.summary}}</p>
+                <p>{{item.summary}}</p>
             </div>
         </md-list-item>
     </md-list>

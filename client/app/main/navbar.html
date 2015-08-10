@@ -1,15 +1,36 @@
+<!-- <div layout="column" layout-fill>
+    <md-toolbar class="md-hue-2">
+        <div class="md-toolbar-tools">
+         <md-button ng-click="toggleSideBar()" hide-gt-md>
+            <i class="material-icons">menu</i>
+             <md-tooltip md-direction="bottom" md-autohide="true">
+                    sidebar
+                </md-tooltip>
+            </md-button>
+            <md-button href="/">
+                <i class="material-icons">developer_board</i>
+                <span class="md-title">ML Docs</span>
+            </md-button>
+        </div>
+    </md-toolbar>
+</div>
+ -->
+
 <md-toolbar class="md-hue-2">
     <div class="md-toolbar-tools">
-        <md-button class="md-icon-button" aria-label="menu" ng-click="toggleSideBar()">
-            <md-icon md-font-set="material-icons"> menu
-            <md-tooltip  md-direction="top" md-autohide="true">
-            	sidebar  
-            </md-tooltip>
-        </md-button>
-        <header>
-            <b class="md-toolbar-tools"><a href="/"><i class="material-icons">directions_run</i> ML Man</a></b>
-        </header>
-      <!--   <form ng-submit="$event.preventDefault()">
+            <md-button ng-click="toggleSideBar()" hide-gt-md>
+            <md-icon md-font-set="material-icons"> <i class="material-icons">menu</i>
+            </md-icon> 
+             <md-tooltip md-direction="bottom" md-autohide="true">
+                    sidebar
+                </md-tooltip>
+            </md-button>
+
+            <md-button href="/">
+            <i class="material-icons">developer_board</i>
+            <span style="font-size:30px;">ML Docs</span>
+            </md-button>
+        <!--   <form ng-submit="$event.preventDefault()">
             <md-autocomplete md-search-text-change="query.suggest(query.q)" md-search-text="query.q" md-selected-item-change="search(suggest, true)" md-items="suggest in query.suggestions" md-min-length="0" md-autoselect="true" md-autofocus="true" placeholder="search marklogic apis">
                 <md-item-template>
                     <span md-highlight-text="query.q" md-highlight-flags="^i">{{suggest}}</span>
@@ -21,9 +42,9 @@
         </form> -->
     </div>
     <!-- <div layout="row" layout="start center">
-<a href="" ng-click="toggleSideBar()"> <md-icon md-font-set="material-icons"> menu </md-icon></a>	
-	<header>
-	<b class="md-toolbar-tools"><a href="/"><i class="material-icons">directions_run</i> ML Man</a></b>	
-	</header>
+<a href="" ng-click="toggleSideBar()"> <md-icon md-font-set="material-icons"> menu </md-icon></a>   
+    <header>
+    <b class="md-toolbar-tools"><a href="/"><i class="material-icons">directions_run</i> ML Man</a></b> 
+    </header>
 </div> -->
 </md-toolbar>

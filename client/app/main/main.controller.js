@@ -2,10 +2,9 @@
 
 angular
     .module('mldocsApp')
-    .controller('MainCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList',
+    .controller('SearchCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList',
         function($scope, $timeout, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList) {
 
-            $scope.message = 'hello from mainctrl';
             $scope.results = [];
             $scope.modules = modules.data[0].facets;
             $scope.apiList = apiList.data;
@@ -15,7 +14,7 @@ angular
             });
 
             $scope.query = {
-                q: '',
+                q: $state.params.q || '',
                 fuzzy: false,
                 strict: true,
                 suggestions: [],
@@ -69,10 +68,11 @@ angular
                 }
             };
 
+           // $state.go('app.search', {q: $scope.query.q})
 
             // for search
             $scope.search = function(text, fromSuggest) {
-
+                
                 $scope.query.q = text || $scope.query.q;
                 var prefix = (fromSuggest) ? 'api:' : '';
                 Search.search({
@@ -83,10 +83,10 @@ angular
                     // remove first item from array
                     $scope.results = _.rest(response);
 
-                    // pluck only 'contents' 
-                    $scope.results = _.pluck($scope.results, 'content');
-
-                    // console.log('search results', $scope.results);
+                    $state.$current.data = $scope.results;
+                    $state.go('app.search', {q: $scope.query.q});
+                   
+                   // $state.go('app.search.result');
 
                 }).error(function(error) {
                     console.error('Error', error);
@@ -94,17 +94,23 @@ angular
             };
 
 
-            // for displaying api documentation
-            $scope.details = function() {
-                var url = '/' + $state.params.detail.replace(':', '/') + '.json';
-                Search.get(url).success(function(doc) {
-                    $scope.api = doc;
-                   // console.log('api', $scope.api);
-                }).error(function(error) {
-                    console.error('error', error);
-                });
-            };
-
+            // if the url contains query params, then execute search
+            try {
+                if ($state.params.q) {
+                    $scope.query.q = $state.params.q;
+                    $scope.search($scope.query.q);
+                }
+            } catch (e) {
+                console.error('error', e.toString());
+            }
+        }
+    ])
+    .controller('ResultCtrl', ['$scope', '$state',
+        function($scope, $state) {
+            console.log('resultCtrl state', $state);
+            $scope.results = $state.$current.data; //($state.$current.data) ? $state.$current.data: $state.current.parant.data;
+            console.log('resultCtrl data', $scope.results);
+                 
         }
     ])
     .controller('ListCtrl', ['$scope', '$state', 'Search',
@@ -118,10 +124,7 @@ angular
                     // remove first item from array
                     $scope.list = _.rest(result);
 
-                    // pluck only 'contents' 
-                    $scope.list = _.pluck($scope.list, 'content');
-
-                  //  console.log('list', $scope.list);
+                    console.log('list', $scope.list);
                 }).error(function(error) {
                     console.error('Error in list', error);
                 });
@@ -133,10 +136,10 @@ angular
     .controller('DetailCtrl', ['$scope', '$state', 'Search',
         function($scope, $state, Search) {
             console.log('$state', $state);
-            var url = '/' + $state.params.detail.replace(':', '/') + '.json';
-            Search.get(url).success(function(doc) {
+            //var url = '/' + $state.params.detail.replace(':', '/') + '.json';
+            Search.get($state.params.uri).success(function(doc) {
                 $scope.api = doc;
-               // console.log('api', $scope.api);
+                console.log('api', $scope.api);
             }).error(function(error) {
                 console.error('error', error);
             });

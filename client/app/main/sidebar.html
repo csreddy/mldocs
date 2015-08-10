@@ -1,12 +1,24 @@
-<md-list ng-repeat="(name, bucket) in modules">
-<md-list class="md-2-line">
-<b>{{name | uppercase }}</b>
-      	<md-list>
-        <md-list-item class="md-2-line" ng-repeat="facet in bucket">
-            <div class="md-list-item-text">
-                <a href="/list/{{facet.name}}">{{facet.name}} ({{facet.count}})</a> 
-            </div>
-        </md-list-item> 
-       </md-list>
+<md-toolbar class="md-hue-2">    
+    <div class="md-toolbar-tools">
+        <i class="material-icons">library_books</i>  <span class="md-subhead">Modules</span>
+    </div>
+</md-toolbar>
+<md-content layout-padding>
+    <md-input-container>
+        <label>Find</label>
+        <input type="text" ng-model="find">
+    </md-input-container>
+    <md-list ng-repeat="(name, bucket) in modules">
+        <md-list class="md-2-line">
+          <!--   <md-subheader>{{name | uppercase }}</md-subheader> -->
+            <!--You can use md-no-sticky class-->
+            <md-list>
+                <md-list-item class="md-2-line" ng-repeat="facet in bucket | filter:find">
+                    <md-button md-ink-ripple href="/list/{{facet.name}}">
+                        <b>{{facet.name}} ({{facet.count}})</b>
+                    </md-button>
+                </md-list-item>
+            </md-list>
+        </md-list>
     </md-list>
-</md-list>
+</md-content>

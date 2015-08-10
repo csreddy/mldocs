@@ -1,7 +1,10 @@
+<md-content layout-padding>
+
+
 <h3 class="md-display-1"><b>{{$state.params.lib}}</b><small>({{list.length}})</small></h4>
 <table>
 	<tr>
-	<th style="width:40%">
+	<th>
 	<md-content layout-padding>
 	    Name
 	</md-content></th>
@@ -11,7 +14,7 @@
 	<tbody>
 		<tr ng-repeat="item in list track by $index">
 			<td><md-content layout-padding>
-			    <a href="/{{item.lib}}:{{item.apiName}}"><b>{{item.lib}}:{{item.apiName}}</b></a>
+			    <a ui-sref="app.detail({uri:item.uri})"><b>{{item['http-verb']}} {{item.lib}}:{{item.apiName}}</b></a>
 			</md-content></td>
 			<td><md-content layout-padding>
 			    {{item.summary | cut:true:150 }}
@@ -19,3 +22,4 @@
 		</tr>
 	</tbody>
 </table>
+</md-content>

@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
     <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
+    <link href="//fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css({.tmp,client}) app/app.css -->
@@ -39,9 +39,6 @@
     <div flex layout="column">
         <section layout="row" flex>
             <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
-                <md-toolbar class="md-hue-2">
-                    <h1 class="md-toolbar-tools">Modules</h1>
-                </md-toolbar>
                 <div ui-view="sidebar"></div>
             </md-sidenav>
             <md-content flex>
@@ -50,6 +47,7 @@
                 </md-toolbar> -->
                 <div ui-view="navbar"></div>
                 <div layout="column" id="content" layout-padding layout-align="top center">
+                    <div ui-view="search"></div>
                     <div ui-view=""></div>
                 </div>
             </md-content>
