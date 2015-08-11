@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://marklogic.com/manage/cluster-local/properties" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://marklogic.com/manage/cluster-local/properties" xmlns:gr="http://marklogic.com/xdmp/group" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <xs:simpleType name="security-version">
+    <xs:annotation>
+      <xs:documentation>
+        The security database version.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:double"/>
+  </xs:simpleType>
+  <xs:simpleType name="cluster-id">
+    <xs:annotation>
+      <xs:documentation>
+        A cluster ID.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:unsignedLong"/>
+  </xs:simpleType>
+  <xs:simpleType name="cluster-name">
+    <xs:annotation>
+      <xs:documentation>
+        A cluster name.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:minLength value="1" fixed="false"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ssl-fips-enabled">
+    <xs:annotation>
+      <xs:documentation>
+        Whether or not SSL FIPS is enabled.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:boolean"/>
+  </xs:simpleType>
+  <xs:simpleType name="timeout">
+    <xs:annotation>
+      <xs:documentation>
+        An integer number of seconds, min 0, max 4294967295.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="0" fixed="false"/>
+      <xs:maxInclusive value="4294967295" fixed="false"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ssl-private-key">
+    <xs:annotation>
+      <xs:documentation>
+        A PEM encoded private key.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="host-id">
+    <xs:annotation>
+      <xs:documentation>
+        A host unique ID (64-bit value).
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:unsignedLong"/>
+  </xs:simpleType>
+  <xs:simpleType name="ssl-ciphers-string">
+    <xs:annotation>
+      <xs:documentation>
+        The ID of the certificate template in the security database.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="host-name">
+    <xs:annotation>
+      <xs:documentation>
+        A host name.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:minLength value="1" fixed="false"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="port">
+    <xs:annotation>
+      <xs:documentation>
+        An integer internet port number, min 1, max 65534.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="1" fixed="false"/>
+      <xs:maxInclusive value="65534" fixed="false"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="boolean">
+    <xs:annotation>
+      <xs:documentation>
+        true or false
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:boolean"/>
+  </xs:simpleType>
+  <xs:complexType name="cluster-local-properties" abstract="false" mixed="false">
+    <xs:annotation>
+      <xs:documentation>
+        The server specification.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element ref="security-version" minOccurs="0"/>
+      <xs:element ref="cluster-id" minOccurs="0"/>
+      <xs:element ref="cluster-name" minOccurs="0"/>
+      <xs:element ref="ssl-fips-enabled" minOccurs="0"/>
+      <xs:element ref="xdqp-ssl-certificate" minOccurs="0"/>
+      <xs:element ref="bootstrap-hosts" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="timestamp" type="xs:unsignedLong" use="optional"/>
+  </xs:complexType>
+  <xs:complexType name="ssl-certificate" mixed="true" abstract="false">
+    <xs:annotation>
+      <xs:documentation/>
+    </xs:annotation>
+    <xs:attribute name="file" use="optional"/>
+  </xs:complexType>
+  <xs:complexType name="bootstrap-hosts" abstract="false" mixed="false">
+    <xs:annotation>
+      <xs:documentation>
+        The hosts that foreign clusters will use to bootstrap communication
+        with this cluster.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element ref="bootstrap-host" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="foreign-cluster" abstract="false" mixed="false">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element ref="foreign-cluster-name" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="xdqp-timeout" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="host-timeout" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="foreign-ssl-certificate" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="xdqp-ssl-enabled" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="xdqp-ssl-allow-sslv3" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="xdqp-ssl-allow-tls" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="xdqp-ssl-ciphers" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="foreign-hosts" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="foreign-hosts" abstract="false" mixed="false">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element ref="foreign-host" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="foreign-host" abstract="false" mixed="false">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element ref="foreign-host-id" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="foreign-host-name" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="foreign-connect-port" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="security-version" type="security-version" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The security database version.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="cluster-local-properties" type="cluster-local-properties" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The cluster specification.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="cluster-id" type="cluster-id" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The cluster ID.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="cluster-name" type="cluster-name" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The cluster name
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="ssl-fips-enabled" type="ssl-fips-enabled" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        Whether or not SSL FIPS is enabled.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="xdqp-timeout" type="timeout" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The XDQP protocol timeout, in seconds.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="host-timeout" type="timeout" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The host response timeout, in seconds.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="xdqp-ssl-enabled" type="boolean" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        Whether or not SSL is enabled for XDQP.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="xdqp-ssl-allow-sslv3" type="boolean" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        Whether or not SSLv3 is allowed for XDQP.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="xdqp-ssl-allow-tls" type="boolean" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        Whether or not TLS is allowed for XDQP.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="xdqp-ssl-certificate" type="ssl-certificate" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The PEM encoded certificate for this cluster. If the 'file' attribute is
+        present, it is a file containing the PEM encoded certificate.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="bootstrap-hosts" type="bootstrap-hosts" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The hosts that foreign clusters will use to bootstrap communication
+        with this cluster.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="bootstrap-host" type="bootstrap-host" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        Information related to a particular foreign host.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="bootstrap-host" abstract="false" mixed="false">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element ref="bootstrap-host-id" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="bootstrap-host-name" minOccurs="1" maxOccurs="1"/>
+      <xs:element ref="bootstrap-connect-port" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="bootstrap-host-id" type="xs:string" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The ID of the host.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="bootstrap-host-name" type="host-name" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The name of the host.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="bootstrap-connect-port" type="port" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The distributed protocol client socket connect internet port number.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="foreign-cluster" type="foreign-cluster" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        A foreign clusters.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="foreign-cluster-name" type="cluster-name" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The name of the foreign cluster.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="foreign-ssl-certificate" type="ssl-certificate" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The SSL certificate for the foreign cluster.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="xdqp-ssl-ciphers" type="ssl-ciphers-string" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        A colon separated list of ciphers (e.g. ALL:!LOW:@STRENGTH)
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="foreign-hosts" type="foreign-hosts" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        Information about foreign hosts.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="foreign-host" type="foreign-host" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        Information related to a particular foreign host.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="foreign-host-id" type="xs:string" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The ID of the foreign host.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="foreign-host-name" type="host-name" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The name of the foreign host.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="foreign-connect-port" type="port" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The distributed protocol client socket connect internet port number.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:annotation>
+    <xs:documentation>
+      Clusters configuration file schema.
+    </xs:documentation>
+  </xs:annotation>
+</xs:schema>

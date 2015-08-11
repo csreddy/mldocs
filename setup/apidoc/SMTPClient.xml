@@ -1,0 +1,253 @@
+<apidoc:module name="SMTPClient" xmlns:apidoc="http://marklogic.com/xdmp/apidoc"><apidoc:summary access="public">
+Implements the send function.
+</apidoc:summary><apidoc:function name="email" type="builtin" lib="xdmp" category="Extension" subcategory="Extension">
+    <apidoc:summary>
+  Send an email in an XQuery program.  A valid SMTP Relay must be
+  configured in the Groups page of the Admin Interface for the email to be
+  sent. The format of the email message must be an XML file that
+  complies with the schema files listed below.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="message" type="element()">
+  An XML representation of an email message to send.  The message must
+  comply with the XML schemas defined in the following schema files:
+  <ul xmlns="http://www.w3.org/1999/xhtml">
+	  <li><code><em>install_dir</em>/Config/email-xml.xsd</code></li>
+	  <li><code><em>install_dir</em>/Config/rfc822.xsd</code></li>
+	</ul>
+  where <code xmlns="http://www.w3.org/1999/xhtml"><em>install_dir</em></code> is the directory in which
+  MarkLogic Server is installed.
+</apidoc:param>
+    </apidoc:params>
+    <apidoc:return>empty-sequence()</apidoc:return>
+    <apidoc:privilege>
+  http://marklogic.com/xdmp/privileges/xdmp-email
+</apidoc:privilege>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+This example demonstrates sending a message with
+HTML content.
+  
+xdmp:email(
+&lt;em:Message
+ xmlns:em="URN:ietf:params:email-xml:"
+ xmlns:rf="URN:ietf:params:rfc822:"&gt;
+  &lt;rf:subject&gt;Sample HTML Email&lt;/rf:subject&gt;
+  &lt;rf:from&gt;
+    &lt;em:Address&gt;
+      &lt;em:name&gt;MarkLogic&lt;/em:name&gt;
+      &lt;em:adrs&gt;marklogic@yourdomain&lt;/em:adrs&gt;
+    &lt;/em:Address&gt;
+  &lt;/rf:from&gt;
+  &lt;rf:to&gt;
+    &lt;em:Address&gt;
+      &lt;em:name&gt;System Administrator&lt;/em:name&gt;
+      &lt;em:adrs&gt;admin@yourdomain&lt;/em:adrs&gt;
+    &lt;/em:Address&gt;
+  &lt;/rf:to&gt;
+  &lt;em:content&gt;
+    &lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+      &lt;head&gt;
+        &lt;title&gt;Test HTML message&lt;/title&gt;
+      &lt;/head&gt;
+      &lt;body&gt;
+        &lt;h1&gt;Test HTML message&lt;/h1&gt;
+        &lt;p&gt;Here is a simple paragraph&lt;/p&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  &lt;/em:content&gt;
+&lt;/em:Message&gt;)
+
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+// This example demonstrates sending a message with
+// HTML content.
+  
+xdmp.email(xdmp.unquote(
+'&lt;em:Message\n\
+ xmlns:em="URN:ietf:params:email-xml:"\n\
+ xmlns:rf="URN:ietf:params:rfc822:"&gt;\n\
+  &lt;rf:subject&gt;Sample HTML Email&lt;/rf:subject&gt;\n\
+  &lt;rf:from&gt;\n\
+    &lt;em:Address&gt;\n\
+      &lt;em:name&gt;MarkLogic&lt;/em:name&gt;\n\
+      &lt;em:adrs&gt;marklogic@yourdomain&lt;/em:adrs&gt;\n\
+    &lt;/em:Address&gt;\n\
+  &lt;/rf:from&gt;\n\
+  &lt;rf:to&gt;\n\
+    &lt;em:Address&gt;\n\
+      &lt;em:name&gt;System Administrator&lt;/em:name&gt;\n\
+      &lt;em:adrs&gt;admin@yourdomain&lt;/em:adrs&gt;\n\
+    &lt;/em:Address&gt;\n\
+  &lt;/rf:to&gt;\n\
+  &lt;em:content&gt;\n\
+    &lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;\n\
+      &lt;head&gt;\n\
+        &lt;title&gt;Test HTML message&lt;/title&gt;\n\
+      &lt;/head&gt;\n\
+      &lt;body&gt;\n\
+        &lt;h1&gt;Test HTML message&lt;/h1&gt;\n\
+        &lt;p&gt;Here is a simple paragraph&lt;/p&gt;\n\
+      &lt;/body&gt;\n\
+    &lt;/html&gt;\n\
+  &lt;/em:content&gt;\n\
+&lt;/em:Message&gt;').next().value.root)
+
+</pre></apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+This example demonstrate sending a message with
+plain text content.
+
+xdmp:email(
+&lt;em:Message
+ xmlns:em="URN:ietf:params:email-xml:"
+ xmlns:rf="URN:ietf:params:rfc822:"&gt;
+  &lt;rf:subject&gt;Sample Plain Text Email&lt;/rf:subject&gt;
+  &lt;rf:from&gt;
+    &lt;em:Address&gt;
+      &lt;em:name&gt;MarkLogic&lt;/em:name&gt;
+      &lt;em:adrs&gt;marklogic@yourdomain&lt;/em:adrs&gt;
+    &lt;/em:Address&gt;
+  &lt;/rf:from&gt;
+  &lt;rf:to&gt;
+    &lt;em:Address&gt;
+      &lt;em:name&gt;System Administrator&lt;/em:name&gt;
+      &lt;em:adrs&gt;admin@yourdomain&lt;/em:adrs&gt;
+    &lt;/em:Address&gt;
+  &lt;/rf:to&gt;
+  &lt;em:content xml:space="preserve"&gt;
+This is a sample email with a plain text body.
+&lt;/em:content&gt;
+&lt;/em:Message&gt;)
+
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+// This example demonstrate sending a message with
+// plain text content.
+
+xdmp.email(xdmp.unquote(
+'&lt;em:Message\n\
+ xmlns:em="URN:ietf:params:email-xml:"\n\
+ xmlns:rf="URN:ietf:params:rfc822:"&gt;\n\
+  &lt;rf:subject&gt;Sample Plain Text Email&lt;/rf:subject&gt;\n\
+  &lt;rf:from&gt;\n\
+    &lt;em:Address&gt;\n\
+      &lt;em:name&gt;MarkLogic&lt;/em:name&gt;\n\
+      &lt;em:adrs&gt;marklogic@yourdomain&lt;/em:adrs&gt;\n\
+    &lt;/em:Address&gt;\n\
+  &lt;/rf:from&gt;\n\
+  &lt;rf:to&gt;\n\
+    &lt;em:Address&gt;\n\
+      &lt;em:name&gt;System Administrator&lt;/em:name&gt;\n\
+      &lt;em:adrs&gt;admin@yourdomain&lt;/em:adrs&gt;\n\
+    &lt;/em:Address&gt;\n\
+  &lt;/rf:to&gt;\n\
+  &lt;em:content xml:space="preserve"&gt;\n\
+This is a sample email with a plain text body.\n\
+&lt;/em:content&gt;\n\
+&lt;/em:Message&gt;').next().value.root)
+
+</pre></apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+This example demonstrates sending a message with
+attachments.
+
+let $newline := "&amp;#13;&amp;#10;"
+let $boundary := concat("blah", xdmp:random())
+let $content-type := concat("multipart/mixed; boundary=",$boundary)
+let $attachment1 := xs:base64Binary(doc("/space/binaries/testdata1/Bon-Jovi.jpeg"))
+let $attachment2 := xs:base64Binary(doc("/space/binaries/testdata1/logo.gif"))
+let $content := concat(
+  "--",$boundary,$newline,
+  $newline,
+  "This is a test email with two images attached.", $newline,
+  "--",$boundary,$newline,
+  "Content-Type: image/jpeg", $newline,
+  "Content-Disposition: attachment; filename=Bon-Jovi.jpeg", $newline,
+  "Content-Transfer-Encoding: base64", $newline,
+  $newline,
+  $attachment1, $newline,
+  "--",$boundary,$newline,
+  "Content-Type: image/gif", $newline,
+  "Content-Disposition: attachment; filename=logo.gif", $newline,
+  "Content-Transfer-Encoding: base64", $newline,
+  $newline,
+  $attachment2, $newline,
+  "--",$boundary,"--", $newline)
+
+return
+  xdmp:email(
+  &lt;em:Message
+    xmlns:em="URN:ietf:params:email-xml:"
+    xmlns:rf="URN:ietf:params:rfc822:"&gt;
+    &lt;rf:subject&gt;Sample Email&lt;/rf:subject&gt;
+    &lt;rf:from&gt;
+      &lt;em:Address&gt;
+        &lt;em:name&gt;MarkLogic&lt;/em:name&gt;
+        &lt;em:adrs&gt;marklogic@yourdomain&lt;/em:adrs&gt;
+      &lt;/em:Address&gt;
+    &lt;/rf:from&gt;
+    &lt;rf:to&gt;
+      &lt;em:Address&gt;
+        &lt;em:name&gt;System Administrator&lt;/em:name&gt;
+        &lt;em:adrs&gt;admin@yourdomain&lt;/em:adrs&gt;
+      &lt;/em:Address&gt;
+    &lt;/rf:to&gt;
+    &lt;rf:content-type&gt;{$content-type}&lt;/rf:content-type&gt;
+    &lt;em:content xml:space="preserve"&gt;
+      {$content}
+    &lt;/em:content&gt;
+  &lt;/em:Message&gt;)
+
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+// This example demonstrates sending a message with
+// attachments.
+
+var newline = "\n";
+var boundary = fn.concat("blah", xdmp.random());
+var contentType = fn.concat("multipart/mixed; boundary=", boundary);
+var attachment1 = xs.base64Binary(
+		cts.doc("/space/binaries/testdata1/Bon-Jovi.jpeg"));
+var attachment2 = xs.base64Binary(
+		cts.doc("/space/binaries/testdata1/logo.gif"));
+var content = fn.concat(
+  "--", boundary, newline, newline,
+  "This is a test email with two images attached.", newline,
+  "--", boundary, newline,
+  "Content-Type: image/jpeg", newline,
+  "Content-Disposition: attachment; filename=Bon-Jovi.jpeg", newline,
+  "Content-Transfer-Encoding: base64", newline,
+  newline, attachment1, newline,
+  "--", boundary, newline,
+  "Content-Type: image/gif", newline,
+  "Content-Disposition: attachment; filename=logo.gif", newline,
+  "Content-Transfer-Encoding: base64", newline,
+  newline,
+  attachment2, newline,
+  "--", boundary,"--", newline);
+xdmp:email(xdmp.unquote(
+'  &lt;em:Message\n\
+    xmlns:em="URN:ietf:params:email-xml:"\n\
+    xmlns:rf="URN:ietf:params:rfc822:"&gt;\n\
+    &lt;rf:subject&gt;Sample Email&lt;/rf:subject&gt;\n\
+    &lt;rf:from&gt;\n\
+      &lt;em:Address&gt;\n\
+        &lt;em:name&gt;MarkLogic&lt;/em:name&gt;\n\
+        &lt;em:adrs&gt;marklogic@yourdomain&lt;/em:adrs&gt;\n\
+      &lt;/em:Address&gt;\n\
+    &lt;/rf:from&gt;\n\
+    &lt;rf:to&gt;\n\
+      &lt;em:Address&gt;\n\
+        &lt;em:name&gt;System Administrator&lt;/em:name&gt;\n\
+        &lt;em:adrs&gt;admin@yourdomain&lt;/em:adrs&gt;\n\
+      &lt;/em:Address&gt;\n\
+    &lt;/rf:to&gt;\n\
+    &lt;rf:content-type&gt;'
+    + contentType + '&lt;/rf:content-type&gt;\n\
+    &lt;em:content xml:space="preserve"&gt;'
+    +  content
+  +  '&lt;/em:content&gt;\n\
+  &lt;/em:Message&gt;').next().value.root)
+
+</pre></apidoc:example>
+  </apidoc:function></apidoc:module>

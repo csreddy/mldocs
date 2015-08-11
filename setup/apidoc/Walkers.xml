@@ -1,0 +1,796 @@
+<apidoc:module name="Walkers" category="SearchBuiltins" lib="cts" xmlns:apidoc="http://marklogic.com/xdmp/apidoc"><apidoc:function name="walk" type="builtin" lib="cts" category="SearchBuiltins" subcategory="Search" class="xquery">
+    <apidoc:summary>
+  Walks a node, evaluating an expression with any text matching a query.
+  It returns a sequence of all the values returned by the expression
+  evaluations.  This is similar to <code xmlns="http://www.w3.org/1999/xhtml">cts:highlight</code> in how it
+  evaluates its expression, but it is different in what it returns.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="node" type="node()">
+    A node to walk.  The node must be either a document node
+    or an element node; it cannot be a text node.
+  </apidoc:param>
+      <apidoc:param name="query" type="cts:query">
+   A query specifying the text on which to evaluate the expression.
+   If a string is entered, the string is treated as a
+   <code xmlns="http://www.w3.org/1999/xhtml">cts:word-query</code> of the specified string.
+  </apidoc:param>
+      <apidoc:param name="expr" type="item()*">
+    An expression to evaluate with matching text. You can use the
+    variables <code xmlns="http://www.w3.org/1999/xhtml">$cts:text</code>, <code xmlns="http://www.w3.org/1999/xhtml">$cts:node</code>,
+    <code xmlns="http://www.w3.org/1999/xhtml">$cts:queries</code>, <code xmlns="http://www.w3.org/1999/xhtml">$cts:start</code>, and
+    <code xmlns="http://www.w3.org/1999/xhtml">$cts:action</code> (described below) in the expression.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:usage>
+  <p xmlns="http://www.w3.org/1999/xhtml">
+    There are five built-in variables to represent a query match.
+    These variables can be used inline in the expression parameter.
+  </p>
+  <blockquote xmlns="http://www.w3.org/1999/xhtml"><dl>
+    <dt><code>$cts:text</code> as <code>xs:string</code></dt>
+    <dd><p>The matched text.</p></dd>
+    <dt><code>$cts:node</code> as <code>text()</code></dt>
+    <dd><p>The node containing the matched text.</p></dd>
+    <dt><code>$cts:queries</code> as <code>cts:query*</code></dt>
+    <dd><p>The matching queries.</p></dd>
+    <dt><code>$cts:start</code> as <code>xs:integer</code></dt>
+    <dd><p>The string-length position of the first character of
+    <code>$cts:text</code> in <code>$cts:node</code>.  Therefore, the following
+    always returns true:</p>
+    <pre xml:space="preserve">fn:substring($cts:node, $cts:start,
+             fn:string-length($cts:text)) eq $cts:text </pre>
+    </dd>
+    <dt><code>$cts:action</code> as <code>xs:string</code></dt>
+    <dd><p>Use <code>xdmp:set</code> on this to specify what should happen
+    next</p>
+    <dl>
+      <dt>"continue"</dt>
+      <dd>(default) Walk the next match.
+      If there are no more matches, return all evaluation results.</dd>
+      <dt>"skip"</dt>
+      <dd>Skip walking any more matches and return all evaluation results.</dd>
+      <dt>"break"</dt>
+      <dd>Stop walking matches and return all evaluation results.</dd>
+    </dl>
+    </dd>
+ </dl></blockquote>
+ <p xmlns="http://www.w3.org/1999/xhtml">You cannot use <code>cts:walk</code> to walk results matching
+ <code>cts:similar-query</code> and <code>cts:element-attribute-*-query</code>
+ items.</p>
+ <p xmlns="http://www.w3.org/1999/xhtml">Because the expressions can be any XQuery expression, they can be very
+ simple like the above example or they can be extremely complex.</p>
+</apidoc:usage>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+(:
+   Return all text nodes containing matches to the query "the".
+:)
+let $x := &lt;p&gt;the quick brown fox &lt;b&gt;jumped&lt;/b&gt; over the lazy dog's back&lt;/p&gt;
+return cts:walk($x, "the", $cts:node)
+=&gt;
+  (text{"the quick brown fox "}, text{" over the lazy dog's back"})
+
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml";
+(:
+   Do not show any more matches that occur after
+   $threshold characters.
+:)
+let $x := &lt;p&gt;This is 1, this is 2, this is 3, this is 4, this is 5.&lt;/p&gt;
+let $pos := 1
+let $threshold := 20
+return
+cts:walk($x, "this is",
+ (if ( $pos gt $threshold )
+  then xdmp:set($cts:action, "break")
+  else ($cts:text, xdmp:set($pos, $cts:start)) ) )
+=&gt;
+("This is", "this is", "this is")
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml";
+(:
+   Show the first two matches.
+:)
+let $x := &lt;p&gt;This is 1, this is 2, this is 3, this is 4, this is 5.&lt;/p&gt;
+let $match := 0
+let $threshold := 2
+return
+cts:walk($x, "this is",
+ (if ( $match ge $threshold )
+  then xdmp:set($cts:action, "break")
+  else ($cts:text, xdmp:set($match, $match + 1)) ) )
+=&gt;
+("This is", "this is")
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml";
+(:
+   Similar to the example above but on JSON nodes.
+:)
+let $x := array-node { "This is 1, this is 2, this is 3, this is 4, this is 5." }
+let $match := 0
+let $threshold := 2
+return
+cts:walk($x, "this is",
+ (if ( $match ge $threshold )
+  then xdmp:set($cts:action, "break")
+  else ($cts:text, xdmp:set($match, $match + 1)) ) )
+=&gt;
+("This is", "this is")
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml";
+(:
+   It works on JSON number, boolean and null nodes as well.
+:)
+let $x := object-node { "p1" : "There are ", "p2" : 10,  "p3" : " books here."}
+return cts:walk($x, cts:json-property-value-query("p2",10), $cts:node)
+=&gt;
+number-node{10}
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="walk" type="builtin" lib="cts" category="SearchBuiltins" subcategory="Search" class="javascript">
+    <apidoc:summary>
+  Walks a node, evaluating a callback function for any text matching a query.
+  It returns the empty-sequence().
+  This is similar to <code xmlns="http://www.w3.org/1999/xhtml">cts.highlight</code> in how it
+  evaluates its expression, but it is different in what it returns.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="node" type="node()">
+    A node to walk.  The node must be either a document node
+    or an element node; it cannot be a text node.
+  </apidoc:param>
+      <apidoc:param name="query" type="cts:query">
+   A query specifying the text on which to evaluate the expression.
+   If a string is entered, the string is treated as a
+   <code xmlns="http://www.w3.org/1999/xhtml">cts:word-query</code> of the specified string.
+  </apidoc:param>
+      <apidoc:param name="callback" type="function(xs:string, text(), cts:query*, xs:integer) as xs:string?">
+    A function to call with matching text.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>empty-sequence()</apidoc:return>
+    <apidoc:usage>
+  <p xmlns="http://www.w3.org/1999/xhtml">
+  The arguments to the callback function provide context for the match.
+  </p>
+  <blockquote xmlns="http://www.w3.org/1999/xhtml"><dl>
+    <dt><code>text</code> as <code>xs:string</code></dt>
+    <dd><p>The matched text.</p></dd>
+    <dt><code>node</code> as <code>text()</code></dt>
+    <dd><p>The node containing the matched text.</p></dd>
+    <dt><code>queries</code> as <code>cts:query*</code></dt>
+    <dd><p>The matching queries.</p></dd>
+    <dt><code>start</code> as <code>xs:integer</code></dt>
+    <dd><p>The string-length position of the first character of
+    <code>text</code> in <code>node</code>.  Therefore, the following
+    always returns true:</p>
+    <pre xml:space="preserve">fn.substring(node, start,
+             fn.stringLength(text)) eq text </pre>
+    </dd>
+ </dl></blockquote>
+ <p xmlns="http://www.w3.org/1999/xhtml">The return from the callback function is an action that specifies what 
+happens next in the walk:</p>
+    <dl xmlns="http://www.w3.org/1999/xhtml">
+      <dt>"continue"</dt>
+      <dd>(default) Walk the next match.
+      If there are no more matches, return.</dd>
+      <dt>"skip"</dt>
+      <dd>Skip walking any more matches and return.</dd>
+      <dt>"break"</dt>
+      <dd>Stop walking matches and return.</dd>
+      <dt>null</dt>
+      <dd>Continue with the previous action.</dd>
+    </dl>
+ <p xmlns="http://www.w3.org/1999/xhtml">You cannot use <code>cts.walk</code> to walk results matching
+ <code>cts:similar-query</code> and <code>cts:element-attribute-*-query</code>
+ items.</p>
+ <p xmlns="http://www.w3.org/1999/xhtml">The callback function can use variables in scope to accumulate results.
+</p>
+</apidoc:usage>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+//
+//   Return all text nodes containing matches to the query "the".
+//
+var doc = new NodeBuilder();
+doc.startElement("p");
+doc.addText("the quick brown fox ");
+doc.startElement("b"); doc.addText("jumped"); doc.endElement();
+doc.addText(" over the lazy dog's back");
+doc.endElement();
+
+var results = [];
+function callback(text, node, queries, start) {
+  results.push(node);
+  return "continue";
+};
+
+cts.walk(doc.toNode(), "the", callback);
+results;
+=&gt;
+  ["the quick brown fox ", " over the lazy dog's back"]
+
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+//
+//  Do not show any more matches that occur after
+//  $threshold characters.
+//
+var doc = new NodeBuilder();
+doc.startElement("p");
+doc.addText("This is 1, this is 2, this is 3, this is 4, this is 5.");
+doc.endElement();
+var pos = 1;
+var threshold = 20;
+var results = [];
+
+function callback(text, node, queries, start) {
+  if (pos &gt; threshold )
+     return "break";
+  else {
+    results.push(text);
+    pos = start;
+    return "continue";
+  }
+}
+
+cts.walk(doc.toNode(), "this is", callback);
+results;
+
+=&gt;
+["This is", "this is", "this is"]
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+//
+//   Show the first two matches.
+//
+var doc = new NodeBuilder();
+doc.startElement("p");
+doc.addText("This is 1, this is 2, this is 3, this is 4, this is 5.");
+doc.endElement();
+var match = 0;
+var threshold = 2;
+var results = [];
+
+function callback(text, node, queries, start) {
+  if (match &gt;= threshold )
+     return "break";
+  else {
+    results.push(text);
+    match = match + 1;
+    return "continue";
+  }
+}
+
+cts.walk(doc.toNode(), "this is", callback);
+results;
+
+=&gt;
+["This is", "this is"]
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+//
+//  Similar to the example above but on JSON nodes.
+//
+var x = ["This is 1, this is 2, this is 3, this is 4, this is 5."];
+var match = 0;
+var threshold = 2;
+var results = [];
+
+function callback(text, node, queries, start) {
+  if (match &gt;= threshold )
+     return "break";
+  else {
+    results.push(text);
+    match = match + 1;
+    return "continue";
+  }
+}
+
+cts.walk(x, "this is", callback);
+results;
+=&gt;
+["This is", "this is"]
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+//
+//  It works on JSON number, boolean and null nodes as well.
+//
+var x = { "p1" : "There are ", "p2" : 10,  "p3" : " books here."};
+var results = [];
+function callback (text, node, queries, start) {
+  results.push(node);
+  return "continue";
+}
+cts.walk(x, cts.jsonPropertyValueQuery("p2",10), callback);
+results;
+=&gt;
+[10]
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="highlight" type="builtin" lib="cts" category="SearchBuiltins" subcategory="Search" class="xquery">
+    <apidoc:summary>
+  Returns a copy of the node, replacing any text matching the query
+  with the specified expression.  You can use this function
+  to easily highlight any text found in a query. Unlike
+  <code xmlns="http://www.w3.org/1999/xhtml">fn:replace</code> and other XQuery string functions that match
+  literal text, <code xmlns="http://www.w3.org/1999/xhtml">cts:highlight</code> matches every term that
+  matches the search, including stemmed matches or matches with
+  different capitalization.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="node" type="node()">
+    A node to highlight.  The node must be either a document node
+    or an element node; it cannot be a text node.
+  </apidoc:param>
+      <apidoc:param name="query" type="cts:query">
+    A query specifying the text to highlight.  If a string
+   is entered, the string is treated as a <code xmlns="http://www.w3.org/1999/xhtml">cts:word-query</code> of the
+   specified string.
+  </apidoc:param>
+      <apidoc:param name="expr" type="item()*">
+    An expression with which to replace each match. You can use the
+    variables <code xmlns="http://www.w3.org/1999/xhtml">$cts:text</code>, <code xmlns="http://www.w3.org/1999/xhtml">$cts:node</code>,
+    <code xmlns="http://www.w3.org/1999/xhtml">$cts:queries</code>, <code xmlns="http://www.w3.org/1999/xhtml">$cts:start</code>, and
+    <code xmlns="http://www.w3.org/1999/xhtml">$cts:action</code> (described below) in the expression.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>node()</apidoc:return>
+    <apidoc:usage>
+  <p xmlns="http://www.w3.org/1999/xhtml">
+    There are five built-in variables to represent a query match.
+    These variables can be used inline in the expression parameter.
+  </p>
+  <blockquote xmlns="http://www.w3.org/1999/xhtml"><dl>
+    <dt><code>$cts:text</code> as <code>xs:string</code></dt>
+    <dd><p>The matched text.</p></dd>
+    <dt><code>$cts:node</code> as <code>text()</code></dt>
+    <dd><p>The node containing the matched text.</p></dd>
+    <dt><code>$cts:queries</code> as <code>cts:query*</code></dt>
+    <dd><p>The matching queries.</p></dd>
+    <dt><code>$cts:start</code> as <code>xs:integer</code></dt>
+    <dd><p>The string-length position of the first character of
+    <code>$cts:text</code> in <code>$cts:node</code>.  Therefore, the following
+    always returns true:</p>
+    <pre xml:space="preserve">fn:substring($cts:node, $cts:start,
+             fn:string-length($cts:text)) eq $cts:text </pre>
+    </dd>
+    <dt><code>$cts:action</code> as <code>xs:string</code></dt>
+    <dd><p>Use <code>xdmp:set</code> on this to specify what should happen
+    next</p>
+    <dl>
+      <dt>"continue"</dt>
+      <dd>(default) Walk the next match.
+      If there are no more matches, return all evaluation results.</dd>
+      <dt>"skip"</dt>
+      <dd>Skip walking any more matches and return all evaluation results.</dd>
+      <dt>"break"</dt>
+      <dd>Stop walking matches and return all evaluation results.</dd>
+    </dl>
+    </dd>
+ </dl></blockquote>
+ <p xmlns="http://www.w3.org/1999/xhtml">You cannot use <code>cts:highlight</code> to highlight results matching
+ <code>cts:similar-query</code> and <code>cts:element-attribute-*-query</code>
+ items.  Using <code>cts:highlight</code> with these queries will
+ return the nodes without any highlighting. </p>
+ <p xmlns="http://www.w3.org/1999/xhtml">You can also use <code>cts:highlight</code> as a general search
+ and replace function. The specified expression will replace any matching
+ text. For example, you could replace the word "hello" with "goodbye"
+ in a query similar to the following:</p>
+ <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+ cts:highlight($node, "hello", "goodbye")</pre>
+ <p xmlns="http://www.w3.org/1999/xhtml">Because the expressions can be any XQuery expression, they can be very
+ simple like the above example or they can be extremely complex.</p>
+</apidoc:usage>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+To highlight "MarkLogic" with bold in the following paragraph:
+
+let $x :=  &lt;p&gt;MarkLogic Server is an enterprise-class
+  database specifically built for content.&lt;/p&gt;
+return
+cts:highlight($x, "MarkLogic", &lt;b&gt;{$cts:text}&lt;/b&gt;)
+
+Returns:
+
+  &lt;p&gt;&lt;b&gt;MarkLogic&lt;/b&gt; Server is an enterprise-class
+  database specifically built for content.&lt;/p&gt;
+
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+Similar to the above use case but on JSON nodes. Note that
+an array is used to represent the original text with the
+specified object node as a member.
+
+let $x :=  object-node { "p1" :
+  "MarkLogic Server is an enterprise-class database specifically built for content."}
+return
+cts:highlight($x, "MarkLogic", object-node {"highlighted" : $cts:text})
+
+Returns:
+
+  {
+    "p1": [
+      {
+        "highlighted": "MarkLogic"
+      },
+     " Server is an enterprise-class database specifically built for content."
+    ]
+  }
+
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+Also on JSON nodes but the query matches the whole node. In this case,
+no array node is created.
+
+let $x :=  object-node { "p1" : "MarkLogic Server"}
+return
+cts:highlight($x, "MarkLogic Server", object-node {"highlighted" : $cts:text})
+
+Returns:
+
+  {
+    "p1": {
+      "highlighted": "MarkLogic Server"
+    }
+  }
+
+</pre></apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+Given the following document with the URI "hellogoodbye.xml":
+
+&lt;root&gt;
+  &lt;a&gt;It starts with hello and ends with goodbye.&lt;/a&gt;
+&lt;/root&gt;
+
+The following query will highlight the word "hello" in
+blue, and everything else in red.
+
+cts:highlight(doc("hellogoodbye.xml"),
+       cts:and-query((cts:word-query("hello"),
+                      cts:word-query("goodbye"))),
+  if (cts:word-query-text($cts:queries) eq "hello")
+  then (&lt;font color="blue"&gt;{$cts:text}&lt;/font&gt;)
+  else (&lt;font color="red"&gt;{$cts:text}&lt;/font&gt;))
+
+returns:
+
+&lt;root&gt;
+  &lt;a&gt;It starts with &lt;font color="blue"&gt;hello&lt;/font&gt;
+  and ends with &lt;font color="red"&gt;goodbye&lt;/font&gt;.&lt;/a&gt;
+&lt;/root&gt;
+</pre></apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+for $x in cts:search(collection(), "MarkLogic")
+return
+cts:highlight($x, "MarkLogic", &lt;b&gt;{$cts:text}&lt;/b&gt;)
+
+returns all of the nodes that contain "MarkLogic",
+placing bold markup around the matched words.
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="highlight" type="builtin" lib="cts" category="SearchBuiltins" subcategory="Search" class="javascript">
+    <apidoc:summary>
+  Returns a copy of the node, replacing any text matching the query
+  with the specified expression.  You can use this function
+  to easily highlight any text found in a query. Unlike
+  <code xmlns="http://www.w3.org/1999/xhtml">fn.replace</code> and other string functions that match
+  literal text, <code xmlns="http://www.w3.org/1999/xhtml">cts.highlight</code> matches every term that
+  matches the search, including stemmed matches or matches with
+  different capitalization.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="node" type="node()">
+    A node to highlight.  The node must be either a document node,
+    element node, object node, or array node; it cannot be a text node.
+  </apidoc:param>
+      <apidoc:param name="query" type="cts:query">
+    A query specifying the text to highlight.  If a string
+   is entered, the string is treated as a <code xmlns="http://www.w3.org/1999/xhtml">cts:word-query</code> of the
+   specified string.
+  </apidoc:param>
+      <apidoc:param name="callback" type="function(NodeBuilder, xs:string, text(), cts:query*, xs:integer) as xs:string?">
+    A function to call on each match.
+  </apidoc:param>
+      <apidoc:param name="builder" type="NodeBuilder">
+    The builder that will be used to construct the highlighted copy.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>empty-sequence()</apidoc:return>
+    <apidoc:usage>
+  <p xmlns="http://www.w3.org/1999/xhtml">
+  The arguments to the callback function provide context for the match.
+  </p>
+  <blockquote xmlns="http://www.w3.org/1999/xhtml"><dl>
+    <dt><code>builder</code> as <code>NodeBuilder</code></dt>
+    <dd><p>An Node builder that is building the highlighted node copy. 
+    Whetever the callback adds to the builder will be added to the final copy.
+    </p></dd>
+    <dt><code>text</code> as <code>xs:string</code></dt>
+    <dd><p>The matched text.</p></dd>
+    <dt><code>node</code> as <code>text()</code></dt>
+    <dd><p>The node containing the matched text.</p></dd>
+    <dt><code>queries</code> as <code>cts:query*</code></dt>
+    <dd><p>The matching queries.</p></dd>
+    <dt><code>start</code> as <code>xs:integer</code></dt>
+    <dd><p>The string-length position of the first character of
+    <code>text</code> in <code>node</code>.  Therefore, the following
+    always returns true:</p>
+    <pre xml:space="preserve">fn.substring(node, start,
+             fn.stringLength(text)) = text </pre>
+    </dd>
+ </dl></blockquote>
+ <p xmlns="http://www.w3.org/1999/xhtml">The return from the callback function is an action that specifies what 
+happens next:</p>
+    <dl xmlns="http://www.w3.org/1999/xhtml">
+      <dt>"continue"</dt>
+      <dd>(default) Walk the next match.
+      If there are no more matches, return all the builder results .</dd>
+      <dt>"skip"</dt>
+      <dd>Skip walking any more matches and return all the builder results.</dd>
+      <dt>"break"</dt>
+      <dd>Stop walking matches and return all the builder results.</dd>
+      <dt>null</dt>
+      <dd>Continue with the previous action.</dd>
+    </dl>
+ <p xmlns="http://www.w3.org/1999/xhtml">You cannot use <code>cts.highlight</code> to highlight results matching
+ <code>cts:similar-query</code> and <code>cts:element-attribute-*-query</code>
+ items.  Using <code>cts.highlight</code> with these queries will
+ return the nodes without any highlighting. </p>
+ <p xmlns="http://www.w3.org/1999/xhtml">You can also use <code>cts.highlight</code> as a general search
+ and replace function. The specified expression will replace any matching
+ text. For example, you could replace the word "hello" with "goodbye"
+ in a query similar to the following:</p>
+ <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+ cts.highlight(node, "hello", 
+	function(builder, text, node, queries, start) {
+	builder.addText("goodbye");
+	});
+</pre>
+</apidoc:usage>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+// To highlight "MarkLogic" with bold in the following paragraph:
+
+var doc = new NodeBuilder();
+doc.startElement("p");
+doc.addText("MarkLogic Server is an enterprise-class\n\
+  database specifically built for content.");
+doc.endElement();
+
+var result = new NodeBuilder();
+cts.highlight(doc.toNode(), "MarkLogic", 
+  function(builder,text,node,queries,start) {
+    builder.startElement("b");
+    builder.addText(text);
+    builder.endElement(); }, result);
+result.toNode()
+
+=&gt;
+
+  &lt;p&gt;&lt;b&gt;MarkLogic&lt;/b&gt; Server is an enterprise-class
+  database specifically built for content.&lt;/p&gt;
+
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+// Similar to the above use case but on JSON nodes. Note that
+// an array is used to represent the original text with the
+// specified object node as a member.
+
+var x = {"p1":
+  "MarkLogic Server is an enterprise-class database built for content."};
+var result = new NodeBuilder();
+cts.highlight(x, "MarkLogic", 
+  function(builder,text,node,queries,start) {
+    builder.addNode( {"highlighted" : text} );
+  }, result
+);
+result.toNode();
+
+=&gt;
+
+  {
+    "p1": [
+      {
+        "highlighted": "MarkLogic"
+      },
+     " Server is an enterprise-class database built for content."
+    ]
+  }
+
+</pre></apidoc:example>
+    <apidoc:example> <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+// Also on JSON nodes but the query matches the whole node. In this case,
+// no array node is created.
+
+var x = { "p1" : "MarkLogic Server"};
+var result = new NodeBuilder();
+cts.highlight(x, "MarkLogic Server", 
+  function(builder,text,node,queries,start) {
+    builder.addNode( {"highlighted" : text} )
+  }, result
+);
+result.toNode();
+
+Returns:
+
+  {
+    "p1": {
+      "highlighted": "MarkLogic Server"
+    }
+  }
+
+</pre></apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+// Given the following document with the URI "hellogoodbye.xml":
+
+&lt;root&gt;
+  &lt;a&gt;It starts with hello and ends with goodbye.&lt;/a&gt;
+&lt;/root&gt;
+
+******
+
+// The following query will highlight the word "hello" in
+// blue, and everything else in red.
+
+var result = new NodeBuilder();
+cts.highlight(fn.doc("hellogoodbye.xml").next().value,
+     cts.andQuery([cts.wordQuery("hello"),
+                   cts.wordQuery("goodbye")]),
+  function(builder, text, node, queries, start) {
+    builder.startElement("font");
+    if (cts.wordQueryText(queries) == "hello") {
+      builder.addAttribute("color","blue"); 
+      builder.addText(text);
+      builder.endElement(); }
+    else {
+      builder.addAttribute("color","red");
+      builder.addText(text);
+      builder.endElement(); }
+  }, result
+);
+result.toNode();
+
+=&gt;
+
+&lt;root&gt;
+  &lt;a&gt;It starts with &lt;font color="blue"&gt;hello&lt;/font&gt;
+  and ends with &lt;font color="red"&gt;goodbye&lt;/font&gt;.&lt;/a&gt;
+&lt;/root&gt;
+</pre></apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+var results = [];
+for (var x of cts.search("MarkLogic")) {
+  var result = new NodeBuilder();
+  cts.highlight(x,"MarkLogic",
+    function(builder, text, node, queries, start) {
+      builder.startElement("b");
+      builder.addText(text);
+      builder.endElement();
+    }, result);
+  results.push(result.toNode());
+};
+results;
+
+returns an array with all of the nodes that contain "MarkLogic",
+placing bold markup (&lt;b&gt; tags) around the matched words.
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="element-walk" type="builtin" lib="cts" category="SearchBuiltins" subcategory="Search" class="xquery">
+    <apidoc:summary>
+  Returns a copy of the node, replacing any elements found
+  with the specified expression.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="node" type="node()">
+    A node to run the walk over.  The node must be either a document node
+    or an element node; it cannot be a text node.
+  </apidoc:param>
+      <apidoc:param name="element" type="xs:QName*">
+    The name of elements to replace.
+  </apidoc:param>
+      <apidoc:param name="expr" type="item()*">
+    An expression with which to replace each match. You can use the
+    variables <code xmlns="http://www.w3.org/1999/xhtml">$cts:node</code> and <code xmlns="http://www.w3.org/1999/xhtml">$cts:action</code>
+    (described below) in the expression.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>node()</apidoc:return>
+    <apidoc:usage>
+  <p xmlns="http://www.w3.org/1999/xhtml">
+    There are two built-in variables to represent an element match.
+    These variables can be used inline in the expression parameter.
+  </p>
+  <blockquote xmlns="http://www.w3.org/1999/xhtml"><dl>
+    <dt><code>$cts:node</code> as <code>element()</code></dt>
+    <dd><p>The matching element node.</p></dd>
+    <dt><code>$cts:action</code> as <code>xs:string</code></dt>
+    <dd><p>Use <code>xdmp:set</code> on this to specify what should happen
+    next</p>
+    <dl>
+      <dt>"continue"</dt>
+      <dd>(default) Walk the next match.
+      If there are no more matches, return all evaluation results.</dd>
+      <dt>"skip"</dt>
+      <dd>Skip walking any more matches and return all evaluation results.</dd>
+      <dt>"break"</dt>
+      <dd>Stop walking matches and return all evaluation results.</dd>
+    </dl>
+    </dd>
+ </dl></blockquote>
+</apidoc:usage>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+(:
+   Replace every 'name' element with the text "Mary"
+:)
+let $x := &lt;p&gt;Dear &lt;name/&gt;, thank you for your interest.&lt;/p&gt;
+return cts:element-walk($x, xs:QName("name"), "Mary")
+=&gt;
+&lt;p&gt;Dear Mary, thank you for your interest.&lt;/p&gt;
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="element-walk" type="builtin" lib="cts" category="SearchBuiltins" subcategory="Search" class="javascript">
+    <apidoc:summary>
+  Returns a copy of the node, replacing any elements found
+  with the specified expression.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="node" type="node()">
+    A node to run the walk over.  The node must be either a document node
+    or an element node; it cannot be a text node.
+  </apidoc:param>
+      <apidoc:param name="element" type="xs:QName*">
+    The name of elements to replace.
+  </apidoc:param>
+      <apidoc:param name="callback" type="function(NodeBuilder, node()) as xs:string?">
+    A function to call on each match.
+  </apidoc:param>
+      <apidoc:param name="builder" type="NodeBuilder">
+    The builder that will be used to construct the modified copy.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>empty-sequence()</apidoc:return>
+    <apidoc:usage>
+  <p xmlns="http://www.w3.org/1999/xhtml">
+    The arguments to the callback function provide context for the element match.
+  </p>
+  <blockquote xmlns="http://www.w3.org/1999/xhtml"><dl>
+    <dt><code>builder</code> as <code>NodeBuilder</code></dt>
+    <dd><p>An Node builder that is building the highlighted node copy. 
+    Whetever the callback adds to the builder will be added to the final copy.
+    </p></dd>
+    <dt><code>node</code> as <code>element()</code></dt>
+    <dd><p>The matching element node.</p></dd>
+ </dl></blockquote>
+ <p xmlns="http://www.w3.org/1999/xhtml">The return from the callback function is an action that specifies what happens next:</p>
+    <dl xmlns="http://www.w3.org/1999/xhtml">
+      <dt>"continue"</dt>
+      <dd>(default) Walk the next match.
+      If there are no more matches, return all evaluation results.</dd>
+      <dt>"skip"</dt>
+      <dd>Skip walking any more matches and return all evaluation results.</dd>
+      <dt>"break"</dt>
+      <dd>Stop walking matches and return all evaluation results.</dd>
+      <dt>null</dt>
+      <dd>Continue with the previous action.</dd>
+    </dl>
+</apidoc:usage>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+//
+//  Replace every 'name' element with the text "Mary"
+//
+var x = new NodeBuilder();
+x.startElement("p"); 
+x.addText("Dear ");
+x.startElement("name"); x.endElement();
+x.addText( ", thank you for your interest.");
+x.endElement();
+var result = new NodeBuilder();
+cts.elementWalk(x.toNode(), xs.QName("name"), 
+  function(builder,node) {
+    builder.addText("Mary")
+  },
+  result
+);
+result.toNode()
+=&gt;
+&lt;p&gt;Dear Mary, thank you for your interest.&lt;/p&gt;
+</pre></apidoc:example>
+  </apidoc:function></apidoc:module>

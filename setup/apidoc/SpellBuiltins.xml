@@ -1,0 +1,367 @@
+<apidoc:module name="SearchBuiltins" category="SpellBuiltins" xmlns:apidoc="http://marklogic.com/xdmp/apidoc"><apidoc:summary access="public">
+<p xmlns="http://www.w3.org/1999/xhtml">The spelling correction built-in functions are used with dictionary documents
+to compare words with words in the dictionary.  These functions use the
+double metaphone algorithm, which uses the way words sound to try and
+suggest spelling alternatives for incorrectly-spelled words.</p>
+<p xmlns="http://www.w3.org/1999/xhtml">There is also a Spelling Dictionary Management XQuery module, which
+is used to load and manage dictionary documents, and is complimentary
+to the spelling built-in functions.</p>
+</apidoc:summary><apidoc:function name="is-correct" type="builtin" lib="spell" category="SpellBuiltins">
+    <apidoc:summary>
+  Returns true() if the specified word is spelled correctly,
+  otherwise returns false().  A word is considered to be spelled
+  correctly if it is in the specified dictionary.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="uri" type="xs:string*">
+    The URIs of the dictionaries to use.
+  </apidoc:param>
+      <apidoc:param name="word" type="xs:string">
+    The word to check.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:boolean</apidoc:return>
+    <apidoc:usage>
+   The <code xmlns="http://www.w3.org/1999/xhtml">spell:is-correct</code> function is a built-in function and
+   does not require the <code xmlns="http://www.w3.org/1999/xhtml">import module</code> statement in the XQuery
+   prolog.
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell:is-correct("en-utf8.xml","occasionally")
+
+=&gt; true()
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell.isCorrect("en-utf8.xml","occasionally");
+
+=&gt; true
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="suggest" type="builtin" lib="spell" category="SpellBuiltins">
+    <apidoc:summary>
+  Suggests a list of spellings for a word. Returns a sequence of the most
+  likely spellings for the specified word.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="uri" type="xs:string*">
+    The URIs of the dictionaries to use.
+  </apidoc:param>
+      <apidoc:param name="word" type="xs:string">
+    The word for which you get spelling suggestions.
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+    The options <span class="xquery" xmlns="http://www.w3.org/1999/xhtml">node</span>
+    <span class="javascript" xmlns="http://www.w3.org/1999/xhtml">object</span> for this suggest operation. 
+    The default is <span class="xquery" xmlns="http://www.w3.org/1999/xhtml">()</span>
+    <span class="javascript" xmlns="http://www.w3.org/1999/xhtml">null</span>.
+
+    <span class="xquery" xmlns="http://www.w3.org/1999/xhtml">The node for the spell:suggest options must be in the
+    <code>http://marklogic.com/xdmp/spell</code> namespace.</span>
+    <p xmlns="http://www.w3.org/1999/xhtml">The <span class="xquery"><code>spell:suggest</code></span>
+    <span class="javascript"><code>spell.suggest</code></span> options include:</p>
+    <blockquote xmlns="http://www.w3.org/1999/xhtml"><dl>
+    <dt><span class="xquery">&lt;maximum&gt;</span>
+        <span class="javascript">maximum</span>
+        </dt>
+    <dd>Specifies the maximum number of suggestions to be returned.
+    The default is 10.</dd>
+    <dt><span class="xquery">&lt;distance-threshold&gt;</span>
+        <span class="javascript">distanceThreshold</span>
+        </dt>
+    <dd>Specifies a cut off threshold for suggestions having a distance
+    less than the given number.  The default is 100.</dd>
+    </dl></blockquote>
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return class="xquery">xs:string*</apidoc:return>
+    <apidoc:return class="javascript">string*</apidoc:return>
+    <apidoc:usage>
+   <span class="xquery" xmlns="http://www.w3.org/1999/xhtml"><p>The <code>spell:suggest</code>
+          function is a built-in function and
+   does not require the <code>import module</code> statement in the XQuery
+   prolog.</p></span>
+
+   <p xmlns="http://www.w3.org/1999/xhtml">The <code><span class="xquery">spell:suggest</span>
+                 <span class="javascript">spell.suggest</span>
+           </code> function only provides suggestions
+   to words that are less than 64 characters in length; words 64 characters
+   or longer return no suggestions.  Also, it removes any dictionary entries
+   that are 64 characters or more, so it will never return a suggestion with
+   greater than 64 characters.</p>
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell:suggest("myDictionary.xml","occasionally")
+ 
+=&gt; occasionally occasional occasion occasions occasion's
+   occasioned optionally educationally irrationally
+</pre></apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell:suggest("spell.xml", "albetros")
+  
+=&gt; albatross abettors alders alters Albert's Elbert's
+   allegros alder's Walters abettor's
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell.suggest("myDictionary.xml","occasionally")
+
+=&gt; occasionally occasional occasion occasions occasion's
+   occasioned optionally educationally irrationally
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell.suggest("spell.xml", "albetros")
+
+=&gt; albatross abettors alders alters Albert's Elbert's
+   allegros alder's Walters abettor's
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="levenshtein-distance" type="builtin" lib="spell" category="SpellBuiltins">
+    <apidoc:summary>
+  Given two strings, returns the Levenshtein distance between those strings.
+  The Levenshtein distance is a measure of how many operations it takes to
+  transform a string into another string, and it is useful in determining
+  if a word is spelled correctly, or in simply comparing how "different" two
+  words are.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="str1" type="xs:string">
+    The first input string.
+  </apidoc:param>
+      <apidoc:param name="str2" type="xs:string">
+    The second input string.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:integer</apidoc:return>
+    <apidoc:usage>
+   <p xmlns="http://www.w3.org/1999/xhtml">The <code>spell:levenshtein-distance</code> function is a built-in
+   function and does not require the <code>import module</code> statement
+   in the XQuery prolog.</p>
+   <p xmlns="http://www.w3.org/1999/xhtml">The <code>spell:levenshtein-distance</code> function throws an exception
+   if one of the strings is 64 or more characters in length and the other
+   is at least 1 character in length.</p>
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell:levenshtein-distance("albatros","albetros")
+  
+=&gt; 1
+</pre></apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell:levenshtein-distance("cat", "cats")
+  
+=&gt; 1
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell.levenshteinDistance("albatros","albetros");
+  
+=&gt; 1
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell.levenshteinDistance("cat", "cats");
+  
+=&gt; 1
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="double-metaphone" type="builtin" lib="spell" category="SpellBuiltins">
+    <apidoc:summary>
+  Given a word returns the two metaphone keys.
+  The primary and secondary metaphone keys which represent
+  the phonetic encoding of two words
+  are returned as a sequence of two strings.  Double metaphone is an algorithm
+  based on phonetic sounds useful in providing data to spelling correction
+  suggestions.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="word" type="xs:string">
+    The word for phonetic matching.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:string*</apidoc:return>
+    <apidoc:usage>
+   The <code xmlns="http://www.w3.org/1999/xhtml">spell:double-metaphone</code> function is a built-in function and
+   does not require the <code xmlns="http://www.w3.org/1999/xhtml">import module</code> statement in the XQuery
+   prolog.
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell:double-metaphone("smith")
+  
+=&gt; smo xmt
+</pre></apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell:double-metaphone("jones")
+  
+=&gt; jns ans
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell.doubleMetaphone("smith");
+  
+=&gt; smo xmt
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell.doubleMetaphone("jones");
+  
+=&gt; jns ans
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="suggest-detailed" type="builtin" lib="spell" category="SpellBuiltins">
+    <apidoc:summary>
+  Suggests a list of spellings for a word. Returns 
+  <span class="xquery" xmlns="http://www.w3.org/1999/xhtml">a sequence of elements</span>
+  <span class="javascript" xmlns="http://www.w3.org/1999/xhtml">an array of objects</span>
+  describing each suggestion, including the suggested word, the distance,
+  the key distance, the word distance, and the levenshtein distance.  You can
+  use this extra information to make your own decisions about which suggestions
+  to use.  If you do not want to use this information, use the
+  <code class="xquery" xmlns="http://www.w3.org/1999/xhtml">spell:suggest</code>
+  <code class="javascript" xmlns="http://www.w3.org/1999/xhtml">spell.suggest</code> function instead.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="dictionary_uris" type="xs:string*">
+    The URIs of the dictionaries to use.
+  </apidoc:param>
+      <apidoc:param name="word" type="xs:string">
+    The word for which you get spelling suggestions.
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+    The options node for this suggest operation. The default is
+    <code xmlns="http://www.w3.org/1999/xhtml"><span class="xquery">()</span>
+          <span class="javascript">null</span></code>.
+
+    <span class="xquery" xmlns="http://www.w3.org/1999/xhtml">The node for the <code>spell:suggest-detailed</code>
+    options must be in the
+    <code>http://marklogic.com/xdmp/spell</code> namespace.</span>
+
+    <p xmlns="http://www.w3.org/1999/xhtml">The <code><span class="xquery">spell:suggest-detailed</span>
+                 <span class="javascript">spell.suggestDetailed</span>
+                 </code>
+    options include:</p>
+    <blockquote xmlns="http://www.w3.org/1999/xhtml"><dl>
+    <dt><span class="xquery">&lt;maximum&gt;</span>
+        <span class="javascript">maximum</span>
+        </dt>
+    <dd>Specifies the maximum number of suggestions to be returned.
+    The default is 10.</dd>
+    <dt><span class="xquery">&lt;distance-threshold&gt;</span>
+        <span class="javascript">distanceThreshold</span>
+        </dt>
+    <dd>Specifies a cut off threshold for suggestions having a distance
+    less than the given number.  The distance is a weighted number
+    indicating the "distance" between two words,  where lower numbers
+    indicate a closer match.  The default is 100, which means that distances
+    less than or equal to 100 are considered as suggestions.</dd>
+    </dl></blockquote>
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return class="xquery">element(spell:suggestion)*</apidoc:return>
+    <apidoc:return class="javascript">Array</apidoc:return>
+    <apidoc:usage>
+   <p xmlns="http://www.w3.org/1999/xhtml">The <code><span class="xquery">spell:suggest-detailed</span>
+                <span class="javascript">spell.suggestDetailed</span>
+                </code>
+   function is built-in and does not require <span class="xquery">the
+   <code>import module</code> statement in the XQuery prolog</span>
+   <span class="javascript">importing any separate module</span>.
+   </p>
+   <p xmlns="http://www.w3.org/1999/xhtml">The <code><span class="xquery">spell:suggest-detailed</span>
+                <span class="javascript">spell.suggestDetailed</span>
+                </code>
+   function only provides suggestions to words that are less than 64
+   characters in length; words 64 characters or longer return no
+   suggestions.  Also, it removes any dictionary entries that are 64
+   characters or more, so it will never return a suggestion with
+   greater than 64 characters.
+   </p>
+   <p xmlns="http://www.w3.org/1999/xhtml">The <code><span class="xquery">key-distance</span>
+                <span class="javascript">keyDistance</span>
+                </code>
+   and <code><span class="xquery">word-distance</span>
+             <span class="javascript">wordDistance</span>
+             </code>
+   values in the output are used by the double metaphone algorithm to
+   calculate the <code>distance</code>, which is a weighted number
+   indicating how close a word is to the one in the dictionary.</p>
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell:suggest-detailed("myDictionary.xml","occasionally")
+  
+=&gt; ()
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell.suggestDetailed("myDictionary.xml","occasionally");
+
+=&gt; ()
+</pre></apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell:suggest-detailed("spell.xml", "albetros")
+
+=&gt;
+&lt;spell:suggestion original="albetros" dictionary="spell.xml"&gt;
+  &lt;spell:word
+         distance="26"
+         key-distance="0"
+         word-distance="95"
+         levenshtein-distance="2"&gt;
+    albatross
+  &lt;/spell:word&gt;
+&lt;/spell:suggestion&gt;
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+two-words.xml:
+
+   &lt;dictionary xmlns="http://marklogic.com/xdmp/spell"&gt;
+   &lt;word&gt;albatross&lt;/word&gt;
+   &lt;word&gt;albatrosses&lt;/word&gt;
+   &lt;/dictionary&gt;
+
+// preparatory
+
+declareUpdate();
+xdmp.documentLoad("/space/two-words.xml");
+
+// then run spell.suggestDetailed
+
+spell.suggestDetailed("/space/two-words.xml",
+                      "albetros",
+                      { 
+		        "maximum": 5,
+                        "distanceThreshold":500
+                      });
+==&gt;
+[
+{
+"original": "albatros",
+"word": "albatross",
+"dictionary": "/space/two-words.xml",
+"distance": 9,
+"keyDistance": 0,
+"wordDistance": 45,
+"levenshteinDistance": 1
+},
+{
+"original": "albatros",
+"word": "albatrosses",
+"dictionary": "/space/two-words.xml",
+"distance": 48,
+"keyDistance": 1,
+"wordDistance": 135,
+"levenshteinDistance": 3
+}
+]
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="romanize" type="builtin" lib="spell" category="SpellBuiltins">
+    <apidoc:summary>
+  Returns the romanization of the string, substituting basic Latin letters
+  for the letters in the string, according to their sound.  Unsupported
+  characters will be mapped to '?' for compatibility with the double metaphone
+  algorithm. We support romanization of the scripts of the languages with
+  advanced support in MarkLogic except for Chinese characters and Hangul.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="string" type="xs:string">
+     The input string.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:string</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell:romanize("Путин")
+=&gt; "putin"
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+spell.romanize("Путин");
+=&gt; "putin"
+</pre></apidoc:example>
+  </apidoc:function></apidoc:module>

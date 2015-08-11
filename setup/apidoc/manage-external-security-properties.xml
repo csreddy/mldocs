@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://marklogic.com/manage/external-security/properties" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://marklogic.com/manage/external-security/properties" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <xs:simpleType name="description">
+    <xs:annotation>
+      <xs:documentation>
+        An object's description.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="id">
+    <xs:annotation>
+      <xs:documentation>
+        An object's unique id.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:unsignedLong"/>
+  </xs:simpleType>
+  <xs:simpleType name="external-security-name">
+    <xs:annotation>
+      <xs:documentation/>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:minLength value="1" fixed="false"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="authentication">
+    <xs:annotation>
+      <xs:documentation>
+        Authentication
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="ldap"/>
+      <xs:enumeration value="kerberos"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="timeout">
+    <xs:annotation>
+      <xs:documentation>
+        An integer number of seconds, min 0, max 4294967295.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:unsignedInt">
+      <xs:minInclusive value="0" fixed="false"/>
+      <xs:maxInclusive value="4294967295" fixed="false"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="authorization">
+    <xs:annotation>
+      <xs:documentation>
+        An authorization scheme.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="internal"/>
+      <xs:enumeration value="ldap"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ldap-bind-method">
+    <xs:annotation>
+      <xs:documentation>
+        ldap bind method.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="MD5"/>
+      <xs:enumeration value="simple"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ldap-server-uri">
+    <xs:annotation>
+      <xs:documentation>
+        ldap server uri.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ldap-base">
+    <xs:annotation>
+      <xs:documentation>
+        ldap base.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ldap-attribute">
+    <xs:annotation>
+      <xs:documentation>
+        ldap attribute.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ldap-default-user">
+    <xs:annotation>
+      <xs:documentation>
+        ldap default user.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ldap-password">
+    <xs:annotation>
+      <xs:documentation>
+        ldap password.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:complexType name="external-security-properties" abstract="false" mixed="false">
+    <xs:annotation>
+      <xs:documentation>
+        External security object
+      </xs:documentation>
+    </xs:annotation>
+    <xs:all minOccurs="1" maxOccurs="1">
+      <xs:element ref="external-security-name" minOccurs="0"/>
+      <xs:element ref="description" minOccurs="0"/>
+      <xs:element ref="authentication" minOccurs="0"/>
+      <xs:element ref="cache-timeout" minOccurs="0"/>
+      <xs:element ref="authorization" minOccurs="0"/>
+      <xs:element ref="ldap-server-uri" minOccurs="0"/>
+      <xs:element ref="ldap-base" minOccurs="0"/>
+      <xs:element ref="ldap-attribute" minOccurs="0"/>
+      <xs:element ref="ldap-default-user" minOccurs="0"/>
+      <xs:element ref="ldap-password" minOccurs="0"/>
+      <xs:element ref="ldap-bind-method" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:element name="description" type="description" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+  	An object's description.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="external-security-name" type="external-security-name" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        External security name (unique)
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="authentication" type="authentication" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        Authentication
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="cache-timeout" type="timeout" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        The login cache timeout, in seconds.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="authorization" type="authorization" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        An authorization scheme.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="ldap-bind-method" type="ldap-bind-method" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        ldap bind method.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="ldap-server-uri" type="ldap-server-uri" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        URI of the ldap server. Required if authentication or authorization is ldap.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="ldap-base" type="ldap-base" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        starting point for search. Required if authentication or authorization is ldap.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="ldap-attribute" type="ldap-attribute" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        ldap attribute for user lookup. Required if authentication or authorization is ldap.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="ldap-default-user" type="ldap-default-user" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        ldap user used by MarkLogic server. 
+        Required if authentication is kerberos and authorization is ldap or bind method is simple.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="ldap-password" type="ldap-password" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        password of the default ldap user. 
+        Required if authentication is kerberos and authorization is ldap or bind method is simple.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="external-security-properties" type="external-security-properties" abstract="false" nillable="false">
+    <xs:annotation>
+      <xs:documentation>
+        An external authentication and authorization config.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+</xs:schema>

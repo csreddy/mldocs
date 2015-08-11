@@ -1,0 +1,2616 @@
+<!-- Copyright 2002-2012 MarkLogic Corporation.  All Rights Reserved. -->
+<apidoc:module name="SearchBoxModule" category="Search" lib="search"
+  bucket="XQuery Library Modules"
+  xmlns:apidoc="http://marklogic.com/xdmp/apidoc"
+  xmlns="http://www.w3.org/1999/xhtml">
+  <apidoc:summary>
+    <p>The Search function module is installed as the following file:</p>
+    <ul>
+      <li>
+        <code><em>install_dir</em>/Modules/MarkLogic/appservices/search/search.xqy</code>
+      </li>
+    </ul>
+    <p>where <code>
+        <em>install_dir</em>
+      </code> is the directory in which MarkLogic Server is installed.</p>
+      <p>To use the <code>search.xqy</code> module in your own XQuery modules, 
+	      include the following line in your XQuery prolog:</p>
+    <pre xml:space="preserve">
+import module namespace search="http://marklogic.com/appservices/search"
+                    at "/MarkLogic/appservices/search/search.xqy";</pre>
+	    <p>The Search functions are used to create search high-level 
+		    results, facets, snippets, and other search-related 
+		    items.</p>
+  </apidoc:summary>
+  <apidoc:function name="check-options" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+	  <apidoc:summary>This function verifies that options XML is 
+		  properly structured. Used in debugging, normally not 
+		  in production. Returns the empty sequence on success, 
+		  otherwise it returns one or more error messages 
+		  inside <code>&lt;report&gt;</code> elements.
+	  </apidoc:summary>
+    <apidoc:params>
+	    <apidoc:param name="options" type="element(search:options)">
+		    Options to define the search 
+		    grammar and control the search. See description for 
+		    <a href="#search:search#search-options"><code>$options</code></a>
+		    for the function <code>search:search</code>. 
+      </apidoc:param>
+      <apidoc:param name="strict" type="xs:boolean?" optional="true">If 
+	      <code>true</code>, index settings are additionally 
+	      verified. The default is <code>false</code>.
+      </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>element(search:report)*</apidoc:return>
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+search:check-options(
+    <options xmlns="http://marklogic.com/appservices/search">
+      <grammar>
+        <joiner strength="10" apply="infix"
+                element="cts:or-query">|</joiner>
+        <joiner strength="20" apply="infix"
+                element="cts:and-query">&amp;</joiner>
+      </grammar>
+    </options>)
+
+=>
+
+()
+]]>
+      </pre>
+    </apidoc:example>
+  </apidoc:function>
+  <apidoc:function name="estimate" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+	  <apidoc:summary>This function quickly estimates the number of hits 
+		  a query will return.  The result is unfiltered and
+		  reflects the index resolution of the search (like
+		  <code>xdmp:estimate</code>).
+	  </apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="cts-query" type="element()">A
+		    serialized and annotated <code>cts:query</code>, 
+		    typically the result of a call to 
+		    <a href="#search:parse"><code>search:parse</code></a>.
+	    </apidoc:param>
+	    <apidoc:param name="options" type="element(search:options)?" 
+		    optional="true">Options to define the search 
+		    grammar and control the search. See description for 
+		    <a href="#search:search#search-options"><code>$options</code></a> 
+		    for the function <code>search:search</code>. 
+	    </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong</apidoc:return>
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+search:estimate(search:parse("Vannevar Bush"))
+
+=>
+
+12345
+]]>
+      </pre>
+    </apidoc:example>
+  </apidoc:function>
+  <apidoc:function name="get-default-options" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+	  <apidoc:summary>This function returns the default options 
+		  XML. Default options do not contain any constraints 
+		  or anything else that requires specific index 
+		  settings.</apidoc:summary>
+    <apidoc:return>element(search:options)</apidoc:return>
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+search:get-default-options()
+
+=>
+
+<options xmlns="http://marklogic.com/appservices/search">
+  ...
+</options>
+]]>
+      </pre>
+    </apidoc:example>
+  </apidoc:function>
+  <apidoc:function name="parse" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+	  <apidoc:summary>This function parses query text according 
+		  to given options and returns the appropriate 
+		  <code>cts:query</code> XML.</apidoc:summary>
+    <apidoc:params>
+	    <apidoc:param name="qtext" type="xs:string+">The query 
+		    text to parse. This may be a sequence, to accommodate 
+		    more complex search UI. Multiple query texts will be 
+		    ANDed together.</apidoc:param>
+      <apidoc:param name="options" type="element(search:options)?" 
+		    optional="true">Options to define the search 
+		    grammar and control the search. See description for 
+		    <a href="#search:search#search-options"><code>$options</code></a> 
+		    for the function <code>search:search</code>. 
+	    </apidoc:param>
+	    <apidoc:param name="output" optional="true" type="xs:string?">
+		    The format of the parsed query, one of
+		    <code>cts:query</code>, <code>search:query</code>, or
+            <code>cts:annotated-query</code>. If you use 
+		    <code>search:query</code>, the output is a structured
+		    query XML output. The default is a <code>cts:query</code>, 
+            without annotations. To get annotations, set this parameter
+            to <code>cts:annotated-query</code>.
+    </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>element()?</apidoc:return>
+    <apidoc:example><pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+     at "/MarkLogic/appservices/search/search.xqy";
+
+search:parse("tag:technology AND format:pdf",
+   <options xmlns="http://marklogic.com/appservices/search">
+     <constraint name="tag">
+       <collection/>
+     </constraint>
+     <constraint name="format">
+        <value>
+          <element ns="http://purl.org/dc/elements/1.1/" name="tag"/>
+        </value>
+     </constraint>
+   </options>
+) 
+
+==>
+
+<cts:and-query xmlns:cts="http://marklogic.com/cts">
+  <cts:collection-query>
+    <cts:uri>technology</cts:uri>
+  </cts:collection-query>
+  <cts:element-value-query>
+    <cts:element xmlns:_1="http://purl.org/dc/elements/1.1/">_1:tag</cts:element>
+    <cts:text xml:lang="en">pdf</cts:text>
+  </cts:element-value-query>
+</cts:and-query>
+]]></pre></apidoc:example>
+    <apidoc:example><pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+     at "/MarkLogic/appservices/search/search.xqy";
+
+search:parse("tag:technology AND format:pdf",
+   <options xmlns="http://marklogic.com/appservices/search">
+     <constraint name="tag">
+       <collection/>
+     </constraint>
+     <constraint name="format">
+        <value>
+          <element ns="http://purl.org/dc/elements/1.1/" name="tag"/>
+        </value>
+     </constraint>
+   </options>, "cts:annotated-query") 
+
+==>
+
+<cts:and-query qtextjoin="AND" strength="20" qtextgroup="( )" 
+    xmlns:cts="http://marklogic.com/cts" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <cts:collection-query qtextpre="tag:" qtextref="cts:annotation">
+    <cts:annotation qtextref="following-sibling::cts:uri"/>
+    <cts:uri>technology</cts:uri>
+  </cts:collection-query>
+  <cts:element-value-query qtextpre="format:" qtextref="cts:annotation">
+    <cts:element xmlns:_1="http://purl.org/dc/elements/1.1/">_1:tag</cts:element>
+    <cts:annotation qtextref="following-sibling::cts:text"/>
+    <cts:text>pdf</cts:text>
+  </cts:element-value-query>
+</cts:and-query>
+]]></pre></apidoc:example>
+  <apidoc:example><pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+     at "/MarkLogic/appservices/search/search.xqy";
+
+search:parse("hello tag:technology AND format:pdf",
+   <options xmlns="http://marklogic.com/appservices/search">
+     <constraint name="tag">
+       <collection/>
+     </constraint>
+     <constraint name="format">
+        <value>
+          <element ns="http://purl.org/dc/elements/1.1/" name="tag"/>
+        </value>
+     </constraint>
+   </options>, "search:query")
+
+=> the following structured query:
+
+<search:query xmlns:search="http://marklogic.com/appservices/search">
+  <search:and-query>
+    <search:term-query>
+      <search:text>hello</search:text>
+    </search:term-query>
+    <search:and-query>
+      <search:collection-constraint-query>
+        <search:constraint-name>tag</search:constraint-name>
+        <search:uri>technology</search:uri>
+      </search:collection-constraint-query>
+      <search:value-constraint-query>
+        <search:constraint-name>format</search:constraint-name>
+        <search:text>pdf</search:text>
+      </search:value-constraint-query>
+    </search:and-query>
+  </search:and-query>
+</search:query>
+]]></pre></apidoc:example>
+  </apidoc:function>
+  <apidoc:function name="remove-constraint" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+	  <apidoc:summary>NOTE: This function is deprecated. This function safely 
+          removes a token from query text, 
+		  ensuring that grammar elements (AND, OR, quotes, 
+		  parentheses) are handled properly.</apidoc:summary>
+    <apidoc:params>
+	    <apidoc:param name="qtext" type="xs:string">The full query 
+		    text string.</apidoc:param>
+	    <apidoc:param name="ptext" type="xs:string">A token to remove 
+		    from full query text.</apidoc:param>
+	    <apidoc:param name="options" type="element(search:options)?">
+		    Options to define the search 
+		    grammar and control the search. See description for 
+		    <a href="#search:search#search-options"><code>$options</code></a> 
+		    for the function <code>search:search</code>. 
+	    </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:string?</apidoc:return>
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+   at "/MarkLogic/appservices/search/search.xqy";
+
+let $options :=
+ <options xmlns="http://marklogic.com/appservices/search">
+   <constraint name="tag">
+     <word>
+      <element ns="http://widgets-r-us.com" name="tag"/>
+     </word>
+   </constraint>
+   <constraint name="year">
+     <value>
+      <element ns="http://widgets-r-us.com" name="year"/>
+     </value>
+   </constraint>
+ </options>
+return
+search:remove-constraint("tag:foo AND (year:2007 OR year:2008)",
+   "year:2008", $options)
+
+=>
+"tag:foo AND year:2007"
+]]>
+</pre>
+    </apidoc:example>
+  </apidoc:function>
+  <apidoc:function name="resolve" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+	  <apidoc:summary>This function is the same as 
+		  <code>search:search</code>, except that it takes 
+		  a parsed and annotated <code>cts:query</code> XML node or a 
+      structured search <code>search:query</code> XML node as 
+		  input.
+	  </apidoc:summary>
+    <apidoc:params>
+	    <apidoc:param name="query" type="element()">Either a
+		    serialized and annotated <code>cts:query</code>, or
+		    a structured query (<code>search:query</code>). 
+		    You can generate either form of query as the result of a 
+		    call to 
+		    <a href="#search:parse"><code>search:parse</code></a>.
+	    </apidoc:param> 
+	    <apidoc:param name="options" type="element(search:options)?" 
+		    optional="true">Options to define the search 
+		    grammar and control the search. See description for 
+		    <a href="#search:search#search-options"><code>$options</code></a>
+		    for the function <code>search:search</code>. 
+	    </apidoc:param>
+	    <apidoc:param name="start" type="xs:unsignedLong?" 
+		    optional="true">The index of the first hit to return. 
+		    The default is 1.
+	    </apidoc:param>
+	    <apidoc:param name="page-length" type="xs:unsignedLong?" 
+		    optional="true">The maximum number of hits to return. 
+		    The default is 10. If the value is 0, no results 
+		    are returned.
+	    </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>element(search:response)</apidoc:return>
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+search:resolve(search:parse("Vannevar Bush"),
+    <options xmlns="http://marklogic.com/appservices/search">
+      <return-results>false</return-results>
+      <return-facets>true</return-facets>
+    </options>)
+
+=>
+
+<search:response total="1234" start="1" page-length="10" xmlns=""
+        xmlns:search="http://marklogic.com/appservices/search">
+  <search:facet name="date">
+	  <search:facet-value value="today" count="1000">
+		  Today</search:facet-value>
+	  <search:facet-value value="yesterday" count="234">
+		  Yesterday</search:facet-value>
+	  <search:facet-value value="thismonth" count="1234">
+		  This Month</search:facet-value>
+  <search:/facet>
+    ...
+</search:response>
+]]>
+      </pre>
+    </apidoc:example>
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+(: structured query example, plain search for "hello" :)
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+     at "/MarkLogic/appservices/search/search.xqy";
+
+let $struct-query :=
+<query xmlns="http://marklogic.com/appservices/search">
+ <term-query>
+  <text>hello</text>
+ </term-query>
+</query>
+return
+search:resolve($struct-query)
+=> returns the a search:response node that matches a query for "hello"      
+      
+]]>
+      </pre>
+    </apidoc:example>
+  </apidoc:function>
+  <apidoc:function name="resolve-nodes" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+	  <apidoc:summary>This function performs the same search as 
+		  <code>search:search</code>, but it takes 
+		  a parsed and annotated <code>cts:query</code> XML node or a 
+      structured search <code>search:query</code> XML node as 
+		  input and returns the actual result nodes from the database.
+	  </apidoc:summary>
+    <apidoc:params>
+	    <apidoc:param name="query" type="element()">Either a
+		    serialized and annotated <code>cts:query</code>, or
+		    a structured query (<code>search:query</code>). 
+		    You can generate either form of query as the result of a 
+		    call to 
+		    <a href="#search:parse"><code>search:parse</code></a>.
+	    </apidoc:param> 
+	    <apidoc:param name="options" type="element(search:options)?" 
+		    optional="true">Options to define the search 
+		    grammar and control the search. See description for 
+		    <a href="#search:search#search-options"><code>$options</code></a> 
+		    for the function <code>search:search</code>. 
+	    </apidoc:param>
+            <apidoc:param name="start" type="xs:unsignedLong?" 
+		    optional="true">The index of the first hit to return. 
+		    The default is 1.
+            </apidoc:param> 
+	    <apidoc:param name="page-length" type="xs:unsignedLong?" 
+		    optional="true">The maximum number of hits to return. 
+		    The default is 10. If the value is 0, no results are 
+		    returned.
+	    </apidoc:param>
+    </apidoc:params>
+    <apidoc:usage>
+      When used in conjunction with the <code>extract-document-data</code>
+      option, each returned node contains the data specified by the
+      extraction, rather than the entire document or fragment.
+      <p>To obtain a <code>search:response</code> instead of the matching
+      nodes, use <code>search:resolve</code>.</p>
+    </apidoc:usage>
+    <apidoc:return>node()*</apidoc:return>
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+search:resolve-nodes(search:parse("Vannevar Bush"),
+    <options xmlns="http://marklogic.com/appservices/search">
+      <return-results>false</return-results>
+      <return-facets>true</return-facets>
+    </options>)
+
+=>
+
+... sequence of document nodes ...
+
+]]>
+      </pre>
+    </apidoc:example>
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+(: structured query example, plain search for "hello" :)
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+     at "/MarkLogic/appservices/search/search.xqy";
+
+let $struct-query :=
+<query xmlns="http://marklogic.com/appservices/search">
+ <term-query>
+  <text>hello</text>
+ </term-query>
+</query>
+return
+search:resolve-nodes($struct-query)
+=> returns the nodes that match a query for "hello"      
+]]>
+      </pre>
+    </apidoc:example>
+  </apidoc:function>
+  <apidoc:function name="search" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+          <apidoc:summary>This function parses and invokes a query according to
+                  specified options, returning up to $page-length result nodes
+                  starting from $start.</apidoc:summary>
+    <apidoc:params>
+            <apidoc:param name="qtext" type="xs:string+">The query text to
+                    parse. This may be a sequence,
+                    to accommodate more complex search UI. Multiple query texts
+                    are combined with an AND operator.</apidoc:param>
+            <apidoc:param name="options" type="element(search:options)?"
+                    optional="true">Options to define
+        the search grammar and control the search.
+	<p id="search-options"> The following is a summary of the 
+		XML structure of an options node: </p>
+ <p>   
+  <ul>
+    <li><a href="#opt-additional-query"
+     ><code>&lt;additional-query&gt;</code></a></li>
+    <li><a href="#opt-concurrency-level"
+     ><code>&lt;concurrency-level&gt;</code></a></li>
+    <li><a href="#opt-constraint"
+     ><code>&lt;constraint&gt;</code></a></li>
+    <li><a href="#opt-debug"><code>&lt;debug&gt;</code></a></li>
+    <li><a href="#opt-default-suggestion-source"
+     ><code>&lt;default-suggestion-source&gt;</code></a></li>
+    <li><a href="#opt-extract-document-data"
+     ><code>&lt;extract-document-data&gt;</code></a></li>
+    <li><a href="#opt-extract-metadata"
+     ><code>&lt;extract-metadata&gt;</code></a></li>
+    <li><a href="#opt-forest"><code>&lt;forest&gt;</code></a></li>
+    <li><a href="#opt-fragment-scope"
+     ><code>&lt;fragment-scope&gt;</code></a></li>
+    <li><a href="#opt-grammar"><code>&lt;grammar&gt;</code></a></li>
+    <li><a href="#opt-operator"><code>&lt;operator&gt;</code></a></li>
+    <li><a href="#opt-page-length"><code>&lt;page-length&gt;</code></a></li>
+    <li><a href="#opt-quality-weight"
+     ><code>&lt;quality-weight&gt;</code></a></li>
+    <li><a href="#opt-result-decorator"><code>&lt;result-decorator&gt;</code></a></li>
+    <li><a href="#opt-return-constraints"
+     ><code>&lt;return-constraints&gt;</code></a></li>
+    <li><a href="#opt-return-facets"
+     ><code>&lt;return-facets&gt;</code></a></li>
+    <li><a href="#opt-return-metrics"
+     ><code>&lt;return-metrics&gt;</code></a></li>
+    <li><a href="#opt-return-plan"><code>&lt;return-plan&gt;</code></a></li>
+    <li><a href="#opt-return-qtext"><code>&lt;return-qtext&gt;</code></a></li>
+    <li><a href="#opt-return-query"><code>&lt;return-query&gt;</code></a></li>
+    <li><a href="#opt-return-results"
+     ><code>&lt;return-results&gt;</code></a></li>
+    <li><a href="#opt-return-similar"
+     ><code>&lt;return-similar&gt;</code></a></li>
+    <li><a href="#opt-search-option"><code>&lt;search-option&gt;</code></a></li>
+    <li><a href="#opt-searchable-expression"
+     ><code>&lt;searchable-expression&gt;</code></a></li>
+    <li><a href="#opt-sort-order"><code>&lt;sort-order&gt;</code></a></li>
+    <li><a href="#opt-suggestion-source"
+     ><code>&lt;suggestion-source&gt;</code></a></li>
+    <li><a href="#opt-term"><code>&lt;term&gt;</code></a></li>
+    <li><a href="#opt-transform-results"
+     ><code>&lt;transform-results&gt;</code></a></li>
+    <li><a href="#opt-tuples"><code>&lt;tuples&gt;</code></a></li>
+    <li><a href="#opt-values"><code>&lt;values&gt;</code></a></li>
+    </ul>    
+ </p>   
+
+          <blockquote>
+            <dl>
+              <dt><a id="opt-additional-query"/>
+                <pre>&lt;additional-query&gt;</pre>
+              </dt>
+              <dd>An additional serialized <code>cts:query</code> node,
+                      which is combined using a
+                      <code>cts:and-query</code> with the query resulting from
+		      the specified <code>$qtext</code>.  The query results 
+		      are constrained by the specified additional-query, but
+		      any terms matching the addtional-query are not 
+		      highlighted in the snippet result output.
+		      For example, the
+                      following options node constrains the results to the
+                      directory named <code>/my/directory/</code>:
+                      <pre xml:space="preserve"><![CDATA[
+<options xmlns="http://marklogic.com/appservices/search">
+  <additional-query>{cts:directory-query("/my/directory/")}
+  </additional-query>
+</options>
+  ]]></pre>
+            <p>If you have multiple <code>additional-query</code> options,
+	    they are combined using a <code>cts:and-query</code>.</p>
+              </dd>
+              <dt><a id="opt-concurrency-level"/>
+                <pre id="concurrency-level">&lt;concurrency-level&gt;</pre>
+              </dt>
+	      <dd>The maximum number of threads used to resolve facets. 
+		      The default is 8, which specifies that at most 8 threads
+		      will be used concurrently to resolve facets.  For 
+		      example, the following specifies a concurrency level of
+		      16: 
+		      <pre xml:space="preserve"><![CDATA[
+<options xmlns="http://marklogic.com/appservices/search">
+  <concurrency-level>16</concurrency-level>
+</options>
+  ]]></pre>
+              </dd>
+
+              <dt><a id="opt-constraint"/>
+                <pre id="constraint">&lt;constraint&gt;</pre>
+              </dt>
+              <dd>The outer wrapper element for a constraint definition.
+                      Constraints are used to define facets which can be
+                      returned as part of the search results.
+                      The default is no defined constraints.
+                      <p>Each <code>constraint</code>  element must have
+                              an <code>@name</code> attribute (required),
+                              which is the unique name of this constraint.
+                              The name can then be used in the search
+                              grammar to specify the constraint. A constraint
+                              name must not contain whitespace.
+                      </p>
+                      <p>The <code>constraint</code>  element can have zero
+                              or more of the following elements:</p>
+                      <dl>
+                              <dt>
+                                      <pre>&lt;value&gt;</pre>
+                              </dt>
+                              <dd>Specifies element or attribute values on
+                                      which to constrain. You 
+				      cannot create facets from a 
+				      <code>value</code> constraint.
+                                      For example:
+  <pre xml:space="preserve"><![CDATA[
+<constraint name="my-value">
+    <value>
+      <element ns="my-namespace" name="my-localname"/>
+    </value>
+</constraint> 
+<constraint name="my-attribute-value">
+    <value>
+      <attribute ns="" name="my-attribute"/>
+      <element ns="my-namespace" name="my-localname"/>
+    </value>
+</constraint>
+<constraint name="fieldvalue">
+    <value>
+        <field name="fieldvalue"/>
+        <weight>2.0</weight>
+    </value>
+</constraint>]]></pre>
+                              </dd>
+                              <dt>
+                                      <pre>&lt;word&gt;</pre>
+                              </dt>
+                              <dd>Specifies the element, attribute, or field on
+                                      which to constrain by word.  You 
+				      cannot create facets from a 
+				      <code>word</code> constraint. 
+                                      For example:
+  <pre xml:space="preserve"><![CDATA[
+<constraint name="name">
+    <word>
+      <element ns="http://widgets-r-us.com" name="name"/>
+      <weight>2.0</weight>
+    </word>
+</constraint>
+<constraint name="description">
+    <word>
+        <field name="my-field"/>
+    </word>
+</constraint>
+  ]]></pre>
+                              </dd>
+                              <dt>
+                                      <pre>&lt;collection&gt;</pre>
+                              </dt>
+                              <dd>Specifies the collection on
+                                      which to constrain.
+                                      For example:
+  <pre xml:space="preserve"><![CDATA[
+<constraint name="my-collection">
+    <collection prefix="http://server.com/my-collection/"/>
+</constraint>
+  ]]></pre>
+                              </dd>
+                              <dt>
+                                      <pre>&lt;range&gt;</pre>
+                              </dt>
+                              <dd>Specifies the element or attribute on
+                                      which to constrain by range.  There must
+                                      be a range index of the specified
+				      type (and collation for string range
+				      indexes) defined for the specified
+                                      element or attribute.  Each
+                                      <code>range</code> element with a
+				      <code>type</code> attribute child, an
+				      optional <code>collation</code> attribute
+				      child (for string range indexes),
+                                      an <code>element</code> child, an optional
+                                      <code>attribute</code> child (for
+                                      attribute ranges), and may have one
+                                      or more <code>computed-bucket</code>
+				      children and/or one or more
+				      <code>facet-option</code> children (to
+				      pass options to the underlying lexicon
+				      apis).  If it is a field range constraint,
+				      then the <code>range</code> element
+				      has a <code>field</code> child element
+				      with a <code>name</code> attribute.
+              If it is a path-index range constraint,
+				      then the <code>range</code> element
+				      has a <code>path-index</code> child element
+				      with any namespaces defined in <code>xmlns</code> attributes.
+				      For example:
+                <pre xml:space="preserve"><![CDATA[
+<options xmlns="http://marklogic.com/appservices/search">
+ <constraint name="made">
+    <range type="xs:dateTime"><!-- requires a dateTime range index -->
+    <element ns="http://example.com" name="manufactured"/>
+    <attribute ns="" name="date"/>
+    <computed-bucket name="today" ge="P0D" lt="P1D"
+            anchor="now">Today</computed-bucket>
+    <computed-bucket name="30-days" ge="-P30D" lt="P1D"
+            anchor="now">Last 30 days</computed-bucket>
+    <computed-bucket name="60-days" ge="-P60D" lt="P1D"
+            anchor="now">Last 60 Days</computed-bucket>
+    <computed-bucket name="year" ge="-P1Y" lt="P1D"
+            anchor="now">Last Year</computed-bucket>
+  </range>
+ </constraint>
+ <constraint name="color">
+   <range type="xs:string">
+     <element ns="" name="bodycolor"/>
+   </range>
+ </constraint>
+ <constraint name="name">
+   <range type="xs:string" collation="http://marklogic.com/collation/">
+     <field name="my-field-name"/>
+   </range>
+ </constraint>
+ <constraint name="color-facet">
+    <range type="xs:string" facet="true">
+      <element ns="" name="bodycolor"/>
+      <!-- the facet-option values are passed directly to the 
+           underlying lexicon calls -->
+      <facet-option>frequency-order</facet-option>
+      <facet-option>descending</facet-option>
+    </range>
+ </constraint>
+ <constraint name="fieldrange">
+    <range type="xs:string" collation="http://marklogic.com/collation/">
+        <field name="fieldrange"/>
+    </range>
+ </constraint>
+ <constraint name="fieldrangebucket">
+  <range type="xs:dateTime">
+    <facet-option>ascending</facet-option>
+    <field name="fieldrangebucket"/>
+    <computed-bucket name="older" lt="-P365D" anchor="now"
+	  >Older than 1 years</computed-bucket>
+    <computed-bucket name="year" ge="-P365D" lt="-P30D" anchor="now"
+        >1 month to 1 year ago</computed-bucket>
+    <computed-bucket name="month" ge="-P30D" lt="-P7D" anchor="now"
+        >7 to 30 days ago</computed-bucket>
+    <computed-bucket name="week" ge="-P7D" lt="-P1D" anchor="now"
+        >1 to 7 days ago</computed-bucket>
+    <computed-bucket name="today" ge="-P1D" lt="P0D" anchor="now"
+        >Today</computed-bucket>
+    <computed-bucket name="future" ge="P0D" anchor="now"
+        >Future</computed-bucket>
+  </range>
+ </constraint>
+ <constraint name="year">
+   <range type="xs:gYear" facet="true">
+     <path-index xmlns:my="http://example.com"
+       >/publication/my:meta/my:year</path-index>
+     <!--uses same options structure, options as element, 
+         element-attribute or field based range constraints -->
+   </range>
+ </constraint>
+ 
+</options>
+]]></pre>
+<p>
+	For <code>range</code> constraints with either <code>bucket</code>
+	or <code>computed-bucket</code> specifications, for maximum performance
+	and sortability, the buckets should be in a continuous order; 
+	if the order is not
+	continuous (either ascending or descending), then the buckets are 
+	returned in the order specified, regardless of any sorting 
+	<code>facet-option</code> in the specification.
+</p>
+			      </dd>
+			                                    <dt>
+                                      <pre>&lt;element-query&gt;</pre>
+			      </dt>
+			      <dd>Specifies a constraint that restricts the
+				      search to the specified element.  You 
+				      cannot create facets from an 
+				      <code>element-query</code> constraint.
+				      <pre xml:space="preserve"><![CDATA[
+<options xmlns="http://marklogic.com/appservices/search">
+  <constraint name="sample-element-constraint">
+    <element-query name="title" ns="http://my/namespace" />
+  </constraint>
+</options>
+					      ]]></pre>
+			      </dd>
+			                                    <dt>
+                                      <pre>&lt;properties&gt;</pre>
+			      </dt>
+			      <dd>Specifies a constraint that finds matches on
+				      the corresponding properties documents.  
+				      You cannot create facets from a 
+				      <code>properties</code> constraint.
+				      <pre xml:space="preserve"><![CDATA[
+<options xmlns="http://marklogic.com/appservices/search">
+  <constraint name="sample-property-constraint">
+    <properties />
+  </constraint>
+</options>
+					      ]]></pre>
+				      For an additional example, see <a href="#prop-constraint">the second example</a> below.
+			      </dd>
+			      <dt><pre>&lt;geo-*&gt;</pre></dt>
+			      <dd>Specifies a geospatial constraint.  Must
+				      be one of the following elements: 
+				      <code>&lt;geo-attr-pair&gt;</code>,
+				      <code>&lt;geo-elem-pair&gt;</code>,
+				      <code>&lt;geo-elem&gt;</code>,
+				      <code>&lt;geo-path&gt;</code>,
+				      <code>&lt;geo-json-property&gt;</code>, or
+				      <code>&lt;geo-json-property-pair&gt;</code>.
+                      If the constraint has a 
+				      <code>&lt;heatmap&gt;</code> child, then
+				      it can be used as a facet, and can 
+				      contain 
+				      <code>&lt;facet-options&gt;</code>.
+				      For example:
+  <pre xml:space="preserve"><![CDATA[
+<constraint name="my-geo-attr-pair">
+    <!-- Uses cts:element-attribute-pair-geospatial-query, and
+    cts:element-attribute-pair-geospatial-boxes for the 
+    heatmap facet.  -->
+  <geo-attr-pair> 
+    <heatmap s="23.2" w="-118.3" n="23.3" e="-118.2" 
+             latdivs="4" londivs="4"/>
+    <facet-option>empties</facet-option> 
+    <parent ns="ns1" name="elem1"/> 
+    <lat ns="ns2" name="attr2"/> 
+    <lon ns="ns3" name="attr3"/>
+  </geo-attr-pair>
+</constraint>
+<constraint name="my-geo-elem-pair">
+    <!-- Uses cts:element-pair-geospatial-query, and
+    cts:element-pair-geospatial-boxes for the 
+    heatmap facet (not shown).  -->
+  <geo-elem-pair> 
+    <parent ns="ns1" name="elem2"/> 
+    <lat ns="ns2" name="attr2"/> 
+    <lon ns="ns3" name="attr3"/>
+  </geo-elem-pair>
+</constraint>
+<constraint name="my-geo-elem">
+    <!-- Uses cts:element-geospatial-query, and
+    cts:element-geospatial-boxes for the 
+    heatmap facet (not shown).  -->
+  <geo-elem> 
+    <element ns="ns1" name="elem3"/> 
+    <geo-option>type=long-lat-points</geo-option>
+  </geo-elem>
+</constraint>
+<constraint name="my-geo-elem-child">
+    <!-- Uses cts:element-child-geospatial-query, and
+    cts:element-geospatial-boxes for the 
+    heatmap facet (not shown).  -->
+  <geo-elem> 
+    <parent ns="ns1" name="elem4"/> 
+    <element ns="ns1" name="elem5"/> 
+  </geo-elem>
+</constraint>
+<constraint name="my-geo-path">
+    <!-- Uses cts:element-child-geospatial-query, and
+    cts:element-geospatial-boxes for the 
+    heatmap facet (not shown).  -->
+  <geo-path>
+    <path-index>/a/b</path-index> 
+  </geo-elem>
+</constraint>
+<constraint name="my-geo-json-property">
+    <!-- Uses cts:json-property-child-geospatial-query, and
+      cts:element-geospatial-boxes for the heatmap facet (not shown).  -->
+  <geo-json-property>
+    <parent-property>optionalParent</parent-property> 
+    <json-property>theChild</json-property>
+  </geo-json-property>
+</constraint>
+<constraint name="my-geo-json-pair-property">
+    <!-- Uses cts:json-property-pair-geospatial-query, and
+      cts:element-geospatial-boxes for the heatmap facet (not shown).  -->
+  <geo-json-property-pair>
+    <parent-property>theParent</parent-property> 
+    <lat-property>latitude</lat-property>
+    <lon-property>longitude</lon-property>
+  </geo-json-property-pair>
+</constraint>
+]]></pre>
+<p>Note that when specifying coordinates using a geospatial constraint, 
+	you must put any coordinate values that contain the negative
+	sign (-) in double-quotes, otherwise the search API will interpret
+	the negaitve sign as the negation operator (when using the default 
+	grammar).  For example, to specify a point using a geospatial 
+	constraint, specify qtext of the form 
+	<code>my-geo-elem-child:"-12, 5"</code> in your search string. 
+</p>
+			      </dd>
+			                                    <dt>
+                                      <pre>&lt;custom&gt;</pre>
+                              </dt>
+			      <dd>Specifies a custom constraint along with
+				      the name of the function implementations 
+				      used to evaluate the custom constraint.  
+				      
+                                      For example:
+  <pre xml:space="preserve"><![CDATA[
+<constraint name="my-custom">
+  <custom facet="true">
+    <parse apply="my-parse-function" 
+        ns="my-function-namespace" at="path-to-module.xqy"/>
+    <start-facet apply="my-start-function" 
+        ns="my-function-namespace" at="path-to-module.xqy"/>
+    <finish-facet apply="my-finish-function" 
+        ns="my-function-namespace" at="path-to-module.xqy"/>
+  </custom>
+</constraint>
+<!--  The start-facet and finish-facet elements can be omitted if 
+      facet="false". When facet="true", the start-facet can be ommitted
+      if you do not run in concurrent mode ("concurrent" option on the
+      lexicon functions). 
+-->
+  ]]></pre>
+                              </dd>
+                              <dt>
+      <pre id="term-option">&lt;term-option&gt;</pre>
+               </dt>
+	      <dd>
+	      <p>Specifies the options passed into the search
+		      (for example, case-insensitive).  There can be zero or 
+		      more <code>term-option</code> elements.  By default, 
+		      the search uses the same default options as the 
+		      underlying <code>cts:query</code> constructors, and the 
+		      defaults change based on your index configuration. 
+		      You can use <code>term-option</code> elements in several
+          places, including as a child
+		      of the <code><a href="#term">term</a></code>
+		      element and within many  
+		      <code><a href="#constraint">constraint</a></code> 
+		      elements (except for <code>element-query</code>
+		      constraints). Within constraints, <code>term-option</code> 
+          specifications typically occur as a child of the type
+          of constraint (for example, in a <code>word</code> constraint, as
+          a child of <code>word</code>.  Use 
+          <a href="#search:check-options">search:check-options</a> to 
+          make sure the usage is legal.</p>
+	      <p>Legal term option values are:</p>
+	      <p>	      <code>case-sensitive</code><br/>
+			      <code>case-insensitive</code><br/>
+			      <code>diacritic-sensitive</code><br/>
+			      <code>diacritic-insensitive</code><br/>
+			      <code>punctuation-sensitive</code><br/>
+			      <code>punctuation-insensitive</code><br/>
+			      <code>whitespace-sensitive</code><br/>
+			      <code>whitespace-insensitive</code><br/>
+			      <code>stemmed</code><br/>
+			      <code>unstemmed</code><br/>
+			      <code>wildcarded</code><br/>
+			      <code>unwilcarded</code><br/>
+			      <code>exact</code><br/>
+			      <code>lang=<em>iso639code</em></code><br/>
+		      </p>
+		      <p>For example:</p>
+  <pre xml:space="preserve"><![CDATA[
+<term-option>diacritic-insensitive</term-option>
+]]></pre>			
+		      <p>Or, for example, within in a word constraint:</p>
+  <pre xml:space="preserve"><![CDATA[
+<constraint name="name" 
+  xmlns="http://marklogic.com/appservices/search">
+  <word>
+    <element ns="http://widgets-r-us.com" name="name"/>
+    <term-option>case-sensitive</term-option>
+  </word>
+</constraint>
+]]></pre>			
+    </dd>
+                              <dt>
+      <pre id="facet-option">&lt;facet-option&gt;</pre>
+               </dt>
+	       <dd><p>Specifies options for facets, and is specified as
+			       a child of any range constraint or other 
+			       constraint that can be used as a facet 
+			       (any constraints except
+			       <code>word</code>, <code>value</code>, 
+			       <code>element-query</code>, or 
+			       <code>property</code>).  </p>
+		       <p>Legal values for a <code>facet-option</code> 
+			       element are generally any option that 
+			       can be passed into the underlying 
+			       <code>cts:range-query</code> or lexicon API.
+			       The following list enumerates the  
+			       <code>facet-option</code> values, but be aware
+			       that some options are only available with some
+			       range types.  For more detail on these options,
+			       see the documentation for the underlying range
+			       or lexicon APIs</p>
+		       <p>    <code>ascending</code><br/>
+			      <code>descending</code><br/>
+			      <code>empties</code><br/>
+			      <code>any</code><br/>
+			      <code>document</code><br/>
+			      <code>properties</code><br/>
+			      <code>locks</code><br/>
+			      <code>frequency-order</code><br/>
+			      <code>item-order</code><br/>
+			      <code>fragment-frequency</code><br/>
+			      <code>item-frequency</code><br/>
+			      <code>type=<em>type</em></code><br/>
+			      <code>timezone=<em>TZ</em></code><br/>
+			      <code>limit=<em>N</em></code><br/>
+			      <code>sample=<em>N</em></code><br/>
+			      <code>truncate=<em>N</em></code><br/>
+			      <code>skip=<em>N</em></code><br/>
+			      <code>score-logtfidf</code><br/>
+			      <code>score-logtf</code><br/>
+			      <code>score-simple</code><br/>
+			      <code>score-random</code><br/>
+			      <code>checked</code><br/>
+			      <code>unchecked</code><br/>
+			      <code>concurrent</code><br/>
+			      <code>map</code><br/>
+			     
+		      </p>
+		      <p>For example:</p>
+  <pre xml:space="preserve"><![CDATA[
+<constraint name="color" xmlns="http://marklogic.com/appservices/search">
+   <range type="xs:string">
+     <element ns="" name="bodycolor"/>
+     <facet-option>item-frequency</facet-option>
+   </range>
+</constraint>
+]]></pre>	
+	       </dd>
+
+                      </dl>
+
+
+              <dt><a id="opt-debug"/>
+                <pre>&lt;debug&gt;</pre>
+              </dt>
+              <dd>Activates debugging mode. Additional report elements will
+                  be present in the output. Set to <code>true</code> to
+                activate. The default is <code>false</code>. </dd>
+
+   
+
+              <dt><a id="opt-default-suggestion-source"/>
+                <pre>&lt;default-suggestion-source&gt;</pre>
+              </dt>
+	      <dd><p>Defines the content to be used as the default source of
+                      suggestions (see
+              <a href="#search:suggest"><code>search:suggest</code></a>). The
+                      source may be expressed as a reference to an existing
+                      named constraint, or as a collection, value,
+                      word or word-lexicon element. Note that the use
+                      of <code>word-lexicon</code> (the database-wide
+                      word lexicon) is not recommended as best practice;
+                      collection and range lexicons will yield the best
+		      performance.
+	      </p>
+                      <p>Each <code>default-suggestion-source</code>  element
+                              can optionally have an <code>@collation</code>
+                              attribute, which specifies the
+                              collation of the value lexicon used during
+                              query evaluation.  If no collation is specified,
+                              then the query uses default collation for the
+                              context in which the query is evaluated.
+                      </p>
+                      <p>The <code>default-suggestion-source</code>  element
+                              can have zero or more of the following
+                              child elements:</p>
+                      <dl>
+                              <dt>
+                                      <pre>&lt;collection&gt;</pre>
+                              </dt>
+                              <dd>Specifies using the collection lexicon
+                                      for suggestions.  For example:
+  <pre xml:space="preserve"><![CDATA[
+<default-suggestion-source>
+  <collection/>
+</default-suggestion-source>  ]]></pre>
+                              </dd>
+                              <dt>
+                                      <pre>&lt;range&gt;</pre>
+                              </dt>
+                              <dd>Specifies the element or attribute lexicon
+                                      to use for suggestions.  For example:
+  <pre xml:space="preserve"><![CDATA[
+<default-suggestion-source>
+  <range type="xs:string">
+    <element ns="my-namespace" name="my-localname"/>
+    <attribute ns="" name="my-attribute"/>
+  </range>
+</default-suggestion-source>  ]]></pre>
+                              </dd>
+                              <dt>
+                                      <pre>&lt;word&gt;</pre>
+                              </dt>
+                              <dd>Specifies using a constrained word lexicon
+                                  for suggestions.  For example:
+  <pre xml:space="preserve"><![CDATA[
+<default-suggestion-source>
+  <word>
+    <field name="my-field"/>
+  </word>
+</default-suggestion-source>
+]]></pre>
+                              </dd>
+                              <dt>
+                                      <pre>&lt;word&gt;</pre>
+                              </dt>
+                              <dd>Specifies using the database-wide word 
+                                  lexicon for suggestions. This option might
+                                  not scale well for a large database.
+                                  For example:
+  <pre xml:space="preserve"><![CDATA[
+<default-suggestion-source>
+  <word-lexicon/>
+</default-suggestion-source>
+]]></pre>
+                              </dd>
+                       </dl>
+              </dd>
+
+              </dd>
+             <dt><a id="opt-extract-document-data"/>
+                <pre>&lt;extract-document-data&gt;</pre>
+             </dt>
+              <dd><p>Select one or more XML elements, XML attributes, 
+                or JSON properties from each matching document to return in 
+                the query result set. The selected content is returned in 
+                within the <code>search:response</code> similar to snippets
+                when used with <code>search:search</code> or
+                <code>search:resolve</code>, and as document nodes when
+                used with <code>search:resolve-nodes</code>.
+                Set <code>@selected</code> to one of <code>"all"</code>, 
+                <code>"include"</code> (default), 
+                <code>"include-with-ancestors"</code>, <code>"exclude"</code>. 
+                If <code>@selected</code> is <code>"all"</code> or there are 
+                no <code>extract-path</code> elements, return the entire 
+                document. For details, see
+ <a href='#display.xqy?fname=http://pubs/6.0doc/xml/search-dev-guide/query-options.xml%2337692'>Extracting a Portion of Matching Documents</a> in the <em>Search Developer's Guide</em>.
+              </p>
+              <pre xml:space="preserve"><![CDATA[
+<search:extract-document-data selected="include">
+  <search:extract-path xmlns:my="/my/namespace">
+    /my:location
+  </search:extract-path>
+  <search:extract-path xmlns="">/userName</search:extract-path>
+</search:extract-document-data>
+             ]]></pre>
+             </dd>
+
+             <dt><a id="opt-extract-metadata"/>
+                <pre>&lt;extract-metadata&gt;</pre>
+              </dt>
+              <dd><p>NOTE: This option is deprecated. Use 
+                <code>extract-document-data</code> instead.</p>
+              <p>Specifies data to return in the 
+              <code>search:metadata</code> section of the 
+              <code>search:response</code> output.  You can specify element
+              or attribute content from the search hits to be returned
+              or values from any constraints in your search.
+              </p>
+ <pre xml:space="preserve"><![CDATA[
+<search:extract-metadata>
+       <!-- qnames specify elements or attributes in document 
+            content; multiples will be returned if they exist -->
+ <search:qname elem-ns="" elem-name="bar"/>
+ <search:qname elem-ns="http://example.com" elem-name="baz" 
+               attr-ns="http://ick" attr-name="id"/>
+ <search:qname elem-ns="http://example.com" 
+               elem-name="blech" attr-ns="" attr-name="size"/>
+       <!-- constraint-values extract values from the index 
+            associated with the constraint -->
+ <search:constraint-value ref="idx"/>
+ <search:constraint-value ref="id"/>
+ <search:qname elem-ns="http://example.com" elem-name="foo"/>
+</search:extract-metadata>
+ 
+ ]]></pre>
+              </dd>
+
+
+              <dt><a id="opt-forest"/>
+                <pre>&lt;forest&gt;</pre>
+              </dt>
+              <dd>A single forest ID to pass into <code>cts:search</code>.
+                      To specify multiple forests, use multiple
+                      <code>forest</code> elements in the options node. 			      <p>The value must be an <code>xs:unsignedLong</code>
+                      type.</p>
+      </dd>
+
+                    <dt><a id="opt-fragment-scope"/>
+                <pre>&lt;fragment-scope&gt;</pre>
+              </dt>
+	      <dd>Controls the scope over which to search.  Valid values are
+		      <code>documents</code> and <code>properties</code>, and 
+		      the default value is <code>documents</code>.
+		      
+		      <p>You can specify <code>fragment-scope</code> as a 
+			      child of <code>&lt;options&gt;</code>, and
+			      that sets a global fragment scope which applies
+			      both to what the search returns (that is, if
+			      it returns results from document fragments or
+			      from property fragments) and the global
+			      scope is inherited by any constraints that
+			      do not explicitly override the 
+			      <code>fragment-scope</code>.
+		      </p>
+		      <p>You can also specify <code>fragment-scope</code> as a 
+			      child of <code>&lt;range&gt;</code>, 
+			      <code>&lt;value&gt;</code>, or
+			      <code>&lt;word&gt;</code> constraints.
+			      Specifying as a child of one of these
+			      constraints sets a local fragment scope for 
+			      that constraint. The local 
+			      <code>fragment-scope</code> overrides a 
+			      global <code>fragment-scope</code>.
+			      For example, a 
+			      <code>fragment-scope</code> of 
+			      <code>properties</code> on a range constraint
+			      enables you to facet on a value stored in a 
+			      property, even if you are searching over 
+			      documents. For example:
+		      </p>
+		      <pre xml:space="preserve"><![CDATA[
+<options xmlns="http://marklogic.com/appservices/search">
+<fragment-scope>documents</fragment-scope>
+  <constraint name="last-modified">
+    <range type="xs:dateTime">
+      <element ns="http://marklogic.com/xdmp/property"
+               name="last-modified"/>
+      <fragment-scope>properties</fragment-scope>
+    </range>
+  </constraint>
+  <debug>true</debug>
+</options>
+				      ]]></pre>
+              </dd>
+
+              <dt><a id="opt-grammar"/>
+                <pre>&lt;grammar&gt;</pre>
+              </dt>
+              <dd> Wrapper element for grammar definition. The default
+		      grammar defines "Google-style" parsing.
+		      <p> The <code>grammar</code> element has a 
+			      <code>quotation</code> element that specifies 
+			      the quotation character with which to surround
+			      phrases. The text between the quotation
+			      characters is treated as a phrase. 
+			      You cannot specify a search that includes
+			      the quotation character; for example, to 
+			      specify a search that includes the 
+			      double quotation character (the default 
+			      quotation character), modify your grammar to 
+			      use a different quotation character.
+		      </p>
+		      <p> The <code>grammar</code> element can have
+			      0 or more <code>joiner</code> elements and 
+			      0 or more <code>starter</code> elements. </p>
+              <p>A <code>grammar</code>  element should contain at
+                 least one <code>joiner</code>, <code>starter</code>,
+                 or <code>implicit</code> child element. If the 
+                 grammer element is present but empty, then the grammar 
+                 does nothing, and the search is parsed according to the 
+			      <code>term</code> option.
+                      </p>
+                      <dl>
+                              <dt>
+                                      <pre>&lt;implicit&gt;</pre>
+			      </dt>
+			      <dd>Specifies the <code>cts:query</code> to use 
+				      to implicitly combine terms when no 
+				      joiner is specified in the qtext. Use
+				      this to modify the implicit search 
+				      grammar (for example, if you want the 
+				      default search to be a 
+				      <code>cts:or-query</code>
+				      instead of a <code>cts:and-query</code>).
+				      <p>The following is an example of a 
+					      <code>options</code> element
+					      with an <code>implicit</code>
+					      specification for a 
+				      <code>cts:or-query</code>:</p>
+			      <pre xml:space="preserve"><![CDATA[
+<options xmlns="http://marklogic.com/appservices/search">
+  <grammar>
+    <implicit>
+      <cts:or-query strength="10" xmlns:cts="http://marklogic.com/cts"/>
+    </implicit>
+  </grammar>
+</options>
+				      ]]></pre>
+			      </dd>
+                              <dt>
+                                      <pre>&lt;joiner&gt;</pre>
+                              </dt>
+                              <dd>Specifies what text to use to combine
+                                      terms together, and what is the
+                                      underlying <code>cts:query</code>
+                                      constructor to use to join the terms
+				      together.  You specify the function to
+				      call for the joiner with the 
+				      <code>apply</code> attribute, along with
+				      optional <code>ns</code> (for the module 
+				      namespace) and
+				      <code>at</code> (for the module path)
+				      attributes.  Additionally, the 
+				      <code>strength</code> attribute determines
+				      the order of precedence over other 
+				      <code>joiner</code> elements, the optional
+				      <code>options</code> attribute specifies
+				      a space-separated list of options that 
+				      are passed through to the underlying
+				      <code>cts:query</code> constructor,
+				      and the <code>element</code>
+				      attribute specifies the 
+				      <code>cts:query</code>
+				      element name (for example, 
+				      <code>cts:and-query</code>).
+                              </dd>
+                              <dt>
+                                      <pre>&lt;starter&gt;</pre>
+                              </dt>
+                              <dd>Specifies what text to use to delimit
+				      and group terms.  
+				      You specify the function to
+				      call for the starter with the 
+				      <code>apply</code> attribute, along with
+				      optional <code>ns</code> (for the module 
+				      namespace) and
+				      <code>at</code> (for the module path)
+				      attributes.  Additionally, the 
+				      <code>strength</code> attribute determines
+				      the order of precedence over other 
+				      <code>starter</code> elements, the 
+				      optional
+				      <code>options</code> attribute specifies
+				      a space-separated list of options that 
+				      are passed through to the underlying
+				      <code>cts:query</code> constructor, 
+				      the <code>element</code>
+				      attribute specifies the 
+				      <code>cts:query</code>
+				      element name (for example, 
+				      <code>cts:and-query</code>), and the 
+				      <code>delimiter</code> attribute 
+				      specifies the string to use as a 
+				      delimiter for the starter. 
+                              </dd>
+                      </dl>
+                      <p>The following is an example of a <code>grammar</code>
+                      element.</p>
+                      <pre xml:space="preserve"><![CDATA[
+<grammar xmlns="http://marklogic.com/appservices/search">
+  <quotation>"</quotation>
+  <implicit>
+    <cts:and-query strength="20" xmlns:cts="http://marklogic.com/cts"/>
+  </implicit>
+  <starter strength="30" apply="grouping" delimiter=")">(</starter>
+  <starter strength="40" apply="prefix" element="cts:not-query">-</starter>
+  <joiner strength="10" apply="infix" element="cts:or-query" 
+      tokenize="word">OR</joiner>
+  <joiner strength="20" apply="infix" element="cts:and-query" 
+      tokenize="word">AND</joiner>
+  <joiner strength="30" apply="infix" element="cts:near-query" 
+      tokenize="word">NEAR</joiner>
+  <joiner strength="30" apply="near2" element="cts:near-query">NEAR/</joiner>
+  <joiner strength="50" apply="constraint">:</joiner>
+  <joiner strength="50" apply="constraint" compare="LT"
+      tokenize="word">LT</joiner>
+  <joiner strength="50" apply="constraint" compare="LE" 
+      tokenize="word">LE</joiner>
+  <joiner strength="50" apply="constraint" compare="GT" 
+      tokenize="word">GT</joiner>
+  <joiner strength="50" apply="constraint" compare="GE" 
+      tokenize="word">GE</joiner>
+  <joiner strength="50" apply="constraint" compare="NE" 
+      tokenize="word">NE</joiner>
+</grammar>
+]]></pre>
+
+              </dd>
+
+              <dt><a id="opt-operator"/>
+                <pre>&lt;operator&gt;</pre>
+              </dt>
+              <dd>A named wrapper for one or more <code>state</code>
+                      elements, each representing a unique run-time
+                      configuration option. For example, if an operator
+                      with the name "sort" is defined, query text
+		      [sort:foo] will select the <code>state</code> child 
+		      with the name "foo" at query runtime, using the option
+		      specified on that <code>state</code> element.  
+		      Options affecting query
+                parsing (such as <code>constraint</code>, <code>grammar</code>,
+                <code>term</code>, <code>empty</code>) may not be configured
+                via operators.
+                <p>An <code>operator</code> element can have one or more
+                        <code>state</code> elements.  Each <code>state</code>
+                        element can have one of the
+                        following elements:</p>
+                <dl>
+                        <dt><code>additional-query</code></dt>
+                        <dt><code>debug</code></dt>
+                        <dt><code>forest</code></dt>
+                        <dt><code>page-length</code></dt>
+                        <dt><code>quality-weight</code></dt>
+                        <dt><code>searchable-expression</code></dt>
+                        <dt><code>sort-order</code></dt>
+                        <dt><code>transform-results</code></dt>
+		</dl>
+		<p>In the following example, a search for 
+		<code>special:hello</code> 
+		 constrains the search by the "hello world" query, and a
+		 search for <code>special:forest</code> constrains the 
+		 search to the forest names "my-forest".  </p>
+		<pre xml:space="preserve"><![CDATA[
+<operator name="special">
+  <state name="hello">
+    <additional-query>{cts:word-query("hello world")}
+    </additional-query>
+  </state>
+  <state name="forest">
+    <forest>{xdmp:forest("my-forest")}</forest>
+  </state>
+</operator>
+]]></pre>
+	 
+        </dd>
+
+              <dt><a id="opt-page-length"/>
+                <pre>&lt;page-length&gt;</pre>
+              </dt>
+              <dd> Specifies the number of results per page. The default value
+                      is 10.
+                      <p>The value must be an <code>xs:unsignedInt</code>
+                      type.</p>
+              </dd>
+
+              <dt><a id="opt-quality-weight"/>
+                <pre>&lt;quality-weight&gt;</pre>
+              </dt>
+              <dd>Specifies a weighting factor to use in the query.
+                      The default value is 1.0.
+                  <p>The value must be an <code>xs:double</code>
+                      type.</p>
+              </dd>
+
+              <dt><a id="opt-result-decorator"/>
+                <pre>&lt;result-decorator&gt;</pre>
+              </dt>
+              <dd>Specifies a custom search result decorator XQuery function.
+		        <pre xml:space="preserve"><![CDATA[
+<result-decorator apply="decorator" ns="http://my/ns" at="/my/path" />
+]]></pre>
+              </dd>
+
+              <dt><a id="opt-return-constraints"/>
+                <pre>&lt;return-constraints&gt;</pre>
+              </dt>
+              <dd>Include original constraint definitions in the results. The
+                      default is false.
+        <p>The value must be an <code>xs:boolean</code>
+                      type.</p>
+              </dd>
+
+              <dt><a id="opt-return-facets"/>
+                <pre>&lt;return-facets&gt;</pre>
+              </dt>
+              <dd>Include resolved facets in the results. The default
+                      is <code>true</code>.
+                      <p>The value must be an <code>xs:boolean</code>
+                      type.</p>
+              </dd>
+
+              <dt><a id="opt-return-metrics"/>
+                <pre>&lt;return-metrics&gt;</pre>
+              </dt>
+              <dd>Include statistics in the results. The default is
+                      <code>true</code>.
+                      <p>The value must be an <code>xs:boolean</code>
+                      type.</p>
+              </dd>
+
+              <dt><a id="opt-return-plan"/>
+                <pre>&lt;return-plan&gt;</pre>
+              </dt>
+	      <dd>Include <code>xdmp:plan</code> output in the results. 
+		      The default is <code>false</code>.  The output
+		      is useful in examining the evaluation plan
+		      of the search.
+                      <p>The value must be an <code>xs:boolean</code>
+                      type.</p>
+              </dd>
+
+              <dt><a id="opt-return-qtext"/>
+                <pre>&lt;return-qtext&gt;</pre>
+              </dt>
+              <dd>Include the original query text in the results.
+                      The default is <code>true</code>.
+                  <p>The value must be an <code>xs:boolean</code>
+                      type.</p>
+              </dd>
+
+              <dt><a id="opt-return-query"/>
+                <pre>&lt;return-query&gt;</pre>
+              </dt>
+              <dd>Include the XML query representation in the results.
+                      The default is <code>false</code>.
+                     <p>The value must be an <code>xs:boolean</code>
+                      type.</p>
+              </dd>
+
+              <dt><a id="opt-return-results"/>
+                <pre>&lt;return-results&gt;</pre>
+              </dt>
+              <dd>Include search results in the output. (Use transform-results
+                      to specify how each result should be formatted.) The
+                      default is <code>true</code>.
+                      <p>The value must be an <code>xs:boolean</code>
+                      type.</p>
+              </dd>
+
+              <dt><a id="opt-return-similar"/>
+                <pre>&lt;return-similar&gt;</pre>
+              </dt>
+              <dd>Include with each search result a list of URLs of similar
+                      documents in the database. The default is
+                      <code>false</code>.
+                      <p>The value must be an <code>xs:boolean</code>
+                      type.</p>
+              </dd>
+
+              <dt><a id="opt-search-option"/>
+                <pre>&lt;search-option&gt;</pre>
+              </dt>
+              <dd>For advanced users, a single option to be passed in
+                      with <code>cts:search</code> calls (for example,
+                      <code>filtered</code>, <code>unfiltered</code>,
+                      <code>score-logtfidf</code>, and so on). To pass in
+                      multiple options, specify multiple
+                      <code>search-options</code> elements in the options
+                      node. The default is no
+                      additional options. For example:
+                        <pre xml:space="preserve"><![CDATA[
+<search-option>unfiltered</search-option>
+<search-option>score-logtf</search-option>
+ ]]></pre>
+              </dd>
+
+              <dt><a id="opt-searchable-expression"/>
+                <pre>&lt;searchable-expression&gt;</pre>
+              </dt>
+              <dd>An expression to be searched.  Whatever expression is
+                      specified is returned from the search.  For example,
+                      if you specify <code>//p</code>, then <code>p</code>
+                      elements that match the search criteria are returned.
+                      The expression must be an inline, fully
+                      searchable XPath expression. All necessary
+                      namespaces must be declared using <code>xmlns</code>
+                attributes. For example: <pre xml:space="preserve"><![CDATA[
+<searchable-expression xmlns:ex="http:example.com"
+    xmlns:com="http://company.com">/ex:orders/com:company
+</searchable-expression>
+        ]]></pre>
+       The default value is <code>fn:collection()</code>, which
+        searches all documents in the database. This option does not apply
+        to facet results. To constrain facet results, use
+        <code>additional-query</code>.
+              </dd>
+
+              <dt><a id="opt-sort-order"/>
+                <pre>&lt;sort-order&gt;</pre>
+              </dt>
+	      <dd><p>Set the default sort order. The first such element is 
+		      the primary sort order, the second secondary sort order, 
+		      and so on. The default is to sort by score, descending.  
+		      Note that the default scoring algorithm can be set 
+		      just like any other option with the option 
+		      named <code>search-option</code>. If you are sorting
+		      by an element or an attribute, you must specify a
+		      <code>type</code> attribute with a value corresponding
+		      to the range index type of that element or 
+		      attribute (for example, <code>xs:string</code>,
+		      <code>xs:dateTime</code>, and so on).  If the
+		      corresponding range index is of type 
+		      <code>xs:string</code>, then you can optionally
+		      specify a <code>collation</code> attribute (otherwise
+		      the collation of the query is used). To change the
+		      sorting direction, specify an optional
+		      <code>direction</code> attribute with a value of 
+		      <code>decending</code> (the default) or  
+		      <code>ascending</code>.
+	      </p>
+	      <p>The <code>sort-order</code> element must have one of a 
+		      single <code>element</code> child, a single 
+		      <code>score</code> child, a single <code>field</code> child,
+          or a single <code>json-property</code> child.   If there is a   
+		      <code>score</code> child, it specifies to
+		      sort by the score of the search result.  If there is an 
+		      <code>element</code> child it can optionally have an
+		      <code>attribute</code> sibling (to specify an attribute
+		      of the preceding <code>element</code>).  Both the 
+		      <code>element</code> and <code>attribute</code> 
+		      elements must have <code>ns</code> and <code>name</code>
+		      attributes to specify the namespace and local-name of 
+		      the specified element and attribute.  Additionally,
+		      the <code>sort-order</code> element can have 0 or more
+		      <code>annotation</code> elements (to add comments,
+		      for example). You should not apply <code>sort-order</code>
+              to a field backed by a field range index with more than 
+              one included element.
+             </p>
+		<p>For example, the following specifies a primary
+			sort order using the element value for
+			<code>my-element</code> (which needs a string
+			range index with the specified collation), and
+			a secondary sort order of score ascending:</p>
+                        <pre xml:space="preserve"><![CDATA[
+<sort-order type="xs:string" 
+    collation="http://marklogic.com/collation/"
+    direction="ascending">
+  <element ns="my-namespace" name="my-element"/>
+  <annotation>some user comment can go here</annotation>
+</sort-order>
+<sort-order direction="ascending">
+  <score/>
+</sort-order>
+ ]]></pre>
+                
+              </dd>
+
+              <dt><a id="opt-suggestion-source"/>
+                <pre>&lt;suggestion-source&gt;</pre>
+              </dt>
+	      <dd><p>Specifies a constraint source to override  
+		      a named constraint when using 
+	      <code><a href="#search:suggest">search:suggest</a></code>. 
+		      The suggestions are often used
+		      for type-ahead suggestions in a search user interface.  
+		      If empty, no suggestions are 
+		      generated when that constraint is applied.  Specifying an
+		      alternate <code>suggestion-source</code> is useful in 
+		      cases where you have a named constraint to use for 
+		      searching and facets, but you might want to use a 
+		      slightly (or completely) different source for 
+		      type-ahead suggestions without needed to re-parse your
+		      search terms.
+		      </p>
+		      <p>Each suggestion source must have a <code>ref</code> 
+			 attribute corresponding to a named constraint (one 
+			 <code>suggestion-source</code> per named constraint).
+			 A <code>suggestion-source</code> can have one 
+			 of the following child elements: 
+			 <code>collection</code>,
+			 <code>range</code>,
+			 <code>word</code>, or
+			 <code>word-lexicon</code>.
+		 </p>
+		 <p>For example, the following overrides the
+			 <code>tag:</code> prefix, using the range index
+			 for the attribute <code>shortname</code> instead of
+			 the one for <code>name</code> when using 
+			 <code>search:suggest</code>:</p>
+                        <pre xml:space="preserve"><![CDATA[
+<constraint name="tag">
+  <range collation="http://marklogic.com/collation/" 
+          type="xs:string" facet="true">
+    <element ns="my-namespace" name="my-element"/>
+    <attribute ns="" name="name"/>
+  </range>
+</constraint>
+<suggestion-source ref="tag">
+  <range collation="http://marklogic.com/collation/" 
+          type="xs:string" facet="true">
+    <element ns="my-namespace" name="my-element"/>
+    <attribute ns="" name="shortname"/>
+  </range>
+</suggestion-source>
+ ]]></pre>
+              </dd>
+
+              <dt><a id="opt-term"/>
+		      <pre id="term">&lt;term&gt;</pre>
+              </dt>
+	      <dd><p>Specifies handling of empty searches and controls options 
+		      for how individual terms (that is, terms 
+		      <em>not</em> associated with a constraint) will 
+		      be represented when parsing the search. 
+	      </p>
+		      
+	      <p>To control how empty searches (that is, the empty
+		      string passed into <code>search:search</code>) are 
+		      resolved, specify an <code>empty</code> child element 
+		      with an <code>apply</code> attribute.  The value of the 
+		      <code>apply</code> attribute specifies the behavior
+		      for empty searches: a value of <code>all-results</code>
+		      specifies that empty searches return everything in the
+		      database, a value of <code>no-results</code> (the 
+		      default) specifies that an empty search returns nothing.  
+		      Additionally, you create your own function to
+		      handle empty searches.  To specify your own
+		      function, create a function that returns a 
+		      <code>cts:query</code> and specify the local-name of 
+		      your function in the <code>apply</code> attribute, the
+		      namespace of the function library module in the 
+		      <code>ns</code> attribute, and the path to the 
+		      module in the <code>at</code> attribute.
+	      </p>
+          <p>You can also specify a <code>default</code> child element
+           which determines special handling to all terms, so you can have
+           all terms apply a set of rules such as query weighting, specifying
+           a element or attribute value or word query to be used as a default,
+           or specifying a constraint to be applied by default.
+          </p>
+          <p>The term definition can include a <code>fragment-scope</code>
+           that limits query scope to the documents or properties fragments.
+           For details, see 
+ <a href='#display.xqy?fname=http://pubs/6.0doc/xml/search-dev-guide/query-options.xml%2335473'>Fragment Scope Option</a> in the <em>Search Developer's Guide</em>
+          </p>
+	      <p>Additionally, you can specify zero or more 
+		      <a href="#term-option"><code>term-option</code></a>
+		      elements to control the behavior of the search terms.
+	      </p>
+	      <p>For example:</p>
+                        <pre xml:space="preserve"><![CDATA[
+ <term>
+   <empty apply="no-results" />
+   <term-option>diacritic-insensitive</term-option>
+   <term-option>unwildcarded</term-option>
+ </term>
+
+ ]]></pre>
+	      <p>The following examples show default term specifications
+        for terms with no constraints:</p>
+                        <pre xml:space="preserve"><![CDATA[
+Term element, parsing to a weighted word query.
+ 
+ <term xmlns="http://marklogic.com/appservices/search>
+    <default>
+        <word>
+            <weight>2.0</weight>
+        </word>
+    </default>
+    <empty apply="all-results"/>
+ </term>
+ 
+Term element, parsing to a weighted element word query on element 
+"foo:bar":
+ 
+ <term xmlns="http://marklogic.com/appservices/search">
+    <default>
+        <word>
+            <element ns="foo" name="bar"/>
+            <weight>2.0</weight>
+        </word>
+    </default>
+    <empty apply="all-results"/>
+ </term>
+ 
+Term element, parsing to an element-values query scoped to the 
+properties fragment:
+ 
+ <term xmlns="http://marklogic.com/appservices/search">
+    <default>
+        <value>
+            <element ns="http://example.com" name="copyright-year"/>
+            <fragment-scope>properties</fragment-scope>
+        </value>
+    </default>
+    <empty apply="all-results"/>
+ </term>
+ 
+ Term element, parsing to a field word query via an existing 
+ field-word constraint:
+
+ <term>     
+    <default ref="my-field-word-constraint"/>
+    <empty apply="all-results"/>
+ </term>
+ 
+Term element, referencing custom code (<default> configuration 
+will be ignored in a conflict). 
+ 
+ <term apply="my-term-query" ns="http://custom/search" 
+   at="/lib/custom.xqy">     
+    <default ref="my-field-word-constraint"/>
+    <empty apply="all-results"/>
+ </term>
+ ]]></pre>
+              </dd>
+
+              <dt><a id="opt-transform-results"/>
+                <pre>&lt;transform-results&gt;</pre>
+              </dt>
+	      <dd><p>Specifies a function to use to process a search result for 
+		      the snippet output.  
+		      The default is that each result is formatted using the
+		      built-in default snippetting function. For details, see
+ <a href='#display.xqy?fname=http://pubs/6.0doc/xml/search-dev-guide/query-options.xml%2358295'>Modifying Your Snippet Results</a> in the <em>Search Developer's Guide</em>.
+	      </p>
+	      <p>To use a different snippetting function, you must
+		      use either <code>search:search</code> or
+		       <code>search:resolve</code>; the 
+		      <code>search:snippet</code> function always uses the 
+		      default snippeting function. 
+		      Specify the local-name of the function to pass in as the  
+		      value of the <code>apply</code> attribute, the
+		      namespace as the value of the <code>ns</code> attribute,
+		      and the path to the module as the value of the 
+		      <code>at</code> attribute. You can pass in parameters
+		      to the function by specifying zero or more 
+		      <code>param</code> child elements (the parameters are
+		      passed in in the order specified).
+	      </p>
+	      <p>In addition to the default snippetting function, there
+		      are three other built-in snippetting functions:
+		      <code>apply="raw"</code> (return the whole node),  
+		      <code>apply="empty-snippet"</code> (return an empty 
+		      snippet), and
+		      <code>apply="metadata-snippet"</code> (return the 
+		      snippet from the specified element in
+		      the properties document).
+	      </p>
+	      <p>The following example specifies a custom snippetting
+		      function:</p>
+                        <pre xml:space="preserve"><![CDATA[
+<transform-results apply="snippet" ns="my-namespace"
+                   at="/my-library.xqy"/>
+
+]]></pre>
+   	      <p>The following example specifies a snippet returning
+		      the element named <code>my-element</code> in the 
+		      properties document:</p>
+                        <pre xml:space="preserve"><![CDATA[
+<transform-results apply="metadata-snippet">
+  <preferred-matches>
+    <!-- Specify namespace and localname for elements that exist 
+         in properties documents -->
+    <element ns="" name="my-element"/>
+  </preferred-matches>
+</transform-results>
+
+ ]]></pre>
+              </dd>
+              <dt><a id="opt-tuples"/>
+                <pre>&lt;tuples&gt;</pre>
+              </dt>
+	      <dd><p>Identifies values range indexes or lexicons in which to
+              find value co-occurrences. A <code>&lt;values-response&gt;</code>
+              of co-occurrences is included in the search response. You
+              can specify range, collection, geospatial, and uri indexes
+              or lexicons.</p>
+          <p>A <code>&lt;tuples/&gt;</code> element can include an
+             <code>&lt;aggregate/&gt;</code> child to specify an aggregate
+             builtin or user-defined function to apply to the values. You
+             can also specify one or more options using 
+             <code>&lt;values-options/&gt;</code>; see <code>cts:values</code> 
+             for a list of available options.</p>
+          <p>The following example specifies co-occurrences between 
+             <code>editor</code> and <code>author</code> element values.
+             attribute range index and the URI lexicon.</p>
+             <pre xml:space="preserve"><![CDATA[
+<options xmlns="http://marklogic.com/appservices/search">
+  <tuples name="editor-author">
+    <range type="xs:string" collation="http://marklogic.com/collation/">
+       <element name="editor" ns=""/>
+    </range>
+    <range type="xs:string" collation="http://marklogic.com/collation/">
+       <element name="author" ns=""/>
+    </range>
+    <lexicon-option>limit=10</lexicon-option>
+  </tuples>
+</options>
+ ]]></pre>
+              </dd>
+              <dt><a id="opt-values"/>
+                <pre>&lt;values&gt;</pre>
+              </dt>
+	      <dd><p>Identifies a values range index or lexicon with which
+             to constrain the search. A <code>&lt;values-response&gt;</code>
+             of matching index or lexicon values is included in the search 
+             response. You can specify range, collection, geospatial, and 
+             uri indexes or lexicons.</p>
+          <p>A <code>&lt;values/&gt;</code> element can include an
+             <code>&lt;aggregate/&gt;</code> child to specify an aggregate
+             builtin or user-defined function to apply to the values. You
+             can also specify one or more options using 
+             <code>&lt;values-options/&gt;</code>; see <code>cts:values</code> 
+             for a list of available options.</p>
+          <p>The following example specifies values from an element
+             attribute range index and from the URI lexicon. For more
+             examples, see <code>search:values</code>.</p>
+             <pre xml:space="preserve"><![CDATA[
+<options xmlns="http://marklogic.com/appservices/search">
+    <!-- element attribute range index values -->
+    <values name="example">
+      <range type="xs:integer">
+        <element ns="" name="game"/>
+        <attribute ns="" name="runs"/>
+      </range>
+      <aggregate apply="sum"/>
+    </values>
+
+    <!-- uri lexicon values -->
+    <values name="uri">
+      <uri/>
+      <values-option>limit=10</values-option>
+    </values>  
+</options>
+ ]]></pre>
+              </dd>
+             </dl>
+          </blockquote>
+
+      </apidoc:param>
+      <apidoc:param name="start" type="xs:unsignedLong?" optional="true">The 
+	      index of the first hit to return. If 0, treated as 1. If 
+	      greater than the number of results, no results will be
+	      returned. The default is 1.
+      </apidoc:param>
+      <apidoc:param name="page-length" type="xs:unsignedLong?" 
+	      optional="true">The maximum number of hits to return. 
+	      The default is 10. If the value is 0, no results are returned.
+       </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>element(search:response)</apidoc:return>
+
+     <apidoc:usage>
+	    <p>The output of <code>search:search</code> returns a 
+		    <code>&lt;response&gt;</code> element, which in turn 
+		    contains a <code>total</code> attribute. The value of the
+		    <code>total</code> attribute is an estimate, based
+		    on the index resolution of the query, and it is not 
+		    filtered for accuracy. The accuracy of the index resolution
+		    depends on the index configuration of the database, on the
+		    query, and on the data being searched. 
+	    </p>
+    </apidoc:usage>
+
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+search:search("Vannevar Bush",
+    <options xmlns="http://marklogic.com/appservices/search">
+      <return-results>false</return-results>
+      <return-facets>true</return-facets>
+    </options>)
+
+=>
+
+<search:response total="1234" start="1" page-length="10" xmlns=""
+        xmlns:search="http://marklogic.com/appservices/search">
+  <search:facet name="date">
+	  <search:facet-value value="today" count="1000">
+		  Today</search:facet-value>
+	  <search:facet-value value="yesterday" count="234">
+		  Yesterday</search:facet-value>
+	  <search:facet-value value="thismonth" count="1234">
+		  This Month</search:facet-value>
+  <search:/facet>
+    ...
+</search:response>
+]]>
+    </pre>
+    </apidoc:example>
+    <apidoc:example><a id="prop-constraint"/>
+      <pre xml:space="preserve"><![CDATA[
+(: properties constraint example :)
+xquery version "1.0-ml";
+(: create a document with some properties to test with :)
+xdmp:document-insert("/foo.xml", <foo>hello</foo>);
+xdmp:document-set-properties("/foo.xml", <blah>boo</blah>);
+
+(: do a properties constraint search :)
+import module namespace search = "http://marklogic.com/appservices/search"
+     at "/MarkLogic/appservices/search/search.xqy";
+
+search:search("hello sample-property-constraint:boo",
+<options xmlns="http://marklogic.com/appservices/search">
+  <constraint name="sample-property-constraint">
+    <properties />
+  </constraint>
+  <debug>true</debug>
+</options>)
+
+=>
+
+<search:response total="1" start="1" page-length="10" xmlns=""
+	xmlns:search="http://marklogic.com/appservices/search">
+  <search:result index="1" uri="/foo.xml" 
+		path="fn:doc(&quot;/foo.xml&quot;)" score="328" 
+		confidence="0.807121" fitness="0.901397">
+    <search:snippet>
+	    <search:match path="fn:doc(&quot;/foo.xml&quot;)/foo">
+		    <search:highlight>hello</search:highlight></search:match>
+    </search:snippet>
+  </search:result>
+  <search:qtext>hello sample-property-constraint:boo</search:qtext>
+  <search:report id="SEARCH-FLWOR">(cts:search(fn:collection(), 
+	  cts:and-query((cts:word-query("hello", ("lang=en"), 1), 
+	  cts:properties-query(cts:word-query("boo", ("lang=en"), 1))), 
+	  ()), ("score-logtfidf"), 1))[1 to 10]
+  </search:report>
+  <search:metrics>
+    <search:query-resolution-time>PT0.647S</search:query-resolution-time>
+    <search:facet-resolution-time>PT0S</search:facet-resolution-time>
+    <search:snippet-resolution-time>PT0.002S</search:snippet-resolution-time>
+    <search:total-time>PT0.651S</search:total-time>
+  </search:metrics>
+</search:response>
+
+]]>
+    </pre>
+    </apidoc:example>
+  </apidoc:function>
+
+  <apidoc:function name="snippet" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+	  <apidoc:summary>This function extracts matching text from the
+		  result node based on options, and returns the matches 
+		  wrapped in a containing node, with highlights 
+		  tagged.
+	  </apidoc:summary>
+    <apidoc:params>
+	    <apidoc:param name="result" type="node()">A node from which 
+		    to pull matching snippets from.
+	    </apidoc:param>
+	    <apidoc:param name="cts-query" type="schema-element(cts:query)">A
+		    serialized and annotated <code>cts:query</code>, 
+		    typically the result of a call to 
+		    <a href="#search:parse"><code>search:parse</code></a>.
+	    </apidoc:param>
+	    <apidoc:param name="options" type="element(search:transform-results)?" 
+		    optional="true">Options to define the search 
+		    grammar and control the search. See description for 
+		    <a href="#search:search#search-options"><code>$options</code></a> for 
+		    the function <code>search:search</code>. Note that 
+		    you cannot specify the  <code>apply</code> attribute
+		    on the <code>transform-results</code> option with
+		    <code>search:snippet</code>; to use a different snippetting
+		    function, use 
+		    <a href="#search:search"><code>search:search</code></a> or 
+		    <a href="#search:resolve"><code>search:resolve</code></a>
+		    instead. 
+	    </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>element(search:snippet)</apidoc:return>
+
+   
+    
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+search:snippet(
+ <html xmlns="http://www.w3.org/1999/xhtml">
+     <head>
+        <title>Page Title</title>
+     </head>
+     <body>
+       <div>Query terms in this div will be ignored for snippeting.</div>
+       <p>Text surrounding query terms is highlighted and truncated
+               according to configuration.</p>
+     </body>
+     </html>,
+      search:parse("term"),
+      <transform-results apply="snippet"
+      xmlns="http://marklogic.com/appservices/search">
+          <per-match-tokens>30</per-match-tokens>
+          <max-matches>4</max-matches>
+          <max-snippet-chars>200</max-snippet-chars>
+          <preferred-matches>
+              <element name="p" ns="http://www.w3.org/1999/xhtml"/>
+          </preferred-matches>
+      </transform-results>)
+
+=>
+
+<search:snippet xmlns:search="http://marklogic.com/appservices/search">
+  <search:match path="/*:html/*:body/*:p[1]">
+      Text surrounding query
+    <search:highlight>terms</search:highlight>
+      is highlighted and truncated according to configuration.
+  </search:match>
+</search:snippet>
+]]>
+  </pre>
+    </apidoc:example>
+  </apidoc:function>
+  <apidoc:function name="suggest" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+	  <apidoc:summary>This function returns a sequence of suggested text 
+		  strings that match a wildcarded search for the 
+		  <code>$qtext</code> input, ready for use in a user 
+		  interface.  Typically this is used for type-ahead 
+		  applications to provide the user 
+		  suggestions while entering terms in a search box.
+	  </apidoc:summary>
+    <apidoc:params>
+	    <apidoc:param name="qtext" type="xs:string+">One or more strings 
+		    of query text.  The first string in the list (or the
+		    string corresponding to the position in the $focus 
+		    parameter value) is used to find matching suggestions
+		    by performing a lexicon match query.
+		    The other strings (if any) are parsed as a 
+		    <code>cts:query</code>, with the resulting queries 
+		    combined with a <code>cts:and-query</code>, and the
+		    resulting <code>cts:query</code> is passed as a 
+		    constraining query to the lexicon match query, restricting 
+		    the suggestions to fragments that match the 
+		    <code>cts:query</code>.  Typically, each item in the
+		    sequence corresponds to a single text entry box in a 
+		    user interface.
+	    </apidoc:param>
+	    <apidoc:param name="options" type="element(search:options)?" 
+		    optional="true">Options to define the search 
+		    grammar and control the search. See description for 
+		    <a href="#search:search#search-options"><code>$options</code></a>
+		    for the function <code>search:search</code>.  In particular, 
+		    the <code>default-suggestion-source</code> and 
+		    <code>suggestion-source</code> options are specific to
+		    <code>search:suggest</code>.
+	    </apidoc:param>
+	    <apidoc:param name="limit" type="xs:unsignedInt?" 
+		    optional="true">The maximum number of
+		    suggestions to return. The default is 10.
+	    </apidoc:param>
+	    <apidoc:param name="cursor-position" type="xs:unsignedInt?" 
+		    optional="true">The position of the cursor, from point of 
+		    origin, in the text box corresponding to the 
+		    <code>$focus</code> parameter. This is used to determine 
+		    on which part of the query text to perform a lexicon 
+		    match.  The default is the string length of the 
+		    <code>$focus</code> string (all of the string).
+	    </apidoc:param>
+	    <apidoc:param name="focus" type="xs:positiveInteger?" 
+		    optional="true">If there are multiple
+		    <code>$qtext</code> strings, the index of the string 
+		    corresponding to the text box that has current 
+		    "focus" in the user interface (and therefore containing 
+		    a partial query text for completion). The
+		    default is 1 (the first <code>$qtext</code> string.
+	    </apidoc:param>
+	    <apidoc:param name="query" type="element(search:query)*" optional="true">
+          Zero or more structured queries with which to constrain the
+          scope of the match for <code>qtext</code>. Default: No additional
+          constraints on the suggestions.
+	    </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:string*</apidoc:return>
+    <apidoc:usage>
+	     <p>
+		    On large databases, the performance of using a 
+		    word lexicon for suggestions will probably be slower than
+		    using a value lexicon.  This can be very application 
+		    specific, and in some cases the performance might be good,
+		    but in general, value lexicons (range constraints) will 
+		    perform much better than word lexicons (word constraints)
+		    with <code>search:suggest</code>. Therefore, MarkLogic 
+		    recommends using value lexicons for suggestions, not word 
+		    lexicons.  
+	    </p>
+	    <p>
+		    The performance of <code>search:suggest</code> is highly
+		    data-dependent.  The best performing suggestion sources 
+		    are value lexicons (range indexes) that use the 
+		    codepoint collation.  Performance is also impacted based on
+		    the number of matches, and it can help to design the 
+		    interaction between <code>search:suggest</code> and the UI
+		    so that suggestions are given after a minimum of 3 
+		    characters are entered (that is, the lexicon match calls 
+		    will have at least 3 characters).  Again, this is quite 
+		    data-dependent, so you should try it on a large data set
+		    with your own data.
+	    </p>
+	    <p>
+		    The output of <code>search:suggest</code> is a sequence of 
+		    query text strings, not a sequence of words.  Each 
+		    query text string can include quoted text, such as
+		    phrases.  The output of  <code>search:suggest</code>
+		    is appropriate to pass into the first argument of
+		    <code>search:search</code>, including any quoted phrases. 
+		    For example, if you have a suggestion that returns 
+		    multi-word phrases
+		    (for example, from range element index values), then
+		    the suggestion will quote the phrase.
+	    </p>
+        <p>
+          Use the <code>query</code> parameter to supply structured
+          queries with which to constrain the returned results. Only
+          suggestions that match these additional queries are returned.
+          For more information about structured queries, see
+ <a href='#display.xqy?fname=http://pubs/6.0doc/xml/search-dev-guide/structured-query.xml%2392329'>Searching Using Structured Queries</a> in the <em>Search Developer's Guide</em>.
+        </p>
+    </apidoc:usage>
+        <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+let $options := 
+<search:options xmlns="http://marklogic.com/appservices/search">
+ <default-suggestion-source>
+   <range collation="http://marklogic.com/collation/" 
+          type="xs:string" facet="true">
+      <element ns="http://marklogic.com/xdmp/apidoc" 
+               name="function"/>
+      <attribute ns="" name="name"/>
+   </range>
+ </default-suggestion-source>
+</search:options>
+return
+search:suggest("docu", $options)
+
+=> a sequence of strings representing query text:
+
+document-add-collections
+document-add-permissions
+document-add-properties
+document-checkin
+document-checkout
+]]>
+      </pre>
+    </apidoc:example>
+
+     <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+let $options := 
+<search:options xmlns="http://marklogic.com/appservices/search">
+ <default-suggestion-source>
+    <range collation="http://marklogic.com/collation/" 
+          type="xs:string" facet="true">
+      <element ns="" name="hello"/>
+   </range>
+ </default-suggestion-source>
+</search:options>
+return
+search:suggest("a", $options)
+
+=>  a sequence of strings representing query text:
+"and that"
+"and this"
+
+]]>
+      </pre>
+    </apidoc:example>
+
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+search:suggest(("ta","foo"),(),5)
+
+=>  a sequence of strings representing query text:
+
+tab
+table
+tadpole
+tag
+
+]]>
+      </pre>
+    </apidoc:example>
+
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+search:suggest(("table","foo"),(),(),5,2)
+
+=>  a sequence of strings representing query text:
+
+food
+fool
+foolhardy
+foolish
+foolishness
+
+]]>
+      </pre>
+    </apidoc:example>
+        <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+(: 
+given a document created with the following:
+
+xdmp:document-insert("/test.xml",
+<root>
+  <my:my-element xmlns:my="my-namespace" shortname="fool"/>
+  <my:my-element xmlns:my="my-namespace" shortname="food"/>
+  <my:my-element xmlns:my="my-namespace" shortname="foolhardy"/>
+  <my:my-element xmlns:my="my-namespace" shortname="foolish"/>
+  <my:my-element xmlns:my="my-namespace" shortname="foolishness"/>
+  <my:my-element xmlns:my="my-namespace" name="foody"/>
+</root>)
+:)
+let $options := 
+<options xmlns="http://marklogic.com/appservices/search">
+ <constraint name="tag">
+   <range collation="http://marklogic.com/collation/" 
+          type="xs:string" facet="true">
+      <element ns="my-namespace" 
+               name="my-element"/>
+      <attribute ns="" name="name"/>
+   </range>
+ </constraint>
+ <suggestion-source ref="tag">
+   <range collation="http://marklogic.com/collation/" 
+          type="xs:string" facet="true">
+      <element ns="my-namespace" 
+               name="my-element"/>
+      <attribute ns="" name="shortname"/>
+   </range>
+ </suggestion-source>
+</options>
+return	  
+search:suggest("tag:foo", $options)
+
+=>
+suggestions to complete tag: from the range index on the 
+"shortname" attribute (notice "foody" is not in the answer):
+
+tag:food
+tag:fool
+tag:foolhardy
+tag:foolish
+tag:foolishness
+]]>
+      </pre>
+    </apidoc:example>
+  </apidoc:function>
+  <apidoc:function name="unparse" lib="search" category="Search"
+          bucket="XQuery Library Modules">
+	  <apidoc:summary>NOTE: This function is deprecated. Turn a serialized,
+        annotated <code>cts:query</code> (typically from 
+		<code>search:parse</code>) back into query text according to 
+        the specified rules.
+	  </apidoc:summary>
+    <apidoc:params>
+	    <apidoc:param name="qtree" type="element()">A
+		    serialized and annotated <code>cts:query</code>, 
+		    typically the result of a call to 
+		    <a href="#search:parse"><code>search:parse</code></a>.
+	    </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:string+</apidoc:return>
+    <apidoc:usage>
+      You can only use <code>search:unparse</code> on an annotated 
+      <code>cts:query</code>. You can generate an annotated query by
+      passing "cts:annotated-query" as the 3rd parameter of
+      <code>search:parse</code>.
+    </apidoc:usage>
+    <apidoc:example>
+      <pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+search:unparse(
+    search:parse("tag:technology AND format:pdf",
+      search:get-default-options(), "cts:annotated-query"))
+
+=>
+
+"tag:technology AND format:pdf"
+]]>
+      </pre>
+    </apidoc:example>
+  </apidoc:function>
+<apidoc:function name="values" lib="search" category="Search" 
+	  bucket="XQuery Library Modules">
+  <apidoc:summary>This function returns lexicon values and co-occurrences,
+    and allows you to calculate aggregates based on the lexicon values.
+  </apidoc:summary>
+  <apidoc:params>
+	  <apidoc:param name="spec-name" type="xs:string">
+		  The name of a specification in the supplied options node 
+		  (a <code><![CDATA[<values>]]></code> or 
+		  <code><![CDATA[<tuples>]]></code> 
+		  specification).
+	  </apidoc:param>
+	  <apidoc:param name="options" type="element(search:options)">
+		  Options to define the search 
+		  grammar and control the search. See description for 
+		  <a href="#search:search#search-options"><code>$options</code></a> for 
+		  the function <code>search:search</code> Must include the 
+		  $spec-name definitions supplied in the first parameter.
+		  <p>The following is sample options node that includes
+			  lexicon specifications: </p>
+		  <blockquote>
+			  <pre xml:space="preserve"><![CDATA[
+<options xmlns="http://marklogic.com/appservices/search">
+     
+    <values name="example">
+        <range type="xs:integer">
+            <element ns="" name="game"/>
+            <attribute ns="" name="runs"/>
+        </range>
+        <aggregate apply="sum"/>
+    </values>
+
+    <!-- uri lexicon -->
+    <values name="uri">
+      <uri/>
+      <values-option>limit=10</values-option>
+    </values>  
+
+     <!-- collection lexicon -->
+    <values name="coll">
+      <collection/>
+      <values-option>limit=10</values-option>
+    </values>
+ 
+    <!-- user-supplied aggregate -->
+    <values name="udf">
+        <range type="xs:double">
+            <element ns="" name="test"/>
+        </range>
+        <aggregate apply="mycalc" udf="sampleplugin"/>
+    </values>
+ 
+    <!-- co-occurrences -->
+    <tuples name="editor-author">
+        <range type="xs:string" collation="http://marklogic.com/collation/">
+            <element name="editor" ns=""/>
+        </range>
+        <range type="xs:string" collation="http://marklogic.com/collation/">
+            <element name="author" ns=""/>
+        </range>
+        <lexicon-option>limit=10</lexicon-option>
+    </tuples>
+
+    <!-- path -->
+    <values name="datepath">
+      <range type="xs:dateTime">
+        <facet-option>descending</facet-option>
+        <facet-option>limit=10</facet-option>
+        <path-index 
+          xmlns:d="http://purl.org/dc/elements/1.1/"
+          >/document/d:date</path-index>
+       </range>
+    </values>
+
+    <!-- field -->
+    <values name="field-range">
+        <range type="xs:dateTime">
+            <field name="range"/>
+        </range>
+    </values>
+ 
+    <return-frequency>false</return-frequency>
+    <return-values>true</return-values>
+    <return-aggregates>true</return-aggregates>
+</options> 
+]]></pre>
+		  </blockquote>
+	  </apidoc:param>
+	  <apidoc:param name="query" type="element(search:query)?" 
+		  optional="true"> 
+		  A structured query to apply as a constraint when retrieving 
+		  lexicon values.
+	  </apidoc:param>
+	  <apidoc:param name="limit" type="xs:unsignedLong?" 
+		  optional="true">
+		  The maximum number of values to return. The default is no 
+		  limit.  
+	  </apidoc:param>
+	  <apidoc:param name="start" type="xs:anyAtomicType?"
+		  optional="true">
+		  A starting value in the lexicon.  If the <code>$start</code> is
+          not present in the lexicon, the values
+		  are returned starting with the next value in the range index
+          after where <code>$start</code> would logically appear. If no
+          <code>$start</code> value is supplied, values are returned
+          beginning with the first value in the lexicon.
+	  </apidoc:param>
+      <apidoc:param name="page-start" type="xs:unsignedLong?" optional="true">
+          The index of the first value to return from within the subset
+          defined by <code>limit</code> and <code>start</code>. Default: 1.
+      </apidoc:param>
+      <apidoc:param name="page-length" type="xs:unsignedLong?" optional="true">
+          The number of values to return within the subset of values
+          defined by <code>limit</code> and <code>start</code>. Default:
+          Return all values.
+      </apidoc:param>
+  </apidoc:params>
+  <apidoc:return>element(search:values-response)</apidoc:return>
+  <apidoc:usage>
+    For details and more examples, see
+ <a href='#display.xqy?fname=http://pubs/6.0doc/xml/search-dev-guide/search-api.xml%2360118'>Returning Lexicon Values With search:values</a> in the <em>Search Developer's Guide</em>.
+  </apidoc:usage>
+  <apidoc:example><pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+let $options := 
+<options xmlns="http://marklogic.com/appservices/search">
+  <values name="uri">
+    <uri/>
+    <aggregate apply="min"/>
+  </values>
+</options>
+return
+search:values("uri", $options)
+=>
+<values-response name="uri" type="xs:string" 
+  xmlns="http://marklogic.com/appservices/search" 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <distinct-value frequency="2">/date.xml</distinct-value>
+  <distinct-value frequency="2">/gajanan.xml</distinct-value>
+  <distinct-value frequency="2">/test/keys.json</distinct-value>
+  <aggregate-result name="min">/date.xml</aggregate-result>
+  <metrics>
+    <values-resolution-time>PT0.000193S</values-resolution-time>
+    <aggregate-resolution-time>PT0.000409S</aggregate-resolution-time>
+    <total-time>PT0.001987S</total-time>
+  </metrics>
+</values-response>
+    ]]></pre>
+  </apidoc:example>
+  <apidoc:example><pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+     at "/MarkLogic/appservices/search/search.xqy";
+
+(: 
+   Requires URI lexicon and string range index on "hello". 
+   This finds the values for "hello" for all documents that 
+   have the element "hello".
+:)
+let $options := 
+<options xmlns="http://marklogic.com/appservices/search">
+  <tuples name="hello">
+    <uri/>
+    <range type="xs:string" collation="http://marklogic.com/collation/">
+      <element ns="" name="hello"/>
+    </range>
+  </tuples>
+</options>
+let $values:= search:values("hello", $options)
+return (
+$values, 
+fn:doc($values/search:tuple/search:distinct-value/fn:data()) )
+=>
+<values-response name="hello" 
+  xmlns="http://marklogic.com/appservices/search" 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <tuple frequency="1">
+    <distinct-value xsi:type="xs:string" 
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      >/date.xml</distinct-value>
+    <distinct-value xsi:type="xs:string" 
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      >2012-08-10-05:00</distinct-value>
+  </tuple>
+  <tuple frequency="1">
+    <distinct-value xsi:type="xs:string" 
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      >/gajanan.xml</distinct-value>
+    <distinct-value xsi:type="xs:string" 
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      >fooooooooo</distinct-value>
+  </tuple>
+  <metrics>
+    <values-resolution-time>PT0.0006S</values-resolution-time>
+    <aggregate-resolution-time>PT0.000014S</aggregate-resolution-time>
+    <total-time>PT0.002337S</total-time>
+  </metrics>
+</values-response>
+<?xml version="1.0" encoding="UTF-8"?>
+<hello>2012-08-10-05:00</hello>
+<?xml version="1.0" encoding="UTF-8"?>
+<foo>bar</foo>
+    ]]></pre>
+  </apidoc:example>
+  <apidoc:example><pre xml:space="preserve"><![CDATA[
+xquery version "1.0-ml";
+import module namespace search = "http://marklogic.com/appservices/search"
+    at "/MarkLogic/appservices/search/search.xqy";
+
+let $options := 
+<options xmlns="http://marklogic.com/appservices/search">
+  <values name="animals">
+    <range type="xs:string">
+      <field name="animal-name" collation="http://marklogic.com/collation/" />
+    </range>
+  </values>
+</options>
+return
+search:values("animals", $options, 
+  search:parse("mammal OR marsupial", (), "search:query"), 
+  10, "camel", 5, 3)
+
+==> Assuming the value subset defined by the query (mammal OR marsupial),
+    limit (10), and start ("buffalo") contains the values (camel, fox,
+    hare, jaguar, kangaroo, lemur, moose, ocelot, panda, rhino), then
+    adding a page-start of 5 and a page-length of 3, you get the following:
+
+<values-response name="animals" type="xs:string" xmlns="http://marklogic.com/appservices/search" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<distinct-value frequency="1">kangaroo</distinct-value>
+<distinct-value frequency="1">lemur</distinct-value>
+<distinct-value frequency="1">moose</distinct-value>
+<metrics>
+<values-resolution-time>PT0.000242S</values-resolution-time>
+<total-time>PT0.00134S</total-time>
+</metrics>
+</values-response>
+  ]]></pre></apidoc:example>
+</apidoc:function>
+  
+</apidoc:module>

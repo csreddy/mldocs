@@ -1,0 +1,123 @@
+<apidoc:module name="JavaScriptBuiltins" category="JavaScript Global Object" xmlns:apidoc="http://marklogic.com/xdmp/apidoc"><apidoc:summary access="public" category="JavaScript Global Object">
+  The JavaScript Global Object functions are MarkLogic-specific JavaScript 
+  functions that extend the Global Object.  These functions are available
+  in the Global space, without any prefixing.
+</apidoc:summary><apidoc:function name="declareUpdate" type="builtin" lib="Global-Object" category="JavaScript Global Object" class="javascript">
+    <apidoc:summary>
+  Declares the statement to be an update.
+
+  <p xmlns="http://www.w3.org/1999/xhtml">A JavaScript statement is executed as a query unless declareUpdate() is
+  called at the beginning of the statement.  Calling declareUpdate with an
+  options argument where <code>explicitCommit</code> property is set to true 
+  starts a multi-statement transaction and requires an explicit commit or 
+  rollback to complete the transaction.  If the options argument is omitted, 
+  or the property <code>explicitCommit</code> property is set to false, an 
+  update is automatically committed.  XDMP-OWNTXN is thrown if the request 
+  is in an open transaction. </p>
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="options" type="Object" optional="true">
+    Options to use for this operation.  If "explicitCommit" property is set to
+    true, declareUpdate starts a multi-statement transaction and requires an
+    explicit commit or rollback to complete the transaction.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>Null</apidoc:return>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  declareUpdate();
+  var person = {name:"Jon", age:50};
+  xdmp.documentInsert("p.json", person);
+</pre></apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  declareUpdate({explicitCommit: true});
+  var person = {name:"Jon", age:50};
+  xdmp.documentInsert("p.json", person);
+  // because explicitCommit is true, you must call xdmp.commit (or
+  // call it in another statement that uses the transaction started 
+  // in this statement)
+  xdmp.commit();
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="require" type="builtin" lib="Global-Object" category="JavaScript Global Object" class="javascript">
+    <apidoc:summary>
+  Imports a module at the specified location, and returns a JavaScript object.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="location" type="String" optional="false">
+    Location of the module to import.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>Object</apidoc:return>
+    <apidoc:usage>
+  <p xmlns="http://www.w3.org/1999/xhtml">The location of the module is resolved with the same rules that MarkLogic
+  resolves imported modules in XQuery. </p>
+  <p xmlns="http://www.w3.org/1999/xhtml">If the document with the user-specified module name does not end with a
+  file extension, require() will first look for the module with the user-
+  specified name appended with the configured extensions for JavaScript module,
+  and then appended with the configured extensions for XQuery module.</p>
+  <p xmlns="http://www.w3.org/1999/xhtml">If the user specified module's file extension does not match any of the
+  module path extension found in the MIME type configuration,
+  JS-ILLEGALMODULEPATH is thrown.</p>
+  <p xmlns="http://www.w3.org/1999/xhtml">If the user does not have execute permission on an existing module, the
+  above logic to resolve a module name applies as if the module is not found
+  and XDMP-MODNOTFOUND is thrown if the module cannot be located.</p>
+  <p xmlns="http://www.w3.org/1999/xhtml">Once a module is located, its query language is determined to be XQuery
+  if its name extension matches with any for the XQuery module; otherwise, it
+  is imported as a JavaScript module.</p>
+  <p xmlns="http://www.w3.org/1999/xhtml">If the imported module is in XQuery, the public functions and variables
+  defined in it are available through the returned JavaScript object as
+  properties, with either the original function name as the property name, or
+  with "-" in the function names removed and the following letter capitalized.
+  </p>
+  <p xmlns="http://www.w3.org/1999/xhtml">In the case where a namespace is shared between built-in functions and
+  XQuery modules (e.g., http://marklogic.com/xdmp/spell), the returned
+  JavaScript object can be used to access both the built-ins and the XQuery
+  functions.  The lookup sequence is function name, followed by variable name
+  then built-in name.</p>
+  <p xmlns="http://www.w3.org/1999/xhtml">If the imported module is in JavaScript, the exported API of the module
+  defined through exports or module.exports object is returned.</p>
+  <p xmlns="http://www.w3.org/1999/xhtml">If there is a dependency cycle, the foreign module may not have finished
+  executing at the time it is required by one of its transitive dependencies;
+  in this case, the object returned by "require" must contain at least the
+  exports that the foreign module has prepared before the call to require that
+  led to the current module's execution.</p>
+</apidoc:usage>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  lib.sjs:
+  var PI = Math.PI;
+  exports.area = function area(r) {
+    return PI * r * r;
+  };
+  Test.js
+  var circle = require("lib");
+  circle.area(2);
+</pre></apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  var admin = require("/MarkLogic/admin");
+  var conf = admin.getConfiguration();
+  admin.forestGetId(conf, "Documents");
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="doc" type="builtin" lib="cts" category="SearchBuiltins" subcategory="Search" class="javascript">
+    <apidoc:summary>
+  <p xmlns="http://www.w3.org/1999/xhtml">Returns the document stored in the database at the specified URI.</p>
+  <p xmlns="http://www.w3.org/1999/xhtml">To retrieve multiple documents stored at multiple URIs, use 
+  <code><a href="#fn.doc">fn.doc</a></code> instead.</p>
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="uri" type="String">
+  The URI of the document to retrieve.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>document-node()?</apidoc:return>
+    <apidoc:usage>
+  The <code xmlns="http://www.w3.org/1999/xhtml">document-node()</code> returned contains an
+  <code xmlns="http://www.w3.org/1999/xhtml">element()</code> root node for XML documents, a
+  <code xmlns="http://www.w3.org/1999/xhtml">text()</code> root node for text documents, and a
+  <code xmlns="http://www.w3.org/1999/xhtml">binary()</code> root node for binary documents.
+</apidoc:usage>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+cts.doc("/mydocs/doc.xml")
+
+=&gt; returns the document at the URI /mydocs/doc.xml
+</pre>
+</apidoc:example>
+  </apidoc:function></apidoc:module>

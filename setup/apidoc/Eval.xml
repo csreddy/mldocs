@@ -1,0 +1,1804 @@
+<apidoc:module name="Eval" category="Extension" lib="xdmp" xmlns:apidoc="http://marklogic.com/xdmp/apidoc"><apidoc:function name="eval" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context">
+    <apidoc:summary class="xquery">
+  Returns the result of evaluating a string as an XQuery module.
+</apidoc:summary>
+    <apidoc:summary class="javascript">
+  Returns the result of evaluating a string as a Javascript program.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="xquery" type="xs:string" class="xquery">
+    The XQuery string to be evaluated.  If the XQuery string contains
+    double quotes ("), surround the string with single quotes (').
+  </apidoc:param>
+      <apidoc:param name="javascript" type="xs:string" class="javascript">
+    The Javascript string to be evaluated.  If the Javascript string contains
+    double quotes ("), surround the string with single quotes (').
+  </apidoc:param>
+      <apidoc:param name="vars" type="item()*" optional="true" class="xquery">
+    The external variable values for this evaluation.
+    This can either be a sequence of map:map objects, or a sequence of even
+    length, alternating QNames and items.
+    <p xmlns="http://www.w3.org/1999/xhtml">Each key in the map(s) is a string representing the name of the parameter
+    in Clark notation: "{namespaceURI}localname". The function
+    <a href="#xdmp:key-from-QName">xdmp:key-from-QName</a>
+    is a convenient way to generate these keys.
+    Each entry in the map is the value of the corresponding external 
+    variable.</p>
+    <p xmlns="http://www.w3.org/1999/xhtml">Alternatively, the alternating sequence should contain QName and item
+    pairs that specify a variable name and value for an external variable.</p>
+  </apidoc:param>
+      <apidoc:param name="vars" type="Object" optional="true" class="javascript">
+    The external variable values for this evaluation.
+    This can either be a sequence of map:map objects, or a sequence of even
+    length, alternating QNames and items.
+    <p xmlns="http://www.w3.org/1999/xhtml">Each key in the map(s) is a string representing the name of the parameter
+    in Clark notation: "{namespaceURI}localname". The function
+    <a href="#xdmp.keyFromQName">xdmp.keyFromQName</a>
+    is a convenient way to generate these keys.
+    Each entry in the map is the value of the corresponding external 
+    variable.</p>
+    <p xmlns="http://www.w3.org/1999/xhtml">Alternatively, the alternating sequence should contain QName and item
+    pairs that specify a variable name and value for an external variable.</p>
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+    <span class="xquery" xmlns="http://www.w3.org/1999/xhtml">The options node. The default value is ().
+    The node for the <code>xdmp:eval</code> options must be in the
+    <code>xdmp:eval</code> namespace. The following is a sample options
+    node:
+    <pre xml:space="preserve">
+    &lt;options xmlns="xdmp:eval"&gt;
+      &lt;isolation&gt;different-transaction&lt;/isolation&gt;
+      &lt;prevent-deadlocks&gt;true&lt;/prevent-deadlocks&gt;
+    &lt;/options&gt; </pre></span>
+    <span class="javascript" xmlns="http://www.w3.org/1999/xhtml">The options object. The default value is null.
+    The following is a sample options object:
+    <pre xml:space="preserve">
+    {
+      "isolation" : "different-transaction",
+      "preventDeadlocks" : true
+    } </pre></span>
+    <p class="xquery" xmlns="http://www.w3.org/1999/xhtml">The <code>xdmp:eval</code> options include:</p>
+    <p class="javascript" xmlns="http://www.w3.org/1999/xhtml">The <code>xdmp.eval</code> options include:</p>
+    <blockquote xmlns="http://www.w3.org/1999/xhtml"><dl>
+    <dt class="xquery"><p>&lt;database&gt;</p></dt>
+    <dt class="javascript"><p>database</p></dt>
+    <dd>The database ID,
+    from <code class="xqury">xdmp:database("db_name")</code>
+    <code class="javascript">xdmp.database("db_name")</code>,
+    <code class="xquery">xdmp:security-database()</code>
+    <code class="javascript">xdmp.securityDatabase()</code>,
+    or <code class="xquery">xdmp:schema-database()</code>
+    <code class="javascript">xdmp.schemaDatabase()</code>.
+    To specify a database other than the context database, the
+    <code>http://marklogic.com/xdmp/privileges/xdmp-eval-in</code> privilege
+    is required.</dd>
+    <dt class="xquery"><p>&lt;modules&gt;</p></dt>
+    <dt class="javascript"><p>modules</p></dt>
+    <dd>The modules database ID for processing module imports.
+        Specifying no <code>module</code> option specifies the current modules database.
+        Specifying <code>0</code> specifies using the file system to process
+	      module imports. You must have the
+        <code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change</code>
+        (for <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>),
+        <code>http://marklogic.com/xdmp/privileges/xdmp-invoke-modules-change</code>
+        (for <code class="xquery">xdmp:invoke</code><code class="xquery">xdmp.invoke</code>),
+        or the
+        <code>http://marklogic.com/xdmp/privileges/xdmp-spawn-modules-change</code>
+        (for <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>)
+        privilege to change either the modules database to another database
+        or to change the root to another path.  You must have the
+        <code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change-file</code>
+        (for <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>),
+        <code>http://marklogic.com/xdmp/privileges/xdmp-invoke-modules-change-file</code>
+        (for <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code>),
+        or the
+        <code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change-file</code>
+        (for <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>)
+        privilege to change the modules database to the file
+	      system or to change a root on the filesystem.</dd>
+    <dt class="xquery"><p>&lt;root&gt;</p></dt>
+    <dt class="javascript"><p>root</p></dt>
+    <dd>The root path for modules.  
+        Specifying no <code>root</code> option specifies the current root.
+        You need the same privilege to modify the root as you need to change
+        the <code>module</code> option.</dd>
+    <dt class="xquery"><p>&lt;timestamp&gt;</p></dt>
+    <dt class="javascript"><p>timestamp</p></dt>
+    <dd>The system timestamp to use for this evaluation.  Specifying
+        no <code>timestamp</code> options specifies the most recent timestamp.
+        You may only specify a timestamp for a query statement, not for an
+	      update statement.  The timestamp is a number that is incremented by
+	      1 each time any configuration or content change is made to the system.
+       	Specifying a timestamp of 0 uses the current system timestamp (the
+	      value returned by <code class="xquery">xdmp:request-timestamp()</code>
+	      <code class="javascript">xdmp.requestTimestamp()</code>). Specifying
+	      a timestamp requires the
+	      <code>http://marklogic.com/xdmp/privileges/xdmp-timestamp</code> execute
+	      privilege.</dd>
+    <dt class="xquery"><p>&lt;ignore-amps&gt;</p></dt>
+    <dt class="javascript"><p>ignoreAmps</p></dt>
+    <dd>(Only valid with
+    <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>,
+    <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code>,
+    <code class="xquery">xdmp:xslt-eval</code><code class="javascript">xdmp.xsltEval</code>,
+    <code class="xquery">xdmp:xslt-invoke</code><code class="javascritp">xdmp.xsltInvoke</code>;
+    does not apply to
+    <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>,
+    <code class="xquery">dbg:eval</code><code class="javascript">dbg.eval</code> or
+    <code class="xquery">dbg:invoke</code><code class="javascript">dbg.invoke</code>).
+    Either <code>true</code> or <code>false</code>. When set to <code>true</code>,
+    the statement is evaluated without using any Amps from the caller.
+    The default value for this option is <code>false</code>.</dd>
+    <dt class="xquery"><p>&lt;isolation&gt;</p></dt>
+    <dt class="javascript"><p>isolation</p></dt>
+    <dd>(Only valid with
+    <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>
+    or <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code>;
+    does not apply to
+    <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>.)
+    Either <code>same-statement</code> or <code>different-transaction</code>. When set to
+    <code>same-statement</code>, the statement is evaluated in the same
+    transaction as the one from which it is called, and subsequent
+    expressions in the calling statement will not see any updates performed
+    in the eval/invoke/spawn. You can only use <code>same-statement</code>
+    isolation with update statements; query statements with
+    <code>same-statement</code> isolation will throw an exception.  When set to
+    <code>different-transaction</code>, the statement is evaluated in
+    a separate transaction from the one in which it is called, making those
+    updates available to  subsequent expressions in the calling statement
+    (assuming the calling statement is an update statement; if the calling
+    statement is not an update, then subsequent expressions will see the
+    version of the database at the system timestamp when the calling statement
+    begins its evaluation).
+    When using <code>different-transaction</code> in an update statement that
+    calls another update statement, do not update the same document as
+    the calling statement is updating; doing so can cause a deadlock.
+    You cannot evaluate a statement in a different database with the
+    <code>isolation</code> option set to <code>same-statement</code>.
+    The default value for the <code>isolation</code> option
+    is <code>different-transaction</code>. For more details, see the
+    "Understanding Transactions in MarkLogic Server" chapter of the
+    <a href="http://developer.marklogic.com/pubs">Developer's Guide</a>.
+    </dd>
+    <dt class="xquery"><p>&lt;static-check&gt;</p></dt>
+    <dt class="javascript"><p>staticCheck</p></dt>
+    <dd>
+    Specify <code>true</code> to only perform static checks on the module, and not to
+    actually execute it. The default is <code>false</code>, which means the the code
+    is fully evaluated.
+    </dd>
+    <dt class="xquery"><p>&lt;prevent-deadlocks&gt;</p></dt>
+    <dt class="javascript"><p>preventDeadlocks</p></dt>
+    <dd>(Only valid with
+    <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code> or
+    <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code>;
+    does not apply to
+    <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>.)
+    Specify <code>true</code> for the server to disallow update requests
+    from an update transaction.  Only has an effect when the
+    <code>isolation</code> option is set to <code>different-transaction</code>
+    as there is no possibility of a deadlock if the <code>isolation</code>
+    option is set to <code>same-statement</code>.
+    When set to <code>true</code> in an update request calling another
+    update request, MarkLogic Server throws the
+    <code>XDMP-PREVENTDEADLOCKS</code>
+    exception.  Setting this option to <code>true</code> prevents
+    the possibility of deadlocks occurring when running eval/invoke of
+    an update transaction from another update transaction. The default value
+    for the this option is <code>false</code>.
+    </dd>
+    <dt class="xquery"><p>&lt;default-xquery-version&gt;</p></dt>
+    <dt class="javascript"><p>defaultXqueryVersion</p></dt>
+    <dd>The default XQuery language version to use for the query, if the query
+    does not contain an explicit version declaration.  If this option is not
+    provided, the defaults are:
+      <ul>
+		<li>
+        <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>:
+        The XQuery language version of the module that called eval.  This version may
+        vary module-by-module if a query consists of modules written in multiple language
+        versions. It may also vary from run to run if the app-server default is changed.
+        </li>
+		<li>
+        <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code>:
+        The default XQuery version for the app server that the invocation occurs on.
+        Note that this may be different than the XQuery version of the module that calls
+        <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code>.
+        </li>
+		<li>
+        <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>:
+        The XQuery version default set on the app server that called
+        <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>.
+        The Task Server has no default XQuery version, the version to use is passed
+        as a part of the task request.
+        </li>
+	      </ul>
+    Allowable values for this option are "0.9-ml", "1.0-ml", "1.0" and
+    the special value "app-server".  The first three are XQuery language
+    versions.  The last indicates that the default XQuery language
+    version set on this app-server should be used.  This is useful if code
+    written in an older XQuery version needs to call
+    <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>
+    on strings that may have been passed as parameters, but should be
+    interpreted in the app-server's default language version.  A module
+    may discover its own XQuery language version with
+    <code class="xquery">xdmp:xquery-version()</code>
+    <code class="javascript">xdmp.xqueryVersion()</code>.
+    </dd>
+    <dt class="xquery"><p>&lt;time-limit&gt;</p></dt>
+    <dt class="javascript"><p>timeLimit</p></dt>
+    <dd>Override the default time limit with this time limit, in seconds,
+    for this evaluation.  You can set the
+    value up to the maximum-time-limit value for the App Server in which
+    the request is evaluated or to a lower value than the default time
+    limit.  This option only applies to
+    <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>,
+    not to
+    <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code> or
+    <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>.</dd>
+    <dt class="xquery"><p>&lt;user-id&gt;</p></dt>
+    <dt class="javascript"><p>userId</p></dt>
+    <dd>Specifies the user ID for the user to run the request being
+    evaluated (the request specified in the <code>$xquery</code> parameter). 
+    If this option is specified, then the
+    request is run as the current user.  You need to have the
+    <code class="xquery">xdmp:login</code><code class="javascript">xdmp.login</code>
+    (<code>http://marklogic.com/xdmp/privileges/xdmp-login</code>)
+    privilege to use this option.  Be aware that this
+    is a very privileged operation, as it allows a user with this
+    privilege to evaluate requests as any other user. For an example,
+    see the <a href="#eval-ex4">fourth example</a> below.</dd>
+    <dt class="xquery"><p>&lt;default-collation&gt;</p></dt>
+    <dt class="javascript"><p>defaultCollation</p></dt>
+    <dd>Specifies the collation to use for this context, unless a collation is
+    explicitly specified in the XQuery prolog or in a function call that
+    allows you to specify a collation.
+    </dd>
+    <dt class="xquery"><p>&lt;priority&gt;</p></dt>
+    <dt class="javascript"><p>priority</p></dt>
+    <dd>Specify the priority of the spawned task.
+    Allowable values for this option are "normal" and "higher".
+    This option only applies to
+    <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>,
+    not to
+    <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code>
+    or
+    <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>.</dd>
+    <dt class="xquery"><p>&lt;result&gt;</p></dt>
+    <dt class="javascript"><p>result</p></dt>
+    <dd>Return a value future for the result of the spawned task.
+    This value future can bound be to a variable without waiting so
+    that work can proceed concurrently with the spawned task. 
+    When the calling request uses the value future in any operation,
+    it will automatically wait for the spawned task to complete and it will
+    use the result.
+    This option only applies to
+    <a class="xquery" href="#xdmp:spawn"><code>xdmp:spawn</code></a>
+    <a class="javascript" href="#xdmp.spawn"><code>xdmp.spawn</code></a>, not to
+    <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code>
+    or <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>.
+    For an example, see
+    <a href="#xdmp:spawn#spawnresultex">The second example.</a></dd>
+    <dt class="xquery"><p>&lt;transaction-mode&gt;</p></dt>
+    <dt class="javascript"><p>transactionMode</p></dt>
+    <dd>Explicitly set the transaction mode for this context. Valid values are
+    <code>auto</code>, <code>query</code>, <code>update-auto-commit</code>, and
+    <code>update</code>.  An <code class="xquery">xdmp:transaction-mode</code>
+    <code class="javascript">xdmp.transactionMode</code> prolog option in the
+    evaluated query will override any transaction mode specified with this option.</dd>
+    </dl></blockquote>
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:privilege>
+<p xmlns="http://www.w3.org/1999/xhtml"><code>http://marklogic.com/xdmp/privileges/xdmp-eval</code></p>
+<p xmlns="http://www.w3.org/1999/xhtml">You must have the
+<code>http://marklogic.com/xdmp/privileges/xdmp-eval-in</code> privilege to
+specify the <code>database</code> option with a database other than the context database.</p>
+<p xmlns="http://www.w3.org/1999/xhtml">You must have the
+  <code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change</code>
+  (for <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>),
+  <code>http://marklogic.com/xdmp/privileges/xdmp-invoke-modules-change</code>
+  (for <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code>), or the
+  <code>http://marklogic.com/xdmp/privileges/xdmp-spawn-modules-change</code>
+  (for <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>)
+        privilege to change either the modules database to another database
+       	or to change the root to another path.  You must have the
+<code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change-file</code>
+  (for <code class="xquery">xdmp:eval</code><code class="javascript">xdmp.eval</code>),
+<code>http://marklogic.com/xdmp/privileges/xdmp-invoke-modules-change-file</code>
+  (for <code class="xquery">xdmp:invoke</code><code class="javascript">xdmp.invoke</code>), or the
+<code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change-file</code>
+  (for <code class="xquery">xdmp:spawn</code><code class="javascript">xdmp.spawn</code>)
+        privilege to change the modules database to the file
+	system or to change a root on the filesystem.</p>
+	<p xmlns="http://www.w3.org/1999/xhtml">You must have the
+	<code>http://marklogic.com/xdmp/privileges/xdmp-login</code>
+	privilege to use the <code class="xquery">user-id</code>
+	<code class="javascript">userId</code> option. </p>
+</apidoc:privilege>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:eval("1+1")
+=&gt; 2
+</pre>
+</apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.eval("1+1")
+=&gt; 2
+</pre>
+</apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml";
+declare namespace my='http://mycompany.com/test';
+
+let $s :=
+      "xquery version '1.0-ml';
+       declare namespace my='http://mycompany.com/test';
+       declare variable $my:x as xs:string external;
+       concat('hello ', $my:x)"
+return
+    (: evaluate the query string $s using the variables
+       supplied as the second parameter to xdmp:eval :)
+    xdmp:eval($s, (xs:QName("my:x"), "world"))
+
+=&gt; hello world
+</pre>
+</apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:eval("doc('/docs/mydoc.xml')",  (),
+                  &lt;options xmlns="xdmp:eval"&gt;
+		    &lt;database&gt;{xdmp:database("otherdb")}&lt;/database&gt;
+		  &lt;/options&gt;)
+=&gt; The '/docs/mydoc.xml' document from the
+   otherdb database.
+</pre>
+</apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.eval("fn.doc('/docs/mydoc.xml')",  null,
+  {
+    "database" : xdmp.database("otherdb")
+  })
+=&gt; The '/docs/mydoc.xml' document from the
+   otherdb database.
+</pre>
+</apidoc:example>
+    <apidoc:example class="xquery"><a id="eval-ex4" xmlns="http://www.w3.org/1999/xhtml"></a>
+<pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:eval('xdmp:get-current-user()', (),
+ &lt;options xmlns="xdmp:eval"&gt;
+  &lt;user-id&gt;{xdmp:user("someuser")}&lt;/user-id&gt;
+ &lt;/options&gt;)
+(:
+  returns "someuser", assuming "someuser" exists in the
+  security database and the user running the eval request has the
+  xdmp:login privilege.
+:)
+</pre>
+</apidoc:example>
+    <apidoc:example class="javascript"><a id="eval-ex4" xmlns="http://www.w3.org/1999/xhtml"></a>
+<pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.eval('xdmp.getCurrentUser()', null,
+  {
+    "userId" : xdmp.user("someuser")
+  })
+=&gt;
+  returns "someuser", assuming "someuser" exists in the
+  security database and the user running the eval request has the
+  xdmp:login privilege.
+</pre>
+</apidoc:example>
+  </apidoc:function><apidoc:function name="xquery-eval" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context" class="javascript">
+    <apidoc:summary>
+  Returns the result of evaluating a string
+  as an XQuery module.  For details, see the XQuery function
+  <a href="#xdmp:eval" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:eval</code></a>.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="xquery" type="xs:string" class="javascript">
+    For details, see the XQuery function
+    <a href="#xdmp:eval" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:eval</code></a>.
+  </apidoc:param>
+      <apidoc:param name="vars" type="Object" optional="true">
+    For details, see the XQuery function
+    <a href="#xdmp:eval" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:eval</code></a>.
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+    The options are the same as those documented with 
+    <a href="#xdmp.eval" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp.eval</code></a>.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.xqueryEval(" 'hello world, today is: ', fn:current-dateTime() ");
+=&gt;
+hello world, today is: 
+2015-01-21T14:24:50.453913-08:00
+</pre>
+</apidoc:example>
+  </apidoc:function><apidoc:function name="javascript-eval" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context" class="xquery">
+    <apidoc:summary>
+  Returns the result of evaluating a string
+  as a JavaScript module.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="javascript" type="xs:string">
+    The JavaScript string to be evaluated.  If the JavaScript string contains
+    double quotes ("), surround the string with single quotes (').
+  </apidoc:param>
+      <apidoc:param name="vars" type="item()*" optional="true">
+    The external variable values for this evaluation.
+    This can either be a sequence of map:map objects, or a sequence of even
+    length, alternating name and items.
+    <p xmlns="http://www.w3.org/1999/xhtml">Each key in the map(s) is a string representing the name of the 
+    parameter.
+    Each entry in the map is the value of the corresponding external 
+    variable.</p>
+    <p xmlns="http://www.w3.org/1999/xhtml">Alternatively, the alternating sequence should contain name string and 
+    item pairs that specify a variable name and value for an external 
+    variable.</p>
+  </apidoc:param>
+      <apidoc:param name="options" type="node()?" optional="true">
+    The options node. The default value is ().
+    The node for the <code xmlns="http://www.w3.org/1999/xhtml">xdmp:eval</code> options must be in the
+    <code xmlns="http://www.w3.org/1999/xhtml">xdmp:eval</code> namespace. The following is a sample options
+    node:
+    <pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+    &lt;options xmlns="xdmp:eval"&gt;
+      &lt;isolation&gt;different-transaction&lt;/isolation&gt;
+      &lt;prevent-deadlocks&gt;true&lt;/prevent-deadlocks&gt;
+    &lt;/options&gt; </pre>
+    <p xmlns="http://www.w3.org/1999/xhtml">The <code>xdmp:eval</code> options include:</p>
+    <blockquote xmlns="http://www.w3.org/1999/xhtml"><dl>
+    <dt><p>&lt;database&gt;</p></dt>
+    <dd>The database ID, from <code>xdmp:database("db_name")</code>,
+    <code>xdmp:security-database()</code>,
+    or <code>xdmp:schema-database()</code>. To specify a database other
+    than the context database, the
+    <code>http://marklogic.com/xdmp/privileges/xdmp-eval-in</code> privilege
+    is required.</dd>
+    <dt><p>&lt;modules&gt;</p></dt>
+    <dd>The modules database ID for processing module imports.
+        Specifying no <code>&lt;modules&gt;</code> element in the
+    options node specifies the current modules database. Specifying
+    <code>0</code> specifies using the file system to process
+    module imports. You must have the
+  <code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change</code>
+  (for <code>xdmp:eval</code>),
+  <code>http://marklogic.com/xdmp/privileges/xdmp-invoke-modules-change</code>
+  (for <code>xdmp:invoke</code>), or the
+  <code>http://marklogic.com/xdmp/privileges/xdmp-spawn-modules-change</code>
+  (for <code>xdmp:spawn</code>)
+        privilege to change either the modules database to another database
+        or to change the root to another path.  You must have the
+<code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change-file</code>
+  (for <code>xdmp:eval</code>),
+<code>http://marklogic.com/xdmp/privileges/xdmp-invoke-modules-change-file</code>
+  (for <code>xdmp:invoke</code>), or the
+<code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change-file</code>
+  (for <code>xdmp:spawn</code>)
+        privilege to change the modules database to the file
+    system or to change a root on the filesystem.
+  </dd>
+    <dt><p>&lt;root&gt;</p></dt>
+    <dd>The root path for modules.
+        Specifying no <code>&lt;root&gt;</code> element in the options
+    node specifies the current root.  You need the same privileges
+    to modify the root as you need to change the <code>module</code>
+    option.</dd>
+    <dt><p>&lt;timestamp&gt;</p></dt>
+    <dd>The system timestamp to use for this evaluation.  Specifying
+        no <code>&lt;timestamp&gt;</code> element in the
+    options node specifies the most recent timestamp. You may only
+    specify a timestamp for a query statement, not for an
+    update statement.  The timestamp is a number that is incremented by
+    1 each time any configuration or content change is made to the system.
+        Specifying a timestamp of 0 uses the current system timestamp (the
+    value returned by <code>xdmp:request-timestamp()</code>). Specifying
+    a timestamp requires the <code>xdmp:timestamp</code> execute
+    privilege.</dd>
+    <dt><p>&lt;ignore-amps&gt;</p></dt>
+    <dd>(Only valid with <code>xdmp:eval</code>, <code>xdmp:invoke</code>,
+    <code>xdmp:xslt-eval</code>, <code>xdmp:xslt-invoke</code>;
+    does not apply to <code>xdmp:spawn</code>, <code>dbg:eval</code> or
+    <code>dbg:invoke</code>)  Either
+    <code>true</code> or
+    <code>false</code>. When set to
+    <code>true</code>, the statement is evaluated without using any Amps
+    from the caller.
+    The default value for the <code>ignore-amps</code> option
+    is <code>false</code>.</dd>
+    <dt><p>&lt;isolation&gt;</p></dt>
+    <dd>(Only valid with <code>xdmp:eval</code> or <code>xdmp:invoke</code>;
+    does not apply to <code>xdmp:spawn</code>.)  Either
+    <code>same-statement</code> or
+    <code>different-transaction</code>. When set to
+    <code>same-statement</code>, the statement is evaluated in the same
+    transaction as the one from which it is called, and subsequent
+    expressions in the calling statement will not see any updates performed
+    in the eval/invoke/spawn. You can only use <code>same-statement</code>
+    isolation with update statements; query statements with
+    <code>same-statement</code> isolation will throw an exception.  When set to
+    <code>different-transaction</code>, the statement is evaluated in
+    a separate transaction from the one in which it is called, making those
+    updates available to  subsequent expressions in the calling statement
+    (assuming the calling statement is an update statement; if the calling
+    statement is not an update, then subsequent expressions will see the
+    version of the database at the system timestamp when the calling statement
+    begins its evaluation).
+    When using <code>different-transaction</code> in an update statement that
+    calls another update statement, do not update the same document as
+    the calling statement is updating; doing so can cause a deadlock.
+    You cannot evaluate a statement in a different database with the
+    <code>isolation</code> option set to <code>same-statement</code>.
+    The default value for the <code>isolation</code> option
+    is <code>different-transaction</code>. For more details, see the
+    "Understanding Transactions in MarkLogic Server" chapter of the
+    <a href="http://developer.marklogic.com/pubs">Developer's Guide</a>.
+    </dd>
+    <dt><p>&lt;static-check&gt;</p></dt>
+    <dd>
+    Specify <code>true</code> to only perform static
+    checks on the module, and not to actually execute it.
+    </dd>
+    <dt><p>&lt;prevent-deadlocks&gt;</p></dt>
+    <dd>(Only valid with <code>xdmp:eval</code> or <code>xdmp:invoke</code>;
+    does not apply to <code>xdmp:spawn</code>.)
+    Specify <code>true</code> for the server to disallow update requests
+    from an update transaction.  Only has an effect when the
+    <code>isolation</code> option is set to <code>different-transaction</code>
+    as there is no possibility of a deadlock if the <code>isolation</code>
+    option is set to <code>same-statement</code>.
+    When set to <code>true</code> in an update request calling another
+    update request, MarkLogic Server throws the
+    <code>XDMP-PREVENTDEADLOCKS</code>
+    exception.  Setting this option to <code>true</code> prevents
+    the possibility of deadlocks occurring when running eval/invoke of
+    an update transaction from another update transaction. The default value
+    for the <code>prevent-deadlocks</code> option is <code>false</code>.
+    </dd>
+    <dt><p>&lt;time-limit&gt;</p></dt>
+    <dd>Override the default time limit with this time limit, in seconds,
+    for this evaluation.  You can set the
+    value up to the maximum-time-limit value for the App Server in which
+    the request is evaluated or to a lower value than the default time
+    limit.  This option only applies to <code>xdmp:spawn</code>, not to
+    <code>xdmp:invoke</code> or <code>xdmp:eval</code>.</dd>
+    <dt><p>&lt;user-id&gt;</p></dt>
+    <dd>Specifies the user ID for the user to run the request being
+    evaluated (the request specified in the <code>$xquery</code> parameter).
+    If no <code>user-id</code> is specified, then the
+    request is run as the current user.  You need to have the
+    <code>xdmp:login</code>
+    (<code>http://marklogic.com/xdmp/privileges/xdmp-login</code>)
+    privilege to use the <code>user-id</code> option.  Be aware that this
+    is a very privileged operation, as it allows a user with this
+    privilege to evaluate requests as any other user. For an example,
+    see the <a href="#js-eval-ex4">fourth example</a> below.</dd>
+    <dt><p>&lt;default-collation&gt;</p></dt>
+    <dd>Specifies the collation to use for this context, unless a collation is
+    explicitly specified in the XQuery prolog or in a function call that
+    allows you to specify a collation.
+    </dd>
+    <dt><p>&lt;priority&gt;</p></dt>
+    <dd>Specify the priority of the spawned task.
+    Allowable values for this option are "normal" and "higher".
+    This option only applies to <code>xdmp:spawn</code>, not to
+    <code>xdmp:invoke</code> or <code>xdmp:eval</code>.</dd>
+    <dt><p>&lt;transaction-mode&gt;</p></dt>
+    <dd>Explicitly set the transaction mode for this context. Valid values are
+    <code>auto</code>, <code>query</code>, <code>update-auto-commit</code> and
+    <code>update</code>.  An <code>xdmp:transaction-mode</code> prolog option
+    in the evaluated query will override any transaction mode specified with
+    this option.</dd>
+    </dl></blockquote>
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:privilege>
+<p xmlns="http://www.w3.org/1999/xhtml"><code>http://marklogic.com/xdmp/privileges/xdmp-eval</code></p>
+<p xmlns="http://www.w3.org/1999/xhtml">You must have the
+<code>http://marklogic.com/xdmp/privileges/xdmp-eval-in</code> privilege to
+specify the <code>&lt;database&gt;</code> option with a database other than the context database.</p>
+<p xmlns="http://www.w3.org/1999/xhtml">You must have the
+  <code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change</code>
+  (for <code>xdmp:eval</code>),
+  <code>http://marklogic.com/xdmp/privileges/xdmp-invoke-modules-change</code>
+  (for <code>xdmp:invoke</code>), or the
+  <code>http://marklogic.com/xdmp/privileges/xdmp-spawn-modules-change</code>
+  (for <code>xdmp:spawn</code>)
+        privilege to change either the modules database to another database
+        or to change the root to another path.  You must have the
+<code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change-file</code>
+  (for <code>xdmp:eval</code>),
+<code>http://marklogic.com/xdmp/privileges/xdmp-invoke-modules-change-file</code>
+  (for <code>xdmp:invoke</code>), or the
+<code>http://marklogic.com/xdmp/privileges/xdmp-eval-modules-change-file</code>
+  (for <code>xdmp:spawn</code>)
+        privilege to change the modules database to the file
+    system or to change a root on the filesystem.</p>
+    <p xmlns="http://www.w3.org/1999/xhtml">You must have the
+    <code>http://marklogic.com/xdmp/privileges/xdmp-login</code>
+    privilege to use the <code>user-login</code> option. </p>
+</apidoc:privilege>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:javascript-eval("1+1")
+  =&gt; 2</pre>
+</apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+let $foo := 
+  'var mycars = xdmp.arrayValues(["Saab","Volvo","BMW","BMW"]); 
+   fn.distinctValues(mycars);'
+return
+xdmp:javascript-eval($foo)
+  =&gt; Saab,Volvo,BMW
+</pre></apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:javascript-eval("fn.doc('/docs/mydoc.xml')",  (),
+          &lt;options xmlns="xdmp:eval"&gt;
+            &lt;database&gt;{xdmp:database("otherdb")}&lt;/database&gt;
+          &lt;/options&gt;)
+  =&gt; The '/docs/mydoc.xml' document from the
+     otherdb database.</pre>
+</apidoc:example>
+    <apidoc:example><a id="js-eval-ex4" xmlns="http://www.w3.org/1999/xhtml"></a><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:javascript-eval('xdmp.getCurrentUser()',
+ &lt;options xmlns="xdmp:eval"&gt;
+  &lt;user-id&gt;{xdmp:user("someuser")}&lt;/user-id&gt;
+ &lt;/options&gt;)
+(:
+  returns "someuser", assuming "someuser" exists in the
+  security database and the user running the eval request has the
+  xdmp:login privilege.
+:)
+</pre>
+</apidoc:example>
+    <apidoc:example><a id="js-eval-ex5" xmlns="http://www.w3.org/1999/xhtml"></a><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+let $s := "var h; var w; xdmp.log(h+' '+w);"
+return
+   xdmp:javascript-eval($s,("h","hello","w","world"))
+(:
+  logs "hello world" in ErrorLog.
+:)
+</pre>
+</apidoc:example>
+  </apidoc:function><apidoc:function name="eval-in" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context" class="xquery">
+    <apidoc:summary>
+  [DEPRECATED: use <a href="#xdmp:eval" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:eval</code></a> with the
+  database option instead] Returns the result of evaluating a string as
+  an XQuery module in a given database.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="xquery" type="xs:string">
+    The XQuery string to be evaluated.  If the XQuery string contains
+    double quotes ("), surround the string with single quotes (').
+  </apidoc:param>
+      <apidoc:param name="ID" type="xs:unsignedLong*">
+    The database ID, from <code xmlns="http://www.w3.org/1999/xhtml">xdmp:database("db_name")</code>,
+    <code xmlns="http://www.w3.org/1999/xhtml">xdmp:security-database()</code>,
+    or <code xmlns="http://www.w3.org/1999/xhtml">xdmp:schema-database()</code>.
+  </apidoc:param>
+      <apidoc:param name="vars" type="item()*" optional="true">
+    The external variable values for this evaluation.
+    This must be a sequence of even length, alternating QNames and items.
+    Each QName and item pair specify a variable name and value.
+  </apidoc:param>
+      <apidoc:param name="modules" type="xs:unsignedLong?" optional="true">
+    The modules database for processing module imports.
+    The empty sequence specifies the current modules database.
+  </apidoc:param>
+      <apidoc:param name="root" type="xs:string?" optional="true">
+    The root path for modules.  
+    The empty sequence specifies the current root.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:eval-in("1+1",2348790529)
+  =&gt; 2</pre>
+</apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "0.9-ml"
+declare namespace my='http://mycompany.com/test'
+
+let $s :=
+      "xquery version '0.9-ml'
+       declare namespace my='http://mycompany.com/test'
+       define variable $my:x as xs:string external
+       concat('hello ', $my:x)"
+return
+    (: evaluate the query string $s using the variables
+       supplied as the second parameter to xdmp:eval :)
+    xdmp:eval-in($s,
+                 xdmp:database("Documents"),
+		 (xs:QName("my:x"),
+		 "world"))
+
+=&gt; hello world
+  </pre>
+</apidoc:example>
+  </apidoc:function><apidoc:function name="invoke" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context">
+    <apidoc:summary>
+  Returns the result of evaluating a module at the given path.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="path" type="xs:string">
+    The path of the module to
+    be executed as a string.  The path is resolved against
+    the root of the App Server evaluating the query, the Modules directory,
+    or relative to the calling module.  The module is considered to be
+    JavaScript if the module path ends with a file extension matching the ones
+    configured for application/vnd.marklogic-javascript in MarkLogic's
+    Mimetypes configuration.  For details on resolving paths,
+    see "Importing XQuery Modules and Resolving Paths" in the
+    <em xmlns="http://www.w3.org/1999/xhtml">Application Developer's Guide</em>.
+  </apidoc:param>
+      <apidoc:param name="vars" type="item()*" optional="true" class="xquery">
+    The external variable values for this evaluation.
+    This can either be a sequence of map:map objects, or a sequence of even
+    length, alternating QNames and items.
+    <p xmlns="http://www.w3.org/1999/xhtml">Each key in the map(s) is a string representing the name of the parameter
+    in Clark notation: "{namespaceURI}localname". The function
+    <a href="#xdmp:key-from-QName">xdmp:key-from-QName</a>
+    is a convenient way to generate these keys.
+    Each entry in the map is the value of the corresponding external 
+    variable.</p>
+    <p xmlns="http://www.w3.org/1999/xhtml">Alternatively, the alternating sequence should contain QName and item
+    pairs that specify a variable name and value for an external variable.</p>
+  </apidoc:param>
+      <apidoc:param name="vars" type="Object" optional="true" class="javascript">
+    The external variable values for this evaluation.
+    This can either be a sequence of map:map objects, or a sequence of even
+    length, alternating QNames and items.
+    <p xmlns="http://www.w3.org/1999/xhtml">Each key in the map(s) is a string representing the name of the parameter
+    in Clark notation: "{namespaceURI}localname". The function
+    <a href="#xdmp.keyFromQName">xdmp.keyFromQName</a>
+    is a convenient way to generate these keys.
+    Each entry in the map is the value of the corresponding external 
+    variable.</p>
+    <p xmlns="http://www.w3.org/1999/xhtml">Alternatively, the alternating sequence should contain QName and item
+    pairs that specify a variable name and value for an external variable.</p>
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+  <span class="xquery" xmlns="http://www.w3.org/1999/xhtml">The options node. The default value is (). The node must be in the
+  <code>xdmp:eval</code> namespace.  See the
+  <a href="#xdmp:eval"><code>xdmp:eval</code></a> section for a list of options.</span>
+  <span class="javascript" xmlns="http://www.w3.org/1999/xhtml">The options object. The default value is null. See the
+  <a href="#xdmp.eval"><code>xdmp.eval</code></a> section for a list of options.</span>
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:privilege>
+<p xmlns="http://www.w3.org/1999/xhtml"><code>http://marklogic.com/xdmp/privileges/xdmp-invoke</code></p>
+</apidoc:privilege>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:invoke("http://example.com/modules/foo.xqy")
+  =&gt; 2</pre>
+</apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp.invoke("http://example.com/modules/foo.xqy")
+  =&gt; 2</pre>
+</apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  This example invokes a module using external variables.
+ 
+  Assume you have a module in the modules database with a URI
+  "http://example.com/application/module.xqy" containing the
+  following code:
+
+  xquery version "1.0-ml";
+  declare namespace my="my-namespace-uri";
+  declare variable $my:var as xs:string external;
+  xdmp:log($my:var)
+
+  Then you can call this module using xdmp:invoke as follows:
+
+  xquery version "1.0-ml";
+  declare namespace my="my-namespace-uri";
+  xdmp:invoke("module.xqy",
+        (xs:QName("my:var"), "log this to ErrorLog.txt"),
+        &lt;options xmlns="xdmp:eval"&gt;
+          &lt;modules&gt;{xdmp:modules-database()}&lt;/modules&gt;
+	  &lt;root&gt;http://example.com/application/&lt;/root&gt;
+         &lt;/options&gt;)
+	
+  =&gt; Invokes an XQuery module from the modules database
+     with the URI http://example.com/application/module.xqy.
+     The invoked module will then be executed, logging the
+     message sent in the external variable to the log file. </pre>
+</apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  This example invokes a module using external variables.
+
+  Assume you have a module in the modules database with a URI
+  "http://example.com/application/log.sjs" containing the
+  following code:
+
+  xdmp.log(myvar)
+
+  Then you can call this module using xdmp.invoke as follows:
+
+  xdmp.invoke("log.sjs",
+	{myvar: "log this to ErrorLog.txt"},
+        {
+          modules : xdmp.modulesDatabase(),
+          root : "http://example.com/application/"
+        });
+
+  =&gt; Invokes a JavaScript module from the modules database
+     with the URI http://example.com/application/log.sjs.
+     The invoked module will then be executed, logging the
+     message sent in the external variable to the 
+     ErrorLog.txt log file. </pre>
+</apidoc:example>
+  </apidoc:function><apidoc:function name="invoke-function" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context" class="xquery">
+    <apidoc:summary>
+  Returns the result of evaluating a function value.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="path" type="function() as item()*">
+    A zero arity function value to execute.
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+  The options node. The default value is (). The node must be in the
+  <code xmlns="http://www.w3.org/1999/xhtml">xdmp:eval</code> namespace.  See the
+  <a href="#xdmp:eval" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:eval</code></a> section for a list of options.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:privilege>
+<p xmlns="http://www.w3.org/1999/xhtml"><code>http://marklogic.com/xdmp/privileges/xdmp-invoke</code></p>
+</apidoc:privilege>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xquery version "1.0-ml";
+  let $content := &lt;doc/&gt;
+  return
+    xdmp:invoke-function(
+      function() { xdmp:document-insert("doc",$content), xdmp:commit() },
+      &lt;options xmlns="xdmp:eval"&gt;
+        &lt;transaction-mode&gt;update&lt;/transaction-mode&gt;
+      &lt;/options&gt;)
+	
+  =&gt; Invokes the function value in a multi-statement update transaction. </pre>
+</apidoc:example>
+  </apidoc:function><apidoc:function name="invoke-function" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context" class="javascript">
+    <apidoc:summary>
+  Returns the result of evaluating a function value.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="jsFunc" type="function()">
+    A zero arity function value to execute.
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+  The options object. The default value is (). See the
+  <a href="#xdmp.eval" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp.eval</code></a> section for a list of options.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:privilege>
+<p xmlns="http://www.w3.org/1999/xhtml"><code>http://marklogic.com/xdmp/privileges/xdmp-invoke</code></p>
+</apidoc:privilege>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  function test29197(uri,doc) {
+    return {
+      setUri: function setUri(_uri) { uri = _uri; },
+      setDoc: function setDoc(_doc) { doc = _doc; },
+      insert: function docInsert() { xdmp.documentInsert(uri,doc); }
+    };
+  };
+  var testInvoke = test29197("29197.json",{a:1});
+  xdmp.invokeFunction(testInvoke.insert,
+    {transactionMode:"update-auto-commit"});
+  xdmp.eval("cts.doc('29197.json')");
+
+  =&gt; Insert a doc and then retrieve it. Returns:
+     {"a":1}
+  </pre>
+</apidoc:example>
+  </apidoc:function><apidoc:function name="invoke-in" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context" class="xquery">
+    <apidoc:summary>
+  [DEPRECATED: use <a href="#xdmp:invoke" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:invoke</code></a> with the
+  database option instead] Returns the result of evaluating a module
+  at the given path.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="uri" type="xs:string">
+    The path of the module to be executed.  The path is resolved against
+    the root of the App Server evaluating the query.  The path must
+    resolve to a main module (not a library module).
+  </apidoc:param>
+      <apidoc:param name="ID" type="xs:unsignedLong*">
+    The database ID, from <code xmlns="http://www.w3.org/1999/xhtml">xdmp:database("db_name")</code>,
+    <code xmlns="http://www.w3.org/1999/xhtml">xdmp:security-database()</code>,
+    or <code xmlns="http://www.w3.org/1999/xhtml">xdmp:schema-database()</code>.
+  </apidoc:param>
+      <apidoc:param name="vars" type="item()*" optional="true">
+    The external variable values for this evaluation.
+    This must be a sequence of even length, alternating QNames and items.
+    Each QName and item pair specify a variable name and value.
+  </apidoc:param>
+      <apidoc:param name="modules" type="xs:unsignedLong?" optional="true">
+    The modules database containing the module to invoke.
+    The empty sequence specifies the current modules database.
+  </apidoc:param>
+      <apidoc:param name="root" type="xs:string?" optional="true">
+    The root path for modules.  
+    The empty sequence specifies the current root.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:invoke-in("http://example.com/modules/foo.xqy",2348790529)
+  =&gt; 2</pre>
+</apidoc:example>
+  </apidoc:function><apidoc:function name="value" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context" class="xquery">
+    <apidoc:summary>
+  Evaluate an expression in the context of the current evaluating statement.
+  This differs from <code xmlns="http://www.w3.org/1999/xhtml">xdmp:eval</code> in that <code xmlns="http://www.w3.org/1999/xhtml">xdmp:value</code>
+  preserves all of the context from the calling query, so you do not
+  need to re-define namespaces, variables, and so on.  Although the expression
+  retains the context from the calling query, it is evaluated in its own
+  transaction with same-statement isolation.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="expr" type="xs:string">
+    The string representing an expression to evaluate.
+  </apidoc:param>
+      <apidoc:param name="map" type="map:map" optional="true">
+  A map of namespace bindings. The keys should be namespace prefixes and the
+  values should be namespace URIs. These namespace bindings will be added to
+  the in-scope namespace bindings in the evaluation of the expression.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:usage>
+  <p xmlns="http://www.w3.org/1999/xhtml">You can only evaluate expressions with <code>xdmp:value</code>; no
+  prolog definitions (namespace declarations, function definitions,
+  module imports, and so on) are allowed.</p>
+  <p xmlns="http://www.w3.org/1999/xhtml">If the expression references something not in the context of either
+  the calling query or the value expression, then an error is thrown. For
+  example, the following throws an undefined variable exception:</p>
+  <pre xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:value("$y")</code></pre>
+</apidoc:usage>
+    <apidoc:privilege>
+  <code xmlns="http://www.w3.org/1999/xhtml">http://marklogic.com/xdmp/privileges/xdmp-value</code>
+</apidoc:privilege>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  let $var := 5
+  return
+  xdmp:value("$var")
+  =&gt; 5
+  </pre>
+</apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml";
+
+xdmp:document-insert("/test.xml",
+ &lt;root&gt;
+   &lt;step1&gt;this is step1&lt;/step1&gt;
+   &lt;step2&gt;this is step2&lt;/step2&gt;
+ &lt;/root&gt;)
+;
+
+(:
+use xdmp:value to dynamically specify a step
+in an XPath expression
+:)
+for $x in ("step1", "step2")
+return
+/root/xdmp:value($x)
+
+=&gt;
+&lt;step1&gt;this is step1&lt;/step1&gt;
+&lt;step2&gt;this is step2&lt;/step2&gt;
+  </pre>
+</apidoc:example>
+  </apidoc:function><apidoc:function name="unpath" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context" class="xquery">
+    <apidoc:summary>
+  Evaluate a string as an XPath and return the corresponding node(s).
+  Any value that is the result of <code xmlns="http://www.w3.org/1999/xhtml">xdmp:path</code> is a
+  valid input to <code xmlns="http://www.w3.org/1999/xhtml">xdmp:unpath</code>.  Any invalid inputs
+  throw an <code xmlns="http://www.w3.org/1999/xhtml">XDMP-UNPATH</code> exception. To evaluate non-XPath
+  expressions, use <code xmlns="http://www.w3.org/1999/xhtml">xdmp:value</code>.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="expr" type="xs:string">
+   The XPath expression string to evaluate. The XPath expression must be
+   of the form returned by <code xmlns="http://www.w3.org/1999/xhtml">xdmp:path</code>.
+  </apidoc:param>
+      <apidoc:param name="map" type="map:map" optional="true">
+  A map of namespace bindings. The keys should be namespace prefixes and the
+  values should be namespace URIs. These namespace bindings will be added to
+  the in-scope namespace bindings in the evaluation of the path.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:privilege>
+  <code xmlns="http://www.w3.org/1999/xhtml">http://marklogic.com/xdmp/privileges/xdmp-value</code>
+</apidoc:privilege>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:unpath("/bookstore/book/title")
+  =&gt; &lt;title&gt;Querying XML&lt;/title&gt;
+  </pre>
+</apidoc:example>
+    <apidoc:example>
+<p xmlns="http://www.w3.org/1999/xhtml">The following example shows how you can use xdmp:unpath
+and specify namespace bindings that are not in the current query scope.</p>
+<pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml";
+
+let $doc := &lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+              &lt;body&gt;&lt;p&gt;This is a document&lt;/p&gt;&lt;/body&gt;
+            &lt;/html&gt;
+let $namespaces := map:map()
+let $_ := map:put($namespaces, "xh", "http://www.w3.org/1999/xhtml")
+let $xpath-str := "$doc/xh:body/xh:p"
+return xdmp:unpath($xpath-str, $namespaces)
+
+=&gt; &lt;p xmlns="http://www.w3.org/1999/xhtml"&gt;This is a document&lt;/p&gt;
+  </pre>
+</apidoc:example>
+    <apidoc:example>
+<p xmlns="http://www.w3.org/1999/xhtml">The following example shows that <code>xdmp:unpath</code>
+will throw an error if the specified XPath expression
+would never be returned by <code>xdmp:path</code>.</p>
+<pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:unpath("/bookstore/book/title[@name eq 'Querying XML']")
+  =&gt; throws the XDMP-UNPATH exception, because the specified
+     path expression would never be the output of xdmp:path.
+  </pre>
+</apidoc:example>
+  </apidoc:function><apidoc:function name="xslt-invoke" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context">
+    <apidoc:summary>
+   Executes an XSLT stylesheet against a node.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="path" type="xs:string">
+    The path of the stylesheet to be executed.  The path is resolved against
+    the root of the App Server evaluating the query, the Modules directory,
+    or relative to the calling module.  For details on resolving paths,
+    see "Importing XQuery Modules and Resolving Paths" in the
+    <em xmlns="http://www.w3.org/1999/xhtml">Application Developer's Guide</em>.
+  </apidoc:param>
+      <apidoc:param name="input" type="node()?" optional="true">
+    The context node to which the stylesheet is applied.
+  </apidoc:param>
+      <apidoc:param name="params" type="map:map?" optional="true">
+    The stylesheet parameter values for this evaluation.
+    Each key in the map is a string representing the name of the parameter
+    in Clark notation: "{namespaceURI}localname". The function
+    <a href="#xdmp:key-from-QName" xmlns="http://www.w3.org/1999/xhtml">xdmp:key-from-QName</a>
+    is a convenient way to generate these keys.
+    Each entry in the map is the value of the corresponding parameter.
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+  <span class="xquery" xmlns="http://www.w3.org/1999/xhtml">The options node. The default value is (). The node 
+  must be in the
+  <code>xdmp:eval</code> namespace.  See the
+  <a href="#xdmp:eval"><code>xdmp:eval</code></a> section for a list of 
+  options.</span>
+  <span class="javascript" xmlns="http://www.w3.org/1999/xhtml">The options object. The default value is 
+  null. </span>
+  Additional options include:
+  <dl xmlns="http://www.w3.org/1999/xhtml">
+  <dt class="xquery"><p>&lt;mode&gt;</p></dt>
+  <dt class="javascript"><p>mode</p></dt>
+  <dd>A QName <span class="javascript"> (in clark notation) </span> specifying 
+  the
+  initial stylesheet mode to use (the <code>&lt;xsl:template&gt;</code> with 
+  the specified <code>mode</code> attribute).</dd>
+  <dt class="xquery"><p>&lt;template&gt;</p></dt>
+  <dt class="javascript"><p>template</p></dt>
+  <dd>A QName <span class="javascript"> (in clark notation) </span> specifying 
+  the name of the initial template to apply.</dd>
+  <dt class="xquery"><p>&lt;encoding&gt;</p></dt>
+  <dt class="javascript"><p>encoding</p></dt>
+  <dd>Specifies the encoding to use when reading the stylesheet into MarkLogic
+  Server.  Supported values include <code>UTF-8</code>,
+  <code>ISO-8859-1</code>, as well as many other popular encodings. 
+  See the <em>Search Developer's Guide</em> for a list of character
+  set encodings by language.  All encodings will be translated into UTF-8
+  from the specified encoding.  The string specifed for the
+  <code>encoding</code> option will be matched to an encoding name according
+  to the Unicode Charset Alias Matching rules
+  (<a href="http://www.unicode.org/reports/tr22/#Charset_Alias_Matching">http://www.unicode.org/reports/tr22/#Charset_Alias_Matching</a>).
+  An automatic encoding detector will be used if the value <code>auto</code>
+  is specified.
+  If no encoding can be detected, the encoding defaults to UTF-8.
+  </dd>
+  </dl>
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>document-node()*</apidoc:return>
+    <apidoc:privilege>
+<p xmlns="http://www.w3.org/1999/xhtml"><code>http://marklogic.com/xdmp/privileges/xslt-invoke</code></p>
+</apidoc:privilege>
+    <apidoc:usage>
+ <p xmlns="http://www.w3.org/1999/xhtml">When running an XSLT stylesheet in MarkLogic, you pass in a node on
+  which the stylesheet operates.  Many stylesheets are written
+  to expect the initial node to be a document
+  node.  In other XSLT processors, the node you pass to the stylesheet is
+  typically read in from the filesystem and is always treated as a document
+  node.  In MarkLogic, you often get the node to pass to the stylesheet as
+  the result of a query or a search, and the node  is not necessarily a
+  document node.  Therefore, if your stylesheet expects
+  the context node to be a document node, make sure to pass in a document
+  node and not an element node.  If you pass in an element node to a
+  stylesheet that has default template rules to expect a document node,
+  then you might miss the processing on the element you passed
+  in (because the stylesheet might expect the child node to be the root
+  element of the XML document, but if you passed in the root element instead of
+  its parent document node, then the child nodes would be the children of the
+  root element, causing the root element to miss its default processing).</p>
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml";
+
+(:
+this example requires a document named hello.xsl directly
+at the App Server root with the following content:
+
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                  version="2.0"&gt;
+    &lt;xsl:template match="/"&gt;
+        &lt;xsl:text&gt;hello&lt;/xsl:text&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
+:)
+xdmp:xslt-invoke("/hello.xsl", document{ &lt;foo/&gt; })
+=&gt;
+hello
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+
+// This example requires a document named hello.xsl directly
+// at the App Server root with the following content:
+
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                  version="2.0"&gt;
+    &lt;xsl:template match="/"&gt;
+        &lt;xsl:text&gt;hello&lt;/xsl:text&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
+
+xdmp.xsltInvoke("/hello.xsl", xdmp.unquote('&lt;foo/&gt;').next().value)
+=&gt;
+hello
+</pre></apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml" ;
+
+(: Hello World example for xslt:invoke, with a parameter.
+   Assumes a stylesheet named params.xsl directly at
+   the App Server root with the following content:
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+      xmlns:f="foo" xmlns:b="bar"
+      version="2.0"&gt;
+    &lt;xsl:param name="f:pName"/&gt;
+    &lt;xsl:param name="b:bName"/&gt;
+    &lt;xsl:param name="cName"/&gt;
+    &lt;xsl:param name="greeting" select="'Hi there '"/&gt;
+    &lt;xsl:template match="/"&gt;
+       &lt;output&gt;
+         &lt;xsl:copy-of select="node"/&gt;
+         &lt;greeting&gt;&lt;xsl:value-of select="$greeting"/&gt;&lt;/greeting&gt;
+         &lt;param&gt;&lt;xsl:value-of select="$f:pName"/&gt;&lt;/param&gt;
+         &lt;param&gt;&lt;xsl:value-of select="$b:bName"/&gt;&lt;/param&gt;
+         &lt;param&gt;&lt;xsl:value-of select="$cName"/&gt;&lt;/param&gt;
+       &lt;/output&gt;
+    &lt;/xsl:template&gt;
+  &lt;/xsl:stylesheet&gt;
+:)
+
+let $params := map:map()
+let $_put := map:put(
+                    $params,
+                    xdmp:key-from-QName(fn:QName("foo", "pName")),
+                    "Stephen")
+let $_put := map:put(
+                    $params,
+                    xdmp:key-from-QName(fn:QName("bar", "bName")),
+                    "Ron")
+let $_put := map:put(
+                    $params,
+                    "cName",
+                    "Dave")
+return
+xdmp:xslt-invoke("/params.xsl",
+    document { &lt;node&gt;Hello World&lt;/node&gt; },
+    $params)
+=&gt;
+&lt;?xml version="1.0" encoding="ASCII"?&gt;
+&lt;output xmlns:f="foo" xmlns:b="bar"&gt;
+  &lt;node&gt;Hello World&lt;/node&gt;
+  &lt;greeting&gt;Hi there &lt;/greeting&gt;
+  &lt;param&gt;Stephen&lt;/param&gt;
+  &lt;param&gt;Ron&lt;/param&gt;
+  &lt;param&gt;Dave&lt;/param&gt;
+&lt;/output&gt;
+
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+//  Hello World example for xslt:invoke, with a parameter.
+//  Assumes a stylesheet named params.xsl directly at
+//  the App Server root with the following content:
+
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+      xmlns:f="foo" xmlns:b="bar"
+      version="2.0"&gt;
+    &lt;xsl:param name="f:pName"/&gt;
+    &lt;xsl:param name="b:bName"/&gt;
+    &lt;xsl:param name="cName"/&gt;
+    &lt;xsl:param name="greeting" select="'Hi there '"/&gt;
+    &lt;xsl:template match="/"&gt;
+       &lt;output&gt;
+         &lt;xsl:copy-of select="node"/&gt;
+         &lt;greeting&gt;&lt;xsl:value-of select="$greeting"/&gt;&lt;/greeting&gt;
+         &lt;param&gt;&lt;xsl:value-of select="$f:pName"/&gt;&lt;/param&gt;
+         &lt;param&gt;&lt;xsl:value-of select="$b:bName"/&gt;&lt;/param&gt;
+         &lt;param&gt;&lt;xsl:value-of select="$cName"/&gt;&lt;/param&gt;
+       &lt;/output&gt;
+    &lt;/xsl:template&gt;
+  &lt;/xsl:stylesheet&gt;
+
+// Run this against the above stylesheet:
+
+var params = new Object();
+var key1 = xdmp.keyFromQName(fn.QName("foo", "pName"));
+params.key1 = "Stephen";
+var key2 = xdmp.keyFromQName(fn.QName("bar", "bName"));
+params.key2 = "Ron";
+params.cName = "Dave";
+xdmp.xsltInvoke("/params.xsl",
+    xdmp.unquote('&lt;node&gt;Hello World&lt;/node&gt;').next().value,
+    params);
+
+=&gt;
+&lt;?xml version="1.0" encoding="ASCII"?&gt;
+&lt;output xmlns:f="foo" xmlns:b="bar"&gt;
+  &lt;node&gt;Hello World&lt;/node&gt;
+  &lt;greeting&gt;Hi there &lt;/greeting&gt;
+  &lt;param&gt;Stephen&lt;/param&gt;
+  &lt;param&gt;Ron&lt;/param&gt;
+  &lt;param&gt;Dave&lt;/param&gt;
+&lt;/output&gt;
+
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="xslt-eval" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context">
+    <apidoc:summary>
+   Executes an XSLT stylesheet against a node.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="stylesheet" type="node()">
+    The XSLT stylesheet to be executed.
+  </apidoc:param>
+      <apidoc:param name="input" type="node()?" optional="true">
+    The context node to which the stylesheet is applied.
+  </apidoc:param>
+      <apidoc:param name="params" type="map:map?" optional="true">
+    The stylesheet parameter values for this evaluation.
+    Each key in the map is a string representing the name of the parameter
+    in Clark notation: "{namespaceURI}localname". The function
+    <a href="#xdmp:key-from-QName" xmlns="http://www.w3.org/1999/xhtml">xdmp:key-from-QName</a>
+    is a convenient way to generate these keys.
+    Each entry in the map is the value of the corresponding parameter.
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+  <span class="xquery" xmlns="http://www.w3.org/1999/xhtml">The options node. The default value is (). The node 
+  must be in the <code>xdmp:eval</code> namespace.  See the
+  <a href="#xdmp:eval"><code>xdmp:eval</code></a> section for a list of 
+  options.</span>
+  <span class="javascript" xmlns="http://www.w3.org/1999/xhtml">The options object. The default value is null.</span>
+  Additional options include:
+  <dl xmlns="http://www.w3.org/1999/xhtml">
+  <dt class="xquery"><p>&lt;mode&gt;</p></dt>
+  <dt class="javascript"><p>mode</p></dt>
+  <dd>A QName <span class="javascript"> (in clark notation) </span> 
+  specifying the
+  initial stylesheet mode to use (the <code>&lt;xsl:template&gt;</code> with the
+  specified <code>mode</code> attribute).</dd>
+  <dt class="xquery"><p>&lt;template&gt;</p></dt>
+  <dt class="javascript"><p>template</p></dt>
+  <dd>A QName <span class="javascript"> (in clark notation) </span> 
+  specifying the name of the initial template to apply.</dd>
+  </dl>
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>document-node()*</apidoc:return>
+    <apidoc:usage>
+  <p xmlns="http://www.w3.org/1999/xhtml">When creating the <code>xsl:stylesheet</code> element that is the
+  stylesheet parameter to <code>xdmp:xslt-eval</code>, keep in mind that
+  it has to first be parsed by XQuery before
+  it is evaluated as a stylesheet.  Therefore, any characters in the stylesheet
+  that require escaping in XQuery must be escaped, otherwise you get an error
+  in the XQuery.  For example, if the stylesheet has any curly braces
+  ( { or } ), you must escape the curly braces (with curly braces). For
+  an example, see <a href="#xslteval4">the example</a> below.</p>
+  <p xmlns="http://www.w3.org/1999/xhtml">When running an XSLT stylesheet in MarkLogic, you pass in a node on
+  which the stylesheet operates.  Many stylesheets are written
+  to expect the initial node to be a document
+  node.  In other XSLT processors, the node you pass to the stylesheet is
+  typically read in from the filesystem and is always treated as a document
+  node.  In MarkLogic, you often get the node to pass to the stylesheet as
+  the result of a query or a search, and the node  is not necessarily a
+  document node.  Therefore, if your stylesheet expects
+  the context node to be a document node, make sure to pass in a document
+  node and not an element node.  If you pass in an element node to a
+  stylesheet that has default template rules to expect a document node,
+  then you might miss the processing on the element you passed
+  in (because the stylesheet might expect the child node to be the root
+  element of the XML document, but if you passed in the root element instead of
+  its parent document node, then the child nodes would be the children of the
+  root element, causing the root element to miss its default processing).</p>
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+let $foo-to-bar :=
+  &lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                  version="2.0"&gt;
+    &lt;xsl:template match="foo"&gt;
+      &lt;bar&gt;
+        &lt;xsl:apply-templates select="node()"/&gt;
+      &lt;/bar&gt;
+    &lt;/xsl:template&gt;
+    &lt;xsl:template match="@*|node()"&gt;
+      &lt;xsl:copy&gt;
+        &lt;xsl:apply-templates select="@*|node()"/&gt;
+      &lt;/xsl:copy&gt;
+    &lt;/xsl:template&gt;
+  &lt;/xsl:stylesheet&gt;
+return xdmp:xslt-eval($foo-to-bar,
+  &lt;stuff&gt;
+   &lt;one/&gt;
+   &lt;foo/&gt;
+   &lt;two/&gt;
+   &lt;foo&gt;&lt;blah&gt;42&lt;/blah&gt;&lt;/foo&gt;
+   &lt;bar&gt;22&lt;/bar&gt;
+  &lt;/stuff&gt;)/element()
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+var fooToBar = xdmp.unquote(
+'  &lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\n\
+                  version="2.0"&gt;\n\
+    &lt;xsl:template match="foo"&gt;\n\
+      &lt;bar&gt;\n\
+        &lt;xsl:apply-templates select="node()"/&gt;\n\
+      &lt;/bar&gt;\n\
+    &lt;/xsl:template&gt;\n\
+    &lt;xsl:template match="@*|node()"&gt;\n\
+      &lt;xsl:copy&gt;\n\
+        &lt;xsl:apply-templates select="@*|node()"/&gt;\n\
+      &lt;/xsl:copy&gt;\n\
+    &lt;/xsl:template&gt;\n\
+  &lt;/xsl:stylesheet&gt;').next().value;
+xdmp.xsltEval(fooToBar, xdmp.unquote(
+'  &lt;stuff&gt;\n\
+   &lt;one/&gt;\n\
+   &lt;foo/&gt;\n\
+   &lt;two/&gt;\n\
+   &lt;foo&gt;&lt;blah&gt;42&lt;/blah&gt;&lt;/foo&gt;\n\
+   &lt;bar&gt;22&lt;/bar&gt;\n\
+  &lt;/stuff&gt;').next().value.root);
+=&gt;
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;stuff&gt;
+   &lt;one/&gt;
+   &lt;bar/&gt;
+   &lt;two/&gt;
+   &lt;bar&gt;
+    &lt;blah&gt;42&lt;/blah&gt;
+   &lt;/bar&gt;
+   &lt;bar&gt;22&lt;/bar&gt;
+&lt;/stuff&gt;
+</pre></apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml" ;
+
+(: Hello World example for xslt:eval, with a parameter :)
+
+let $params := map:map()
+let $_put := map:put(
+                    $params,
+                    xdmp:key-from-QName(fn:QName("foo", "pName")),
+                    "Stephen")
+let $_put := map:put(
+                    $params,
+                    xdmp:key-from-QName(fn:QName("bar", "bName")),
+                    "Ron")
+let $_put := map:put(
+                    $params,
+                    "cName",
+                    "Dave")
+return
+  xdmp:xslt-eval(
+    &lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+      xmlns:f="foo" xmlns:b="bar"
+      version="2.0"&gt;
+    &lt;xsl:param name="f:pName"/&gt;
+    &lt;xsl:param name="b:bName"/&gt;
+    &lt;xsl:param name="cName"/&gt;
+    &lt;xsl:param name="greeting" select="'Hi there '"/&gt;
+    &lt;xsl:template match="/"&gt;
+       &lt;output&gt;
+         &lt;xsl:copy-of select="node"/&gt;
+         &lt;greeting&gt;&lt;xsl:value-of select="$greeting"/&gt;&lt;/greeting&gt;
+         &lt;param&gt;&lt;xsl:value-of select="$f:pName"/&gt;&lt;/param&gt;
+         &lt;param&gt;&lt;xsl:value-of select="$b:bName"/&gt;&lt;/param&gt;
+         &lt;param&gt;&lt;xsl:value-of select="$cName"/&gt;&lt;/param&gt;
+       &lt;/output&gt;
+    &lt;/xsl:template&gt;
+  &lt;/xsl:stylesheet&gt;,
+  document { &lt;node&gt;Hello World&lt;/node&gt; },
+  $params)
+=&gt;
+&lt;?xml version="1.0" encoding="ASCII"?&gt;
+&lt;output xmlns:f="foo" xmlns:b="bar"&gt;
+  &lt;node&gt;Hello World&lt;/node&gt;
+  &lt;greeting&gt;Hi there &lt;/greeting&gt;
+  &lt;param&gt;Stephen&lt;/param&gt;
+  &lt;param&gt;Ron&lt;/param&gt;
+  &lt;param&gt;Dave&lt;/param&gt;
+&lt;/output&gt;
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+//  Hello World example for xdmp.xsltEval, with a parameter 
+
+var params = new Object();
+var key1 = xdmp.keyFromQName(fn.QName("foo", "pName"));
+params.key1 = "Stephen";
+var key2 = xdmp.keyFromQName(fn.QName("bar", "bName"));
+params.key2 = "Ron";
+params.cName = "Dave";
+xdmp.xsltEval(xdmp.unquote(
+'    &lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\n\
+      xmlns:f="foo" xmlns:b="bar"\n\
+      version="2.0"&gt;\n\
+    &lt;xsl:param name="f:pName"/&gt;\n\
+    &lt;xsl:param name="b:bName"/&gt;\n\
+    &lt;xsl:param name="cName"/&gt;\n\
+    &lt;xsl:param name="greeting" select="' + "'Hi there '" +' "/&gt;\n\
+    &lt;xsl:template match="/"&gt;\n\
+       &lt;output&gt;\n\
+         &lt;xsl:copy-of select="node"/&gt;\n\
+         &lt;greeting&gt;&lt;xsl:value-of select="$greeting"/&gt;&lt;/greeting&gt;\n\
+         &lt;param&gt;&lt;xsl:value-of select="$f:pName"/&gt;&lt;/param&gt;\n\
+         &lt;param&gt;&lt;xsl:value-of select="$b:bName"/&gt;&lt;/param&gt;\n\
+         &lt;param&gt;&lt;xsl:value-of select="$cName"/&gt;&lt;/param&gt;\n\
+       &lt;/output&gt;\n\
+    &lt;/xsl:template&gt;\n\
+  &lt;/xsl:stylesheet&gt;').next().value,
+    xdmp.unquote('&lt;node&gt;Hello World&lt;/node&gt;').next().value,
+    params);
+
+=&gt;
+&lt;?xml version="1.0" encoding="ASCII"?&gt;
+&lt;output xmlns:f="foo" xmlns:b="bar"&gt;
+  &lt;node&gt;Hello World&lt;/node&gt;
+  &lt;greeting&gt;Hi there &lt;/greeting&gt;
+  &lt;param&gt;Stephen&lt;/param&gt;
+  &lt;param&gt;Ron&lt;/param&gt;
+  &lt;param&gt;Dave&lt;/param&gt;
+&lt;/output&gt;
+</pre></apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml" ;
+
+(: example that passes in a QName for a mode :)
+xdmp:xslt-eval(
+    &lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+     version="2.0"&gt;
+    &lt;xsl:template match="/"&gt;
+       &lt;output&gt;this has no mode&lt;/output&gt;
+    &lt;/xsl:template&gt;
+    &lt;xsl:template match="/" mode="my-mode"&gt;
+      &lt;debug&gt;this has a mode&lt;/debug&gt;
+    &lt;/xsl:template&gt;
+  &lt;/xsl:stylesheet&gt;,
+  document { &lt;node&gt;Hello World&lt;/node&gt; },
+  (),
+  &lt;options xmlns="xdmp:eval"&gt;
+    &lt;mode&gt;{fn:QName("", "my-mode")}&lt;/mode&gt;
+  &lt;/options&gt;)
+=&gt;
+&lt;?xml version="1.0" encoding="ASCII"?&gt;
+&lt;debug&gt;this has a mode&lt;/debug&gt;
+
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+// example that passes in a QName for a mode 
+
+xdmp.xsltEval(xdmp.unquote(
+'    &lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"\n\
+     version="2.0"&gt;\n\
+    &lt;xsl:template match="/"&gt;\n\
+       &lt;output&gt;this has no mode&lt;/output&gt;\n\
+    &lt;/xsl:template&gt;\n\
+    &lt;xsl:template match="/" mode="my-mode"&gt;\n\
+      &lt;debug&gt;this has a mode&lt;/debug&gt;\n\
+    &lt;/xsl:template&gt;\n\
+  &lt;/xsl:stylesheet&gt;').next().value,
+  xdmp.unquote('&lt;node&gt;Hello World&lt;/node&gt;').next().value,
+  null,
+  {mode:"{}my-mode"});
+
+=&gt;
+&lt;?xml version="1.0" encoding="ASCII"?&gt;
+&lt;debug&gt;this has a mode&lt;/debug&gt;
+
+</pre></apidoc:example>
+    <apidoc:example class="xquery"><a id="xslteval4" xmlns="http://www.w3.org/1999/xhtml"></a>
+<pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xquery version "1.0-ml";
+
+(:
+  Note the esacped curly braces ( {{ and }} on the name attribute
+  of xsl:element), as the stylesheet must first be parsed by XQuery
+  before it is evaluated as a stylesheet.  If you do not escape
+  the curly braces, the query throws the XQuery exception:
+  [1.0-ml] XDMP-CONTEXT: (err:XPDY0002) Expression depends on the context
+           where none is defined
+  That is because, without the escaped braces, XQuery tries to evaluate
+  the expression in the name attribute, but there is no context for it.
+:)
+xdmp:xslt-eval(
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+      version="2.0"&gt;
+    &lt;xsl:template match="foo"&gt;
+     &lt;xsl:element name="{{name(.)}}"/&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
+,
+document{ &lt;foo&gt;something goes here&lt;/foo&gt;} )
+=&gt;
+&lt;?xml version="1.0" encoding="ASCII"?&gt;
+&lt;foo/&gt;
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="spawn" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context">
+    <apidoc:summary>
+  Place the specified module on the task queue for evaluation.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="path" type="xs:string">
+    The path, relative to the specified root, of the module to be executed.
+    The module is considered to be JavaScript if the module path ends with a
+    file extension matching the ones configured for
+    application/vnd.marklogic-javascript in MarkLogic's Mimetypes
+    configuration.  For more details on resolving paths, see "Importing XQuery
+    Modules and Resolving Paths" in the <em xmlns="http://www.w3.org/1999/xhtml">Application Developer's Guide</em>.
+  </apidoc:param>
+      <apidoc:param name="vars" type="item()*" optional="true" class="xquery">
+    The external variable values for this evaluation.
+    This can either be a sequence of map:map objects, or a sequence of even
+    length, alternating QNames and items.
+    <p xmlns="http://www.w3.org/1999/xhtml">Each key in the map(s) is a string representing the name of the parameter
+    in Clark notation: "{namespaceURI}localname". The function
+    <a href="#xdmp:key-from-QName">xdmp:key-from-QName</a>
+    is a convenient way to generate these keys.
+    Each entry in the map is the value of the corresponding external 
+    variable.</p>
+    <p xmlns="http://www.w3.org/1999/xhtml">Alternatively, the alternating sequence should contain QName and item
+    pairs that specify a variable name and value for an external variable.</p>
+  </apidoc:param>
+      <apidoc:param name="vars" type="Object" optional="true" class="javascript">
+    The external variable values for this evaluation.
+    This can either be a sequence of map:map objects, or a sequence of even
+    length, alternating QNames and items.
+    <p xmlns="http://www.w3.org/1999/xhtml">Each key in the map(s) is a string representing the name of the parameter
+    in Clark notation: "{namespaceURI}localname". The function
+    <a href="#xdmp.keyFromQName">xdmp.keyFromQName</a>
+    is a convenient way to generate these keys.
+    Each entry in the map is the value of the corresponding external 
+    variable.</p>
+    <p xmlns="http://www.w3.org/1999/xhtml">Alternatively, the alternating sequence should contain QName and item
+    pairs that specify a variable name and value for an external variable.</p>
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+  <span class="xquery" xmlns="http://www.w3.org/1999/xhtml">The options node. The default value is (). The node 
+  must be in the
+  <code>xdmp:eval</code> namespace.  See the
+  <a href="#xdmp:eval"><code>xdmp:eval</code></a> section for a list of options.</span>
+  <span class="javascript" xmlns="http://www.w3.org/1999/xhtml">The options object. The default value is null. 
+  See the
+  <a href="#xdmp.eval"><code>xdmp.eval</code></a> section for a list of options.</span>
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:usage>
+    <p xmlns="http://www.w3.org/1999/xhtml">This function places the specified XQuery module
+    in the task queue to be processed. The module will be evaluated when the
+    task server has the available resources to process it. The tasks are
+    processed in the order in which they are added to the queue. </p>
+    <p xmlns="http://www.w3.org/1999/xhtml">Once <code class="xquery">xdmp:spawn</code>
+    <code class="javascript">xdmp.spawn</code> is called, it cannot be 
+    rolled back,
+    even if the transaction from which it is called does not complete.
+    Therefore, use care or preferably avoid calling this function
+    from a module that is performing an update transaction.  Once a module is
+    spawned, its evaluation is completely asynchronous of the statement in
+    which <code class="xquery">xdmp:spawn</code>
+    <code class="javascript">xdmp.spawn</code> was called. Consequently,
+    if you call this function from a module that is updating a
+    document, and if the update ends up retrying (for example, if a deadlock
+    is detected), then the entire module is re-evaluated and the
+    <code class="xquery">xdmp:spawn</code>
+    <code class="javascript">xdmp.spawn</code> call is therefore called again.
+    This will only happen in update statements, not in query statements. 
+    For details
+    on how transactions work in MarkLogic Server, see "Understanding
+    Transactions in MarkLogic Server" in the <em>Developer's Guide</em>.</p>
+</apidoc:usage>
+    <apidoc:privilege>
+<p xmlns="http://www.w3.org/1999/xhtml"><code>http://marklogic.com/xdmp/privileges/xdmp-spawn</code></p>
+</apidoc:privilege>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:spawn("module.xqy", (),
+        &lt;options xmlns="xdmp:eval"&gt;
+          &lt;modules&gt;{xdmp:modules-database()}&lt;/modules&gt;
+	  &lt;root&gt;http://example.com/application/&lt;/root&gt;
+         &lt;/options&gt;)
+	
+  =&gt; Puts the module from the modules database with the
+     URI http://example.com/application/module.xqy
+     in the task server queue.</pre>
+</apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp.spawn("module.xqy", null,
+        {
+          "modules" : xdmp.modulesDatabase(),
+          "root" : "http://example.com/application/"
+        })
+
+  =&gt; Puts the module from the modules database with the
+     URI http://example.com/application/module.xqy
+     in the task server queue.</pre>
+</apidoc:example>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml"><a id="spawnresultex"></a>
+(:
+   This example uses the &lt;result&gt; option to use the results of a
+   spawned task in the query
+:)  
+let $x := xdmp:spawn("/oneplusone.xqy", (),
+  &lt;options xmlns="xdmp:eval"&gt;
+    &lt;result&gt;{fn:true()}&lt;/result&gt;
+  &lt;/options&gt;
+)
+return
+($x + 2)
+(:
+   if /oneplusone.xqy has the following body:
+
+   1 + 1
+
+   then this query returns 4
+:)
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml"><a id="spawnresultex"></a>
+// This example uses the "result" option to use the results of a
+// spawned task in the query
+
+var x = xdmp.spawn("/oneplusone.sjs", null, {result: true})
+// because xdmp.spawn returns a ValueIterator, 
+// use next().value to get the returned value
+x.next().value + 2
+
+// If  "/oneplusone.sjs" has following code: 
+//    1 + 1 
+// then this returns 4 
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="spawn-function" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context" class="xquery">
+    <apidoc:summary>
+  Place the specified function value on the task queue for evaluation.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="function" type="function() as item()*">
+    A zero arity function value to execute.
+  </apidoc:param>
+      <apidoc:param name="options" type="(element()|map:map)?" optional="true">
+  The options node. The default value is (). The node must be in the
+  <code xmlns="http://www.w3.org/1999/xhtml">xdmp:eval</code> namespace.  See the
+  <a href="#xdmp:eval" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:eval</code></a> section for a list of options.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>item()*</apidoc:return>
+    <apidoc:usage>
+    <p xmlns="http://www.w3.org/1999/xhtml">The <code>xdmp:spawn</code> function places the specified function value
+    in the task queue to be processed. The function will be executed when the
+    task server has the available resources to process it. The tasks are
+    processed in the order in which they are added to the queue. </p>
+    <p xmlns="http://www.w3.org/1999/xhtml">Once <code>xdmp:spawn</code> is called, it cannot be rolled back,
+    even if the transaction from which it is called does not complete.
+    Therefore, use care or preferably avoid calling <code>xdmp:spawn</code>
+    from a module that is performing an update transaction.  Once a module is
+    spawned, its evaluation is completely asynchronous of the statement in
+    which <code>xdmp:spawn</code> was called. Consequently,
+    if you call <code>xdmp:spawn</code> from a module that is updating a
+    document, and if the update ends up retrying (for example, if a deadlock
+    is detected), then the entire module is re-evaluated and the
+    <code>xdmp:spawn</code> call is therefore called again. This will
+    only happen in update statements, not in query statements. For details
+    on how transactions work in MarkLogic Server, see "Understanding
+    Transactions in MarkLogic Server" in the <em>Developer's Guide</em>.</p>
+    <p xmlns="http://www.w3.org/1999/xhtml">If your function performs an update, then by default it will run
+    in update transaction-mode, which runs as a multi-statement transaction.
+    You must put an explicit <code>xdmp:commit()</code> with a 
+    transaction-mode of update (otherwise it will automatically roll back).  
+    For implicit commits, you can specify a transaction-mode of 
+    update-auto-commit.</p>
+</apidoc:usage>
+    <apidoc:privilege>
+<p xmlns="http://www.w3.org/1999/xhtml"><code>http://marklogic.com/xdmp/privileges/xdmp-spawn</code></p>
+</apidoc:privilege>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  let $message := "Hi!"
+  return
+    xdmp:spawn-function(function() { xdmp:sleep(1000), xdmp:log($message) })
+	
+  =&gt; Puts the inline function in the task server queue.
+</pre></apidoc:example>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+for $x in (1 to 10)
+return
+xdmp:spawn-function(function() {xdmp:document-insert(
+  fn:concat("/doc", $x, ".xml"), &lt;foo&gt;{$x * 2}&lt;/foo&gt;)}, 
+&lt;options xmlns="xdmp:eval"&gt;
+  &lt;transaction-mode&gt;update-auto-commit&lt;/transaction-mode&gt;
+&lt;/options&gt;)
+(: 
+   This example uses update-auto-commit for implicit commit.
+   If you use &lt;transaction-mode&gt;update&lt;/transaction-mode&gt;
+   (or if you do not specify an option, and then update
+   is the default) then you must put an expicit xdmp:commit() 
+   in your function as it is run as a multi-statement transaction,
+   and will rollback without an expliit xdmp:commit().
+:)
+
+(: spawns functions to create the specified documents on the task server :) 
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="spawn-in" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context" class="xquery">
+    <apidoc:summary>
+  [DEPRECATED: use <a href="#xdmp:spawn" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:spawn</code></a> with the
+  database option instead] Place the specified module on the task
+  queue for evaluation.  It will be evaluated in the given database.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="path" type="xs:string">
+    The path, relative to the specified root, of the module to be executed.
+  </apidoc:param>
+      <apidoc:param name="ID" type="xs:unsignedLong">
+    The database ID, from <code xmlns="http://www.w3.org/1999/xhtml">xdmp:database("db_name")</code>,
+    <code xmlns="http://www.w3.org/1999/xhtml">xdmp:security-database()</code>,
+    or <code xmlns="http://www.w3.org/1999/xhtml">xdmp:schema-database()</code>.
+  </apidoc:param>
+      <apidoc:param name="vars" type="item()*" optional="true">
+    The external variable values for this evaluation.
+    This must be a sequence of even length, alternating QNames and items.
+    Each QName and item pair specify a variable name and value.
+  </apidoc:param>
+      <apidoc:param name="modules" type="xs:unsignedLong?" optional="true">
+    The modules database that contains the module to invoke.
+    The empty sequence specifies the current modules database.
+  </apidoc:param>
+      <apidoc:param name="root" type="xs:string?" optional="true">
+    The root path for modules.
+    The empty sequence specifies the current root.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>empty-sequence()</apidoc:return>
+    <apidoc:usage>
+    <p xmlns="http://www.w3.org/1999/xhtml">The <code>xdmp:spawn-in</code> function places the specified XQuery
+    module in the task queue to be processed. The module will be evaluated
+    when the task server has the available resources to process it. The tasks
+    are processed in the order in which they are added to the queue. </p>
+</apidoc:usage>
+    <apidoc:example><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:spawn-in("example.xqy",
+                324398742983742,
+                (),
+                xdmp:modules-database(),
+                "http://example.com/application/")
+  =&gt; ()
+  Puts the module from the modules database with the
+  URI http://example.com/application/module.xqy
+  in the task server queue. The module will be
+  executed in the context of the database with
+  an ID of 324398742983742.
+</pre></apidoc:example>
+  </apidoc:function></apidoc:module>

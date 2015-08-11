@@ -1,0 +1,770 @@
+<apidoc:module name="SecurityBuiltins" category="Security" lib="xdmp" xmlns:apidoc="http://marklogic.com/xdmp/apidoc"><apidoc:summary access="public">
+The security built-in functions are XQuery functions to perform many
+security-related tasks in MarkLogic Server.
+</apidoc:summary><apidoc:function name="can-grant-roles" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Tests whether a user can grant or revoke a set of roles.  Raises an error 
+  if the session user can not.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="roles" type="xs:string*">
+    A set of role names
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>empty-sequence()</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:can-grant-roles(("development", "qa"))
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.canGrantRoles(["development", "qa"]);
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="security-assert" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Tests whether the current user has at least one of a given set of privileges.
+  Raises an error if the user does not have any of the privileges.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="privileges" type="xs:string*">
+    The set of privilege URIs.  These are the action URIs for the privileges,
+    not the names of the privileges.
+  </apidoc:param>
+      <apidoc:param name="kind" type="xs:string">
+    The kind of privileges (either "execute" or "uri"). 
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>empty-sequence()</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:security-assert("http://my-function/function-foo", "execute")
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.securityAssert("http://my-function/function-foo", "execute");
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="has-privilege" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Tests whether the current user has at least one of a given set of privileges.
+  Returns true if they do, false otherwise.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="privileges" type="xs:string*">
+    The set of privilege URIs.  These are the URIs for the privileges, not
+    the names of the privileges.
+  </apidoc:param>
+      <apidoc:param name="kind" type="xs:string">
+    The kind of privileges (either "execute" or "uri").
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:boolean</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:has-privilege("http://myprivs/function-foo", "execute")
+=&gt; true if the current user has the execute privilege on a
+   privilege with the URI "http://myprivs/function-foo"
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.hasPrivilege("http://myprivs/function-foo", "execute");
+=&gt; true if the current user has the execute privilege on a
+   privilege with the URI "http://myprivs/function-foo"
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="user-roles" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns all roles assigned to a user, including roles directly assigned
+  to the user and roles inherited by other roles.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="name" type="xs:string">
+    The user name.
+  </apidoc:param>
+      <apidoc:param name="extSecId" type="xs:unsignedLong" optional="true">
+    An external security config ID. This is needed only for external user.
+  </apidoc:param>
+      <apidoc:param name="secDbFirst" type="xs:boolean" optional="true">
+    A boolean value to specify whether to use security database first or not.
+    If not specified, defaults to the current app server's setting,
+    or true when running on the task server.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong*</apidoc:return>
+    <apidoc:privilege>
+  http://marklogic.com/xdmp/privileges/xdmp-user-roles
+</apidoc:privilege>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:user-roles("ian")
+=&gt;(2349872340, 432987324)
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.userRoles("ian");
+=&gt; [2349872340, 432987324]
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="userid-roles" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns all roles assigned to a user, including roles directly assigned
+  to the user and roles inherited by other roles.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="userId" type="xs:unsignedLong">
+    The user name.
+  </apidoc:param>
+      <apidoc:param name="extSecId" type="xs:unsignedLong" optional="true">
+    An external security config ID. This is needed only for external user.
+  </apidoc:param>
+      <apidoc:param name="secDbFirst" type="xs:boolean" optional="true">
+    A boolean value to specify whether to use security database first or not.
+    If not specified, defaults to the current app server's setting,
+    or true when running on the task server.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong*</apidoc:return>
+    <apidoc:privilege>
+  http://marklogic.com/xdmp/privileges/xdmp-user-roles
+</apidoc:privilege>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:user-roles(83928739123)
+=&gt; (2349872340, 432987324)
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.userRoles(83928739123);
+=&gt; [2349872340, 432987324]
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="role-roles" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the set of all roles inherited by a given role, including roles
+  directly assigned to the role and roles inherited from other roles.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="name" type="xs:string">
+    The role name.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong*</apidoc:return>
+    <apidoc:privilege>
+  http://marklogic.com/xdmp/privileges/xdmp-role-roles
+</apidoc:privilege>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:role-roles("vp")
+=&gt; (2349872340, 432987324)
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.roleRoles("vp");
+=&gt; [2349872340, 432987324]
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="privilege-roles" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the set of all roles that have a given privilege.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="action" type="xs:string">
+    The privilege action.
+  </apidoc:param>
+      <apidoc:param name="kind" type="xs:string">
+    The privilege kind.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong*</apidoc:return>
+    <apidoc:privilege>
+  http://marklogic.com/xdmp/privileges/xdmp-privilege-roles
+</apidoc:privilege>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:privilege-roles(
+         "http://marklogic.com/xdmp/privileges/admin-module-write",
+         "execute")
+=&gt; ( 8487823278258687528, 8950790268580922626, 
+     14303099028664823447, 2890629636447572780,
+     13947965013900320292 )
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.privilegeRoles(
+         "http://marklogic.com/xdmp/privileges/admin-module-write",
+         "execute");
+=&gt; ( 8487823278258687528, 8950790268580922626, 
+     14303099028664823447, 2890629636447572780,
+     13947965013900320292 )
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="amp-roles" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the set of all roles assigned to an amp, including roles directly
+  assigned to the amp and roles inherited by other roles.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="namespace-uri" type="xs:string">
+    The amped function namespace URI.
+  </apidoc:param>
+      <apidoc:param name="localname" type="xs:string">
+    The amped function localname.
+  </apidoc:param>
+      <apidoc:param name="document-uri" type="xs:string">
+    The amped function module URI.
+  </apidoc:param>
+      <apidoc:param name="database-id" type="xs:unsignedLong">
+    The database ID containing the module.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong*</apidoc:return>
+    <apidoc:privilege>
+  http://marklogic.com/xdmp/privileges/xdmp-amp-roles
+</apidoc:privilege>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:amp-roles("http://marklogic.com",
+                 "read-docs",
+                 "/app/docs.xqy",
+                 239487239487)
+=&gt; (2349872340, 432987324)
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.ampRoles("http://marklogic.com",
+                 "read-docs",
+                 "/app/docs.xqy",
+                 239487239487);
+=&gt; *[2349872340, 432987324]
+(the *[ ] notation indicates a ValueIterator with the given values)
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="document-get-collections" type="builtin" lib="xdmp" category="Extension" subcategory="Extension">
+    <apidoc:summary>
+  Returns the collections to which a given document belongs.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="uri" type="xs:string">
+    The document URI.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return class="xquery">xs:string*</apidoc:return>
+    <apidoc:return class="javascript">String[]</apidoc:return>
+    <apidoc:usage class="javascript">
+  If the URI passed in doesn't exist, an empty array is returned.
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:document-get-collections("chapter5.xml")
+=&gt; ("http://marklogic.com/all-books",
+        "http://marklogic.com/xml-books")
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.documentGetCollections("chapter5.json")
+=&gt; ["http://marklogic.com/all-books",
+        "http://marklogic.com/xml-books"]
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="node-collections" type="builtin" lib="xdmp" category="Extension" subcategory="XQuery Context">
+    <apidoc:summary>
+  Returns any collections for the node's document in the database. If
+  the specified node does not come from a document in a database, then
+  <code xmlns="http://www.w3.org/1999/xhtml">xdmp:node-collections</code> returns an empty sequence.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="node" type="node()">
+    The node whose collections are to be returned.
+   </apidoc:param>
+    </apidoc:params>
+    <apidoc:return class="xquery">xs:string*</apidoc:return>
+    <apidoc:return class="javascript">String[]</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:node-collections(doc("http://marklogic.com/document"))
+=&gt; ("http://acme.com/this-collection", "http://acme.com/that-collection")
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.nodeCollections(cts.doc("/dog.json"));
+=&gt; ["http://acme.com/this-collection", "http://acme.com/that-collection"]
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="document-get-permissions" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the permissions to a given document.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="uri" type="xs:string">
+    The document URI.
+  </apidoc:param>
+      <apidoc:param class="xquery" name="format" type="xs:string" optional="true">
+    Specify what format the result should be in.
+    It can be either "elements" or "objects".
+    With "elements", the built-in returns a sequence of XML elements.
+    With "objects",  the built-in returns a sequence of map:map.
+    The default is "elements".
+  </apidoc:param>
+      <apidoc:param class="javascript" name="format" type="xs:string" optional="true">
+    Specify what format the result should be in.
+    It can be either "objects" or "elements".
+    With "objects",  the built-in returns an array of objects.
+    With "elements", the built-in returns an array of XML element nodes.
+    The default is "objects".
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return class="xquery">item()*</apidoc:return>
+    <apidoc:return class="javascript">Object[]</apidoc:return>
+    <apidoc:usage class="javascript">
+  If the URI passed in doesn't exist, an empty array is returned.
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:document-get-permissions("chapter5.xml")
+  =&gt;(&lt;sec:permission&gt;
+          &lt;sec:capability&gt;read&lt;/sec:capability&gt;
+          &lt;sec:role-id&gt;324978243&lt;/sec:role-id&gt;
+        &lt;/sec:permission&gt;,
+        &lt;sec:permission&gt;
+          &lt;sec:capability&gt;read&lt;/sec:capability&gt;
+          &lt;sec:role-id&gt;32493478578243&lt;/sec:role-id&gt;
+        &lt;/sec:permission&gt;,
+        &lt;sec:permission&gt;
+          &lt;sec:capability&gt;update&lt;/sec:capability&gt;
+          &lt;sec:role-id&gt;32493478578243&lt;/sec:role-id&gt;
+        &lt;/sec:permission&gt;)
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp.documentGetPermissions("chapter5.json")
+  =&gt;
+  [
+    {
+      "permission" : {
+        "capability" : "read",
+        "roldId" : "324978243"
+       }
+    },
+    {
+      "permission" : {
+        "capability" : "read",
+        "roldId" : "32493478578243"
+      }
+    },
+    {
+      "permission" : {
+        "capability" : "update",
+        "roldId" : "32493478578243"
+      }
+    }
+  ]
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="node-permissions" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the permissions to a node's document.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="node" type="node()">
+    The node.
+  </apidoc:param>
+      <apidoc:param class="xquery" name="format" type="xs:string" optional="true">
+    Specify what format the result should be in.
+    It can be either "elements" or "objects".
+    With "elements", the built-in returns a sequence of XML elements.
+    With "objects",  the built-in returns a sequence of map:map.
+    The default is "elements".
+  </apidoc:param>
+      <apidoc:param class="javascript" name="format" type="xs:string" optional="true">
+    Specify what format the result should be in.
+    It can be either "objects" or "elements".
+    With "objects",  the built-in returns an array of objects.
+    With "elements", the built-in returns an array of XML element nodes.
+    The default is "objects".
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return class="xquery">item()*</apidoc:return>
+    <apidoc:return class="javascript">Object[]</apidoc:return>
+    <apidoc:usage class="javascript">
+  If the URI passed in doesn't exist, an empty array is returned.
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:node-permissions(fn:doc("chapter5.xml"))
+  =&gt;(&lt;sec:permission&gt;
+          &lt;sec:capability&gt;read&lt;/sec:capability&gt;
+          &lt;sec:role-id&gt;324978243&lt;/sec:role-id&gt;
+        &lt;/sec:permission&gt;,
+        &lt;sec:permission&gt;
+          &lt;sec:capability&gt;read&lt;/sec:capability&gt;
+          &lt;sec:role-id&gt;32493478578243&lt;/sec:role-id&gt;
+        &lt;/sec:permission&gt;,
+        &lt;sec:permission&gt;
+          &lt;sec:capability&gt;update&lt;/sec:capability&gt;
+          &lt;sec:role-id&gt;32493478578243&lt;/sec:role-id&gt;
+        &lt;/sec:permission&gt;)
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp.nodePermissions(cts.doc("chapter5.json"))
+  =&gt;
+  [
+    {
+      "permission" : {
+        "capability" : "read",
+        "roldId" : "324978243"
+       }
+    },
+    {
+      "permission" : {
+        "capability" : "read",
+        "roldId" : "32493478578243"
+      }
+    },
+    {
+      "permission" : {
+        "capability" : "update",
+        "roldId" : "32493478578243"
+      }
+    }
+  ]
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="default-permissions" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the permissions any new document would get if the current user
+  were to insert a document without specifying the default permissions.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="uri" type="xs:string" optional="true">
+    The document URI to get default permissions.
+  </apidoc:param>
+      <apidoc:param class="xquery" name="format" type="xs:string" optional="true">
+    Specify what format the result should be in.
+    It can be either "elements" or "objects".
+    With "elements", the built-in returns a sequence of XML elements.
+    With "objects",  the built-in returns a sequence of map:map.
+    The default is "elements".
+  </apidoc:param>
+      <apidoc:param class="javascript" name="format" type="xs:string" optional="true">
+    Specify what format the result should be in.
+    It can be either "objects" or "elements".
+    With "objects",  the built-in returns an array of objects.
+    With "elements", the built-in returns an array of XML element nodes.
+    The default is "objects".
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return class="xquery">element()*</apidoc:return>
+    <apidoc:return class="javascript">Object[]</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:default-permissions("http://example.com/content/foo.xml")
+  =&gt;(&lt;sec:permission&gt;
+          &lt;sec:capability&gt;read&lt;/sec:capability&gt;
+          &lt;sec:role-id&gt;324978243&lt;/sec:role-id&gt;
+        &lt;/sec:permission&gt;,
+        &lt;sec:permission&gt;
+          &lt;sec:capability&gt;read&lt;/sec:capability&gt;
+          &lt;sec:role-id&gt;32493478578243&lt;/sec:role-id&gt;
+        &lt;/sec:permission&gt;,
+        &lt;sec:permission&gt;
+          &lt;sec:capability&gt;update&lt;/sec:capability&gt;
+          &lt;sec:role-id&gt;32493478578243&lt;/sec:role-id&gt;
+        &lt;/sec:permission&gt;)
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp.defaultPermissions("http://example.com/content/foo.json")
+  =&gt;
+  [
+    {
+      "permission" : {
+        "capability" : "read",
+        "roldId" : "324978243"
+       }
+    },
+    {
+      "permission" : {
+        "capability" : "read",
+        "roldId" : "32493478578243"
+      }
+    },
+    {
+      "permission" : {
+        "capability" : "update",
+        "roldId" : "32493478578243"
+      }
+    }
+  ]
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="default-collections" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the collections any new document would get if the current user
+  were to insert a document without specifying the collections.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="uri" type="xs:string" optional="true">
+    The document URI to get parent directory.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:string*</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:default-collections()
+=&gt; ("http://example.com/docs",
+        "http://example.com/manuals")
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.defaultCollections();
+=&gt; ("http://example.com/docs",
+        "http://example.com/manuals")
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="get-current-user" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the name of the current user.
+</apidoc:summary>
+    <apidoc:params/>
+    <apidoc:return>xs:string?</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:get-current-user();
+=&gt; "ian"
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.getCurrentUser();
+=&gt; "ian"
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="get-current-userid" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the ID of the current user.
+</apidoc:summary>
+    <apidoc:params/>
+    <apidoc:return>xs:unsignedLong</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:get-current-userid()
+=&gt; 23987236
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.getCurrentUserid();
+=&gt; 23987236
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="get-request-user" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  If this App Server is using application-level authentication, 
+  returns the ID of the user in the last successful call to 
+  <a href="#xdmp:login" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:login</code></a>.
+  Otherwise, returns the ID of the user from the <code xmlns="http://www.w3.org/1999/xhtml">Authorization</code> 
+  header of this App Server request.
+  If you want to get the ID of the current user, use the 
+  <a href="#xdmp:get-current-userid" xmlns="http://www.w3.org/1999/xhtml"><code>xdmp:get-current-userid</code></a> 
+  function.
+</apidoc:summary>
+    <apidoc:params/>
+    <apidoc:return>xs:unsignedLong</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:get-request-user()
+=&gt; 23987236
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.getRequestUser();
+=&gt; 23987236
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="get-current-roles" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns all the current roles, both assigned and inherited by the
+  current user and any received from amps.
+</apidoc:summary>
+    <apidoc:params/>
+    <apidoc:return>xs:unsignedLong*</apidoc:return>
+    <apidoc:privilege>
+  http://marklogic.com/xdmp/privileges/xdmp-get-current-roles
+</apidoc:privilege>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:get-current-roles()
+=&gt; (2349872340, 432987324)
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.getCurrentRoles();
+=&gt; (2349872340, 432987324)
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="permission" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary class="xquery">
+  Returns a permission element in the security namespace corresponding
+  to the named role and capability given.
+</apidoc:summary>
+    <apidoc:summary class="javascript">
+  Returns a permission object corresponding
+  to the named role and capability given.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="role" type="xs:string">
+    A role name.
+  </apidoc:param>
+      <apidoc:param name="capability" type="xs:string">
+    A capability (read, update, insert, or execute).
+  </apidoc:param>
+      <apidoc:param class="xquery" name="format" type="xs:string" optional="true">
+    Specify what format the result should be in.
+    It can be either "element" or "object".
+    With "element", the built-in returns an XML element.
+    With "object",  the built-in returns a map:map.
+    The default is "element".
+  </apidoc:param>
+      <apidoc:param class="javascript" name="format" type="xs:string" optional="true">
+    Specify what format the result should be in.
+    It can be either "object" or "element".
+    With "object",  the built-in returns an object.
+    With "element", the built-in returns an XML element node.
+    The default is "object".
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return class="xquery">element()</apidoc:return>
+    <apidoc:return class="javascript">Object</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp:permission("development", "read")
+  =&gt;&lt;sec:permission&gt;
+          &lt;sec:capability&gt;read&lt;/sec:capability&gt;
+          &lt;sec:role-id&gt;32497824353&lt;/sec:role-id&gt;
+       &lt;/sec:permission&gt;
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+  xdmp.permission("development", "read")
+  =&gt;
+  {
+    "capability" : "read",
+    "roleId" : "32497824353"
+  }
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="user" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the user ID for the specified user name.  Unlike the security
+  library module function <code xmlns="http://www.w3.org/1999/xhtml">sec:uid-for-name</code>, this function
+  can be evaluted against any database and does not need to be evaluated
+  directly against the security database.  It returns the user ID from the
+  security database configured for the database in which the App Server
+  evaluates against.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="user" type="xs:string">
+    A user name.
+  </apidoc:param>
+      <apidoc:param name="extSecId" type="xs:unsignedLong" optional="true">
+    An external security config ID. This is needed only for external user.
+  </apidoc:param>
+      <apidoc:param name="secDbFirst" type="xs:boolean" optional="true">
+    A boolean value to specify whether to use security database first or not.
+    If not specified, defaults to the current app server's setting,
+    or true when running on the task server.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:user("sylvester")
+=&gt; 239871567325
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.user("john", xdmp.externalSecurity("ldap-config"), false);
+=&gt; 16291221516538572683
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="role" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the role ID for the specified role name.  Unlike the security
+  library module function <code xmlns="http://www.w3.org/1999/xhtml">sec:uid-for-name</code>, this function
+  can be evaluted against any database and does not need to be evaluated
+  directly against the security database.  It returns the role ID from the
+  security database configured for the database in which the App Server
+  evaluates against.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="role" type="xs:string">
+    A role name.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:role("editor")
+=&gt; 2392349873545
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.role("editor");
+=&gt; 2392349873545
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="privilege" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the privilege ID for the specified privilege name.  Unlike the security
+  library module function <code xmlns="http://www.w3.org/1999/xhtml">sec:uid-for-name</code>, this function
+  can be evaluted against any database and does not need to be evaluated
+  directly against the security database.  It returns the privilege ID from the
+  security database configured for the database in which the App Server
+  evaluates against.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="action" type="xs:string">
+    A privilege action.
+  </apidoc:param>
+      <apidoc:param name="kind" type="xs:string">
+    A privilege kind: "execute" or "URI".
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:privilege("http://my-app/test","execute")
+=&gt; 2392349873545
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.privilege("http://my-app/test","execute");
+=&gt; 2392349873545
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="amp" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the amp ID for the specified amp.  Unlike the security
+  library module function <code xmlns="http://www.w3.org/1999/xhtml">sec:uid-for-name</code>, this function
+  can be evaluted against any database and does not need to be evaluated
+  directly against the security database.  It returns the amp ID from the
+  security database configured for the database in which the App Server
+  evaluates against.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="namespace" type="xs:string">
+    A function namespace.
+  </apidoc:param>
+      <apidoc:param name="localname" type="xs:string">
+    A function localname.  </apidoc:param>
+      <apidoc:param name="module-uri" type="xs:string">
+    The module URI for the amp.
+  </apidoc:param>
+      <apidoc:param name="database" type="xs:unsignedLong">
+    The ID of the database in which the module to which this amp refers is
+    stored.  If the module is on the filesystem under the <code xmlns="http://www.w3.org/1999/xhtml">Modules</code>
+    directory, then specify 0 for the database ID.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:amp("http://my-app/test","my-func","/modules/my-module.xqy",
+            xdmp:modules-database())
+=&gt; 2392349873545
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.amp("http://marklogic.com/xdmp/security", "amp-add-roles",
+         "/MarkLogic/security.xqy", 0);
+=&gt; 3548369234520018804
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="user-external-security" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+Returns external security id and user name for an external user.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="user-id" type="xs:unsignedLong">
+    A user ID.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return class="xquery">element(external-user)?</apidoc:return>
+    <apidoc:return class="javascript">Object</apidoc:return>
+    <apidoc:usage schema="external-user.xsd">
+</apidoc:usage>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:user-external-security(2646897984048470146)
+=&gt;
+&lt;external-user&gt;
+  &lt;external-security-id&gt;11235280821135443504&lt;/external-security-id&gt;
+  &lt;user-name&gt;john&lt;/user-name&gt;
+&lt;/external-user&gt;
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.userExternalSecurity(
+  xdmp.user("user2@REPO.LOCAL",
+    xdmp.externalSecurity("ldap08-a")
+  )
+)
+=&gt;
+{
+  "externalSecurityId": "3714400769541931396",
+  "userName": "user2@REPO.LOCAL"
+}
+</pre></apidoc:example>
+  </apidoc:function><apidoc:function name="external-security" type="builtin" lib="xdmp" category="Security">
+    <apidoc:summary>
+  Returns the external security ID for the specified external security name.
+  Unlike the security library module function <code xmlns="http://www.w3.org/1999/xhtml">sec:uid-for-name</code>, 
+  this function can be evaluted against any database and does not need to be 
+  evaluated directly against the security database. It returns the external
+  security ID from the security database configured for the database in which 
+  the App Server evaluates against.
+</apidoc:summary>
+    <apidoc:params>
+      <apidoc:param name="external-security" type="xs:string">
+    An external security name.
+  </apidoc:param>
+    </apidoc:params>
+    <apidoc:return>xs:unsignedLong</apidoc:return>
+    <apidoc:example class="xquery"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp:external-security("ldap-config")
+=&gt; 2392349873545
+</pre></apidoc:example>
+    <apidoc:example class="javascript"><pre xml:space="preserve" xmlns="http://www.w3.org/1999/xhtml">
+xdmp.externalSecurity("ldap-config");
+=&gt; 2392349873545
+</pre></apidoc:example>
+  </apidoc:function></apidoc:module>
