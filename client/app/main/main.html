@@ -33,6 +33,9 @@
   </div>
 </div>
 
+    <div ng-include="'app/main/partials/intro.partial.html'" scope="" onload=""></div>
+
+
     <h4 ng-if="results.length > 0">Found <b>{{results.length}}</b> apis</h4>
     <md-list>
         <md-list-item class="md-2-line" ng-repeat="item in results track by $index">

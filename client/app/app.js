@@ -12,24 +12,24 @@ angular.module('mldocsApp', [
     function($mdThemingProvider, $mdIconProvider) {
 
         // app theme
-        //$mdThemingProvider.theme('default').dark();
-        //$mdThemingProvider.theme('my').primaryPalette('red');
-        // $mdThemingProvider.setDefaultTheme('my');
+        //$mdThemingProvider.theme('default').dark;
+        $mdThemingProvider.theme('teal').primaryPalette('teal');
+        $mdThemingProvider.setDefaultTheme('teal');
 
-        var customBlueMap = $mdThemingProvider.extendPalette('light-blue', {
-            'contrastDefaultColor': 'light',
-            'contrastDarkColors': ['50'],
-            '50': 'ffffff'
-        });
-        $mdThemingProvider.definePalette('customBlue', customBlueMap);
-        $mdThemingProvider.theme('default')
-            .primaryPalette('customBlue', {
-                'default': '500',
-                'hue-1': '50'
-            })
-            .accentPalette('pink');
-        $mdThemingProvider.theme('input', 'default')
-            .primaryPalette('grey')
+        // var customBlueMap = $mdThemingProvider.extendPalette('light-blue', {
+        //     'contrastDefaultColor': 'light',
+        //     'contrastDarkColors': ['50'],
+        //     '50': 'ffffff'
+        // });
+        // $mdThemingProvider.definePalette('customBlue', customBlueMap);
+        // $mdThemingProvider.theme('default')
+        //     .primaryPalette('customBlue', {
+        //         'default': '500',
+        //         'hue-1': '50'
+        //     })
+        //     .accentPalette('pink');
+        // $mdThemingProvider.theme('input', 'default')
+        //     .primaryPalette('grey')
 
 
         // icons

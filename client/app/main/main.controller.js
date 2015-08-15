@@ -4,7 +4,7 @@ angular
     .module('mldocsApp')
     .controller('SearchCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList',
         function($scope, $timeout, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList) {
-
+             $scope.intro = true;
             $scope.results = [];
             $scope.modules = modules.data[0].facets;
             $scope.apiList = apiList.data;
@@ -72,7 +72,8 @@ angular
 
             // for search
             $scope.search = function(text, fromSuggest) {
-                
+                $scope.intro = false;
+
                 $scope.query.q = text || $scope.query.q;
                 var prefix = (fromSuggest) ? 'api:' : '';
                 Search.search({
@@ -97,6 +98,7 @@ angular
             // if the url contains query params, then execute search
             try {
                 if ($state.params.q) {
+                     $scope.intro = false;
                     $scope.query.q = decodeURIComponent($state.params.q);
                     $scope.search($scope.query.q);
                 }
