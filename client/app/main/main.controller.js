@@ -20,7 +20,7 @@ angular
                 suggestions: [],
                 strictSuggest: function(text) {
                     Search.suggest({
-                        q: text,
+                        q: decodeURIComponent(text),
                         facetsOnly: false
                     }).success(function(results) {
                         $scope.query.suggestions = _.compact(results);
@@ -51,7 +51,7 @@ angular
 
                     //console.log('fuzzySuggestions', fuzzySuggestions);
                     Search.suggest({
-                        q: text,
+                        q: decodeURIComponent(text),
                         facetsOnly: false
                     }).success(function(results) {
                         strictSuggestions = _.compact(results);
@@ -97,7 +97,7 @@ angular
             // if the url contains query params, then execute search
             try {
                 if ($state.params.q) {
-                    $scope.query.q = $state.params.q;
+                    $scope.query.q = decodeURIComponent($state.params.q);
                     $scope.search($scope.query.q);
                 }
             } catch (e) {
@@ -118,7 +118,8 @@ angular
             console.log($state);
             $scope.getList = function(name) {
                 Search.search({
-                    collection: name
+                    collection: name,
+                    perPage: 999
                 }).success(function(result) {
                     $scope.list = result;
                     // remove first item from array

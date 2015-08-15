@@ -1,7 +1,9 @@
+
 <md-content layout-padding>
-
-
 <h3 class="md-display-1"><b>{{$state.params.lib}}</b><small>({{list.length}})</small></h4>
+<md-input-container>
+  <input type="text" ng-model="filterApi" placeholder="filter">
+</md-input-container>
 <table>
 	<tr>
 	<th>
@@ -12,8 +14,8 @@
 	    Description
 	</md-content></th></tr>
 	<tbody>
-		<tr ng-repeat="item in list track by $index">
-			<td><md-content layout-padding>
+		<tr ng-repeat="item in list | filter:filterApi">
+			<td class="col-md-5"><md-content layout-padding>
 			    <a ui-sref="app.detail({uri:item.uri})"><b>{{item['http-verb']}} {{item.lib}}:{{item.apiName}}</b></a>
 			</md-content></td>
 			<td><md-content layout-padding>

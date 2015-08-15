@@ -93,10 +93,10 @@
         </table>
         </div>
 
-   <h3 class="md-title"><b>Example</b></h3>
+   <h3 class="md-title" ng-if="api.examples.length > 0"><b>Example</b></h3>
 <div ng-repeat="example in api.examples">
 <!--  length of 3 to check for empty values -->
-     <pre ng-if="example.length > 3">{{example}}</pre> 
+     <pre>{{example}}</pre> 
 </div>
    
     <!-- <md-whiteframe class="md-whiteframe-z5" layout layout-align="center center" ng-repeat="example in api.examples">  
