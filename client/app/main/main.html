@@ -5,6 +5,7 @@
 <md-button class="md-raised md-mini md-primary" md-ripple-size="full" ng-click="search()"> Search </md-button>
 <hr> -->
 
+
 <div layout="row" layout-align="start center">
   <div flex="66">
     <form ng-submit="$event.preventDefault()">
@@ -36,7 +37,7 @@
     <div ng-include="'app/main/partials/intro.partial.html'" scope="" onload=""></div>
 
 
-    <h4 ng-if="results.length > 0">Found <b>{{results.length}}</b> apis</h4>
+    <h4 ng-if="results.length > 0">Found <b>{{results.length}}</b> APIs</h4>
     <md-list>
         <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
             <div class="md-list-item-text">

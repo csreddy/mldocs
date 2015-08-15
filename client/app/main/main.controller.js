@@ -121,7 +121,7 @@ angular
             $scope.getList = function(name) {
                 Search.search({
                     collection: name,
-                    perPage: 999
+                    perPage: 9999
                 }).success(function(result) {
                     $scope.list = result;
                     // remove first item from array
