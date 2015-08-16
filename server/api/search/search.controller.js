@@ -15,7 +15,7 @@ exports.index = function(req, res) {
 exports.search = function(req, res) {
     var searchCriteria = [q.collection('docs')];
     var facetOptions = [q.facet('lib', 'lib'), q.facet('bucket', 'bucket')]
-    var resultLimit = req.body.perPage || 100; // default
+    var resultLimit = req.body.perPage || 1000; // default
     if (req.body.facetsOnly) {
         resultLimit = 0;
     }
@@ -121,7 +121,7 @@ exports.all = function(req, res) {
 
     db.documents.query(
         q.where(
-           q.collection('docs')
+            q.collection('docs')
         )
         .slice(0, resultLimit, q.extract(['/lib', '/apiName']))
     )
@@ -129,8 +129,8 @@ exports.all = function(req, res) {
             result = result.map(function(item) {
                 if (item.content) {
                     return {
-                       lib: item.content.extracted[1].lib,
-                       apiName: item.content.extracted[0].apiName
+                        lib: item.content.extracted[1].lib,
+                        apiName: item.content.extracted[0].apiName
                     }
                 }
             })
@@ -148,8 +148,8 @@ exports.get = function(req, res) {
     //console.log('req.params', req);
     db.documents.read(req.query.uri).result(function(doc) {
         if (doc[0] && doc[0].hasOwnProperty('content')) {
-                doc[0].content.examples = removeEmptyExamples(doc[0].content.examples);
-                return res.status(200).json(doc[0].content)
+            doc[0].content.examples = removeEmptyExamples(doc[0].content.examples);
+            return res.status(200).json(doc[0].content)
         } else {
             return res.status(200).json({})
         }
@@ -163,9 +163,13 @@ exports.get = function(req, res) {
 
 
 function removeEmptyExamples(examplesArray) {
-  var examples = [];
-  examples =  examplesArray.map(function(ex) {
-         if (ex.length > 5) { return ex}
-    })
-  return _.compact(examples); // removed undefined items from arrayand returns the clean array
+    var examples = [];
+    if (_.isArray(examplesArray)) {
+        examples = examplesArray.map(function(ex) {
+            if (ex.length > 5) {
+                return ex
+            }
+        })
+    }
+    return _.compact(examples); // removed undefined items from arrayand returns the clean array
 }

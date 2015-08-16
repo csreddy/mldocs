@@ -4,7 +4,7 @@ angular
     .module('mldocsApp')
     .controller('SearchCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList',
         function($scope, $timeout, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList) {
-             $scope.intro = true;
+            $scope.intro = true;
             $scope.results = [];
             $scope.modules = modules.data[0].facets;
             $scope.apiList = apiList.data;
@@ -74,31 +74,37 @@ angular
             $scope.search = function(text, fromSuggest) {
                 $scope.intro = false;
 
-                $scope.query.q = text || $scope.query.q;
-                var prefix = (fromSuggest) ? 'api:' : '';
-                Search.search({
-                    q: prefix + $scope.query.q,
-                    facetsOnly: false
-                }).success(function(response) {
+                // $scope.$evalAsync(function() {
+                    $scope.query.q = text || $scope.query.q;
+                    var prefix = (fromSuggest) ? 'api:' : '';
+                    Search.search({
+                        q: prefix + $scope.query.q,
+                        facetsOnly: false
+                    }).success(function(response) {
 
-                    // remove first item from array
-                    $scope.results = _.rest(response);
+                        // remove first item from array
+                        $scope.results = _.rest(response);
 
-                    $state.$current.data = $scope.results;
-                    $state.go('app.search', {q: $scope.query.q});
-                   
-                   // $state.go('app.search.result');
+                        $state.$current.data = $scope.results;
+                        $state.go('app.search', {
+                            q: $scope.query.q
+                        });
 
-                }).error(function(error) {
-                    console.error('Error', error);
-                });
+                        // $state.go('app.search.result');
+
+                    }).error(function(error) {
+                        console.error('Error', error);
+                    });
+                // });
+
+
             };
 
 
             // if the url contains query params, then execute search
             try {
                 if ($state.params.q) {
-                     $scope.intro = false;
+                    $scope.intro = false;
                     $scope.query.q = decodeURIComponent($state.params.q);
                     $scope.search($scope.query.q);
                 }
@@ -112,7 +118,7 @@ angular
             console.log('resultCtrl state', $state);
             $scope.results = $state.$current.data; //($state.$current.data) ? $state.$current.data: $state.current.parant.data;
             console.log('resultCtrl data', $scope.results);
-                 
+
         }
     ])
     .controller('ListCtrl', ['$scope', '$state', 'Search',
@@ -127,7 +133,7 @@ angular
                     // remove first item from array
                     $scope.list = _.rest(result);
 
-                    console.log('list', $scope.list);
+                   // console.log('list', $scope.list);
                 }).error(function(error) {
                     console.error('Error in list', error);
                 });
@@ -138,11 +144,11 @@ angular
     ])
     .controller('DetailCtrl', ['$scope', '$state', 'Search',
         function($scope, $state, Search) {
-            console.log('$state', $state);
+           // console.log('$state', $state);
             //var url = '/' + $state.params.detail.replace(':', '/') + '.json';
             Search.get($state.params.uri).success(function(doc) {
                 $scope.api = doc;
-                console.log('api', $scope.api);
+               // console.log('api', $scope.api);
             }).error(function(error) {
                 console.error('error', error);
             });

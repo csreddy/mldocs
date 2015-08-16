@@ -1,23 +1,23 @@
 <h4 class="md-headline"><b>
 <!-- <md-button md-no-ink class="md-primary" href="/list/{{api.lib}}">{{api.lib}}</md-button>:{{api.apiName}}() -->
 
-<a href="/list/{{api.lib}}">{{api.lib}}</a>:{{api.apiName}}()</b>
+<a href="/list/{{api.lib}}">{{::api.lib}}</a>:{{::api.apiName}}()</b>
 </h4>
 
 <md-content layout-padding>
  <h3 class="md-title"><b>Summary</b></h3>
         <md-content layout-padding>
-            {{api.summary}}
+            {{::api.summary}}
         </md-content>
 
         <h3 class="md-title"><b>Usage</b></h3>
         <p>
             <pre style="max-width:500px">
-        <b>{{api.lib}}:{{api.apiName}}(){ </b>
+        <b>{{::api.lib}}:{{::api.apiName}}(){ </b>
         <span ng-repeat="param in api.params">
-        <b style="padding-left:30px;">{{param.name}}</b> as <em>{{param.type}}</em>
+        <b style="padding-left:30px;">{{::param.name}}</b> as <em>{{::param.type}}</em>
          </span>
-        <b>}</b> as <b>{{api.return}}</b>
+        <b>}</b> as <b>{{::api.return}}</b>
         </pre>
         </p>
 
@@ -45,17 +45,17 @@
                 <tr ng-repeat="param in api.params">
                     <td>
                         <md-content layout-padding>
-                            <code>{{param.name}}</code>
+                            <code>{{::param.name}}</code>
                         </md-content>
                     </td>
                     <td>
                         <md-content layout-padding>
-                            {{param.required}}
+                            {{::param.required}}
                         </md-content>
                     </td>
                     <td>
                         <md-content layout-padding>
-                            {{param.description}}
+                            {{::param.description}}
                         </md-content>
                     </td>
                 </tr>
@@ -65,7 +65,7 @@
 
    <h3 class="md-title" ng-if="api.examples.length > 0"><b>Example</b></h3>
 <div ng-repeat="example in api.examples">
-     <pre>{{example}}</pre>
+     <pre>{{::example}}</pre>
 </div>
    
     <!-- <md-whiteframe class="md-whiteframe-z5" layout layout-align="center center" ng-repeat="example in api.examples">  

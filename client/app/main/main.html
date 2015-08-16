@@ -41,9 +41,9 @@
     <md-list>
         <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
             <div class="md-list-item-text">
-                <a ui-sref="app.detail({uri:item.uri})"><b>{{item.lib}}:{{item.apiName}}</b></a>
-                <small><em>(<a href="/list/{{item.bucket}}">{{item.bucket}}</a>)</em></small>
-                <p>{{item.summary | cut:true:220}}</p>
+                <a ui-sref="app.detail({uri:item.uri})"><b>{{::item.lib}}:{{::item.apiName}}</b></a>
+                <small><em>(<a href="/list/{{item.bucket}}">{{::item.bucket}}</a>)</em></small>
+                <p>{{::item.summary | cut:true:220}}</p>
             </div>
         </md-list-item>
     </md-list>
