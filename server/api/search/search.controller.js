@@ -15,7 +15,7 @@ exports.index = function(req, res) {
 exports.search = function(req, res) {
     var searchCriteria = [q.collection('docs')];
     var facetOptions = [q.facet('lib', 'lib'), q.facet('bucket', 'bucket')]
-    var resultLimit = req.body.perPage || 1000; // default
+    var resultLimit = req.body.perPage || 100; // default
     if (req.body.facetsOnly) {
         resultLimit = 0;
     }
@@ -53,6 +53,8 @@ exports.search = function(req, res) {
                 if (res.content) {
                     var uri = res.uri
                     res = res.content
+                    // trim strings
+                    res.summary = trimStrings(res.summary)
                     res.uri = uri;
                 }
                 return res
@@ -172,4 +174,10 @@ function removeEmptyExamples(examplesArray) {
         })
     }
     return _.compact(examples); // removed undefined items from arrayand returns the clean array
+}
+
+function trimStrings(str) {
+    str =  _.trim(str, '\n');
+    str = _.trim(str);
+    return str;
 }

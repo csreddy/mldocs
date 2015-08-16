@@ -2,8 +2,8 @@
 
 angular
     .module('mldocsApp')
-    .controller('SearchCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList',
-        function($scope, $timeout, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList) {
+    .controller('SearchCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList', 'offline',
+        function($scope, $timeout, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList, offline) {
             $scope.intro = true;
             $scope.results = [];
             $scope.modules = modules.data[0].facets;
@@ -68,37 +68,62 @@ angular
                 }
             };
 
-           // $state.go('app.search', {q: $scope.query.q})
+            // $state.go('app.search', {q: $scope.query.q})
 
             // for search
             $scope.search = function(text, fromSuggest) {
                 $scope.intro = false;
+                $scope.query.q = text || $scope.query.q;
+                var prefix = (fromSuggest) ? 'api:' : '';
+                Search.search({
+                    q: prefix + $scope.query.q,
+                    facetsOnly: false,
+                    perPage: 9999
+                }).success(function(response) {
 
-                // $scope.$evalAsync(function() {
-                    $scope.query.q = text || $scope.query.q;
-                    var prefix = (fromSuggest) ? 'api:' : '';
-                    Search.search({
-                        q: prefix + $scope.query.q,
-                        facetsOnly: false
-                    }).success(function(response) {
+                    // remove first item from array
+                    $scope.results = _.rest(response);
 
-                        // remove first item from array
-                        $scope.results = _.rest(response);
-
-                        $state.$current.data = $scope.results;
-                        $state.go('app.search', {
-                            q: $scope.query.q
-                        });
-
-                        // $state.go('app.search.result');
-
-                    }).error(function(error) {
-                        console.error('Error', error);
+                    $state.$current.data = $scope.results;
+                    $state.go('app.search', {
+                        q: $scope.query.q
                     });
-                // });
 
+                    // $state.go('app.search.result');
+
+                }).error(function(error) {
+                    console.error('Error', error);
+                });
+            };
+
+            // save for offline access
+            $scope.saveForOffline = function() {
+                Search.search({
+                    q: '',
+                    facetsOnly: false,
+                    perPage: 9999
+                }).success(function(response) {
+                    $scope.forOffline = _.rest(response);
+                    offline.save($scope.forOffline);
+                }).error(function(error) {
+                    console.error('error', error);
+                });
 
             };
+
+            $scope.offlineSearch = function() {
+                offline.search({
+                    q: $scope.query.q,
+                    perPage: 10,
+                    facetsOnly: false
+                }).then(function(results) {
+                    $scope.offlineResults = results;
+                    console.log('offline results', $scope.offlineResults);
+                }, function(error) {
+                    console.log('error in offline search', error);
+                });
+            };
+
 
 
             // if the url contains query params, then execute search
@@ -115,15 +140,13 @@ angular
     ])
     .controller('ResultCtrl', ['$scope', '$state',
         function($scope, $state) {
-            console.log('resultCtrl state', $state);
             $scope.results = $state.$current.data; //($state.$current.data) ? $state.$current.data: $state.current.parant.data;
             console.log('resultCtrl data', $scope.results);
 
         }
     ])
-    .controller('ListCtrl', ['$scope', '$state', 'Search',
-        function($scope, $state, Search) {
-            console.log($state);
+    .controller('ListCtrl', ['$scope', '$state', 'Search', 'offline',
+        function($scope, $state, Search, offline) {
             $scope.getList = function(name) {
                 Search.search({
                     collection: name,
@@ -133,22 +156,35 @@ angular
                     // remove first item from array
                     $scope.list = _.rest(result);
 
-                   // console.log('list', $scope.list);
+                    console.log('list', $scope.list);
+
+                    // save into indexedDB for offline access
+                    // offline.addApis($scope.list);
+
+
                 }).error(function(error) {
                     console.error('Error in list', error);
                 });
             };
 
             $scope.getList($state.params.lib);
+
+            $scope.addItems = function() {
+                offline.save($scope.list);
+            };
+
+            $scope.getOfflineItems = function() {
+                offline.getList();
+            };
         }
     ])
     .controller('DetailCtrl', ['$scope', '$state', 'Search',
         function($scope, $state, Search) {
-           // console.log('$state', $state);
+            // console.log('$state', $state);
             //var url = '/' + $state.params.detail.replace(':', '/') + '.json';
             Search.get($state.params.uri).success(function(doc) {
                 $scope.api = doc;
-               // console.log('api', $scope.api);
+                // console.log('api', $scope.api);
             }).error(function(error) {
                 console.error('error', error);
             });

@@ -7,7 +7,8 @@ angular.module('mldocsApp', [
     'ui.router',
     'ui.bootstrap',
     'ngMaterial',
-    'search.service'
+    'search.service',
+    'offline.service'
 ]).config(['$mdThemingProvider', '$mdIconProvider',
     function($mdThemingProvider, $mdIconProvider) {
 
@@ -119,9 +120,10 @@ angular.module('mldocsApp', [
         };
     })
     .run(
-        ['$rootScope', '$state', '$stateParams',
-            function($rootScope, $state, $stateParams) {
+        ['$rootScope', '$state', '$stateParams', 'offline',
+            function($rootScope, $state, $stateParams, offline) {
                 $rootScope.$state = $state;
                 $rootScope.$stateParams = $stateParams;
+               // offline.getDBSchema()
             }
         ]);
