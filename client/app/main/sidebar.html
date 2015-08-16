@@ -15,7 +15,7 @@
             <md-list>
                 <md-list-item class="md-2-line" ng-repeat="facet in bucket | filter:find"  style="margin-bottom:-20px;">
                     <md-button md-ink-ripple href="/list/{{facet.name}}">
-                        <b>{{facet.name}} ({{facet.count}})</b>
+                        <h5>{{facet.name}} <small class="md-caption">({{facet.count}})</small></h5>
                     </md-button>
                 </md-list-item>
             </md-list>
