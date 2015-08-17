@@ -10,5 +10,6 @@ router.post('/', controller.search);
 router.post('/suggest', controller.suggest);
 router.get('/get', controller.get);
 router.get('/all', controller.all);
+router.get('/check', controller.checkConnectivity);
 
 module.exports = router; 

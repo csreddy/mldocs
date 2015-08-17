@@ -38,7 +38,7 @@ angular.module('mldocsApp', [
     }
 ])
     .config(['$stateProvider', '$urlRouterProvider', '$locationProvider',
-        function($stateProvider, $urlRouterProvider, $locationProvider, $state) {
+        function($stateProvider, $urlRouterProvider, $locationProvider) {
             /*$urlRouterProvider
             .when('/app/:api', ['$state',
                 function($state) {
@@ -54,28 +54,48 @@ angular.module('mldocsApp', [
                 .state('app', {
                     url: '/',
                     resolve: {
-                        modules: function(Search) {
-                            return Search.search({
-                                q: '',
-                                facetsOnly: true
-                            }).success(function(result) {
-                                var facets = result[0].facets;
-                                _.forEach(facets, function(bucket, key) {
-                                    facets[key] = bucket.facetValues;
+                        isOnline: ['offline',
+                            function(offline) {
+                               return offline.checkIsOnline().then(function(response) {
+                                    return response.data.isOnline;
+                                }, function(error) {
+                                    return false;
                                 });
-                                //  console.log('facets', facets);
-                                return facets;
-                            }).error(function(error) {
-                                console.error('ERROR with facets', error);
-                            });
-                        },
-                        apiList: function(Search) {
-                            return Search.all().success(function(result) {
-                                return result;
-                            }).error(function(error) {
-                                console.log('error', error);
-                            });
-                        }
+                            }
+                        ],
+                        modules: ['Search',
+                            function(Search) {
+                                return Search.search({
+                                    q: '',
+                                    facetsOnly: true
+                                }).then(function(result) {
+                                    var facets = result.data[0].facets;
+                                    _.forEach(facets, function(bucket, key) {
+                                        facets[key] = bucket.facetValues;
+                                    });
+                                    //  console.log('facets', facets);
+                                    return facets;
+                                }, function(error) {
+                                    console.error('Error getting modules', error);
+                                    if (error.state === 503) {
+                                        return [];
+                                    }
+
+                                });
+                            }
+                        ],
+                        apiList: ['Search',
+                            function(Search) {
+                                return Search.all().then(function(result) {
+                                    return _.pluck(result.data, 'apiName');
+                                }, function(error) {
+                                    console.error('Error getting api <list></list>', error);
+                                    if (error.state === 503) {
+                                        return [];
+                                    }
+                                });
+                            }
+                        ]
                     },
                     views: {
                         '': {
@@ -90,7 +110,7 @@ angular.module('mldocsApp', [
                             templateUrl: 'app/main/navbar.html',
                             controller: 'NavCtrl'
                         },
-                       /* '': {
+                        /* '': {
                             templateUrl: 'app/main/result.html',
                             controller: 'ResultCtrl'
                         }*/
@@ -124,6 +144,6 @@ angular.module('mldocsApp', [
             function($rootScope, $state, $stateParams, offline) {
                 $rootScope.$state = $state;
                 $rootScope.$stateParams = $stateParams;
-               // offline.getDBSchema()
+                // offline.getDBSchema()
             }
         ]);

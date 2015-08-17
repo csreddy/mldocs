@@ -1,8 +1,18 @@
 'use strict';
 
 angular.module('offline.service', [])
-    .service('offline', ['$window', '$q',
-        function($window, $q) {
+    .service('offline', ['$window', '$http',
+        function($window, $http) {
+            var isOnline = true;
+
+            // check if db is online
+            checkIsOnline().then(function(response) {
+                isOnline = response.data.isOnline;
+            }, function(error) {
+                isOnline = false;
+            });
+
+
             var db = new Dexie('offlineDB'); // new Dexie('offlineDB').delete();
             db.version(1).stores({
                 apis: '++id,&apiName,isRest,lib,category,subcategory,bucket,summary'
@@ -57,10 +67,10 @@ angular.module('offline.service', [])
 
             function search(searchCriteria) {
                 console.log('seaching...');
-                 var collection =  db.apis.where('apiName').equalsIgnoreCase(searchCriteria.q);
-                 return collection.toArray().then(function(apis) {
+                var collection = db.apis.where('apiName').equalsIgnoreCase(searchCriteria.q);
+                return collection.toArray().then(function(apis) {
                     return apis;
-                 });
+                });
             }
 
             function addSampleData() {
@@ -89,6 +99,63 @@ angular.module('offline.service', [])
                 });
             }
 
+            function checkIsOnline() {
+                return $http({
+                    method: 'GET',
+                    url: '/api/search/check'
+                });
+            }
+
+            function apiList() {
+                console.log('offline api list...');
+                var collection = db.apis;
+                return collection.toArray().then(function(apis) {
+                    return _.pluck(apis, 'apiName');
+                });
+            }
+
+            function moduleList() {
+                console.log('offline module list...');
+                var modules = {
+                    lib: [],
+                    bucket: []
+                };
+                return db.apis.toArray().then(function(apis) {
+                    var libs = _.pluck(apis, 'lib').sort();
+                    var buckets = _.pluck(apis, 'bucket').sort();
+                    // lib
+                    _.forEach(_.uniq(libs), function(libName) {
+                        var count = 0;
+                        _.forEach(libs, function(l) {
+                            if (libName === l) {
+                                count++;
+                            }
+                        });
+                        modules.lib.push({
+                            name: libName,
+                            count: count
+                        });
+                    });
+                    // bucket
+                     _.forEach(_.uniq(buckets), function(libName) {
+                        var count = 0;
+                        _.forEach(buckets, function(l) {
+                            if (libName === l) {
+                                count++;
+                            }
+                        });
+                        modules.bucket.push({
+                            name: libName,
+                            count: count
+                        });
+                    });
+
+
+
+                    return modules;
+                });
+            }
+
 
 
             this.db = db;
@@ -97,5 +164,9 @@ angular.module('offline.service', [])
             this.getDBSchema = getDBSchema;
             this.search = search;
             this.addData = addSampleData;
+            this.checkIsOnline = checkIsOnline;
+            this.isOnline = isOnline;
+            this.apiList = apiList;
+            this.moduleList = moduleList;
         }
     ]);

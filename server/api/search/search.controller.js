@@ -61,6 +61,11 @@ exports.search = function(req, res) {
             });
             return res.status(200).json(result);
         }, function(error) {
+            if (error.code === 'ECONNREFUSED') {
+            return res.status(503).json({
+                error: 'database is down'
+            })
+        }
             return res.status(error.statusCode).json({
                 error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
             });
@@ -110,6 +115,12 @@ exports.suggest = function(req, res) {
         .result(function(result) {
             return res.status(200).json(result);
         }, function(error) {
+            if (error.code === 'ECONNREFUSED') {
+            return res.status(503).json({
+                error: 'database is down'
+            })
+        }
+
             return res.status(error.statusCode).json({
                 error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
             });
@@ -139,6 +150,11 @@ exports.all = function(req, res) {
             result = _.compact(result);
             return res.status(200).json(result);
         }, function(error) {
+            if (error.code === 'ECONNREFUSED') {
+            return res.status(503).json({
+                error: 'database is down'
+            })
+        }
             return res.status(error.statusCode).json({
                 error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
             });
@@ -157,12 +173,39 @@ exports.get = function(req, res) {
         }
 
     }, function(error) {
+        if (error.code === 'ECONNREFUSED') {
+            return res.status(503).json({
+                error: 'database is down'
+            })
+        }
+
         return res.status(error.statusCode).json({
             error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
         });
     })
 };
 
+// checks if database is up/down
+exports.checkConnectivity = function(req, res) {
+    db.documents.query(
+        q.where(
+            q.collection('docs')
+        )
+        .slice(0, 0)
+         )
+        .result(function(success) {
+            return res.status(200).json({
+                isOnline: true
+            })
+        }, function(error) {
+            if (error.code === 'ECONNREFUSED') {
+                return res.status(200).json({
+                   isOnline: false
+                })
+            }
+            return res.sendStatus(500)
+        })
+};
 
 function removeEmptyExamples(examplesArray) {
     var examples = [];

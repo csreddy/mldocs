@@ -2,16 +2,31 @@
 
 angular
     .module('mldocsApp')
-    .controller('SearchCtrl', ['$scope', '$timeout', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList', 'offline',
-        function($scope, $timeout, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList, offline) {
+    .controller('SearchCtrl', ['$scope', '$timeout', 'isOnline', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList', 'offline',
+        function($scope, $timeout, isOnline, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList, offline) {
+            
+            console.log('---------- ONLINE: ' + isOnline + '------------');
             $scope.intro = true;
             $scope.results = [];
-            $scope.modules = modules.data[0].facets;
-            $scope.apiList = apiList.data;
-            // remove lib to make suggestion data compatible between normal suggest and fuzzy-suggest
-            var modifiedApiList = $scope.apiList.map(function(item) {
-                return item.apiName;
-            });
+            $scope.modules = modules || [];
+            var _apiList = apiList || [];
+
+            if (!isOnline) {
+                //  get api list
+                offline.apiList().then(function(apis) {
+                    _apiList = apis;
+                }, function(error) {
+                    console.log('Error getting offline api list', error);
+                });
+                // get module list
+                offline.moduleList().then(function(modules) {
+                    $scope.modules = modules;
+                }, function(error) {
+                    console.log('Error getting offline api list', error);
+                });
+
+            }
+
 
             $scope.query = {
                 q: $state.params.q || '',
@@ -33,20 +48,27 @@ angular
                         keys: ['lib', 'apiName']
                     };
 
-                    var f = new Fuse(modifiedApiList, options);
+                    var f = new Fuse(_apiList, options);
                     $scope.query.suggestions = f.search(text);
                 },
                 suggest: function(text) {
                     var fuzzySuggestions = [];
                     var strictSuggestions = [];
                     try {
-                        var f = new Fuse(modifiedApiList);
+                        var f = new Fuse(_apiList);
                         fuzzySuggestions = f.search(text); // this returns indexes
                         fuzzySuggestions = fuzzySuggestions.map(function(index) {
-                            return modifiedApiList[index];
+                            return _apiList[index];
                         });
                     } catch (e) {
                         console.log(e.message);
+                    }
+
+                    // if app is offline, then get suggestions from fuzzy search only, 
+                    // do not call ML suggest api
+                    if (!isOnline) {
+                        $scope.query.suggestions = fuzzySuggestions;
+                        return;
                     }
 
                     //console.log('fuzzySuggestions', fuzzySuggestions);
@@ -61,10 +83,6 @@ angular
                     }).error(function(error) {
                         console.log('error', error);
                     });
-                },
-
-                selectedApi: function() {
-                    console.log('selectedApi');
                 }
             };
 
@@ -75,12 +93,23 @@ angular
                 $scope.intro = false;
                 $scope.query.q = text || $scope.query.q;
                 var prefix = (fromSuggest) ? 'api:' : '';
+
+                // if app offline then use search() provided for offline service
+                if (!isOnline) {
+                    offlineSearch({
+                        q: $scope.query.q,
+                        facetsOnly: false,
+                        perPage: 9999
+                    });
+                    return;
+                }
+
+
                 Search.search({
                     q: prefix + $scope.query.q,
                     facetsOnly: false,
                     perPage: 9999
                 }).success(function(response) {
-
                     // remove first item from array
                     $scope.results = _.rest(response);
 
@@ -111,18 +140,14 @@ angular
 
             };
 
-            $scope.offlineSearch = function() {
-                offline.search({
-                    q: $scope.query.q,
-                    perPage: 10,
-                    facetsOnly: false
-                }).then(function(results) {
-                    $scope.offlineResults = results;
-                    console.log('offline results', $scope.offlineResults);
+            function offlineSearch(searchCriteria) {
+                offline.search(searchCriteria).then(function(results) {
+                    $scope.results = results;
+                    console.log('offline results', $scope.results);
                 }, function(error) {
                     console.log('error in offline search', error);
                 });
-            };
+            }
 
 
 
@@ -156,7 +181,7 @@ angular
                     // remove first item from array
                     $scope.list = _.rest(result);
 
-                    console.log('list', $scope.list);
+                    //console.log('list', $scope.list);
 
                     // save into indexedDB for offline access
                     // offline.addApis($scope.list);

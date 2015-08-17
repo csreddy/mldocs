@@ -34,21 +34,7 @@
   </div>
 </div>
 
-    <md-button class="md-primary" ng-click="offlineSearch()">Offline Search</md-button>
-    <md-button ng-click="saveForOffline()">Save Offline</md-button>
-
-    <div ng-include="'app/main/partials/intro.partial.html'" scope="" onload=""></div>
-
- <h4 ng-if="results.length > 0">OFFLINE : Found <b>{{offlineResults.length}}</b> APIs</h4>
-    <md-list>
-        <md-list-item class="md-2-line" ng-repeat="item in offlineResults track by $index">
-            <div class="md-list-item-text">
-                <a ui-sref="app.detail({uri:item.uri})"><b>{{::item.lib}}:{{::item.apiName}}</b></a>
-                <small><em>(<a href="/list/{{item.bucket}}">{{::item.bucket}}</a>)</em></small>
-                <p>{{::item.summary | cut:true:220}}</p>
-            </div>
-        </md-list-item>
-    </md-list>
+    <div ng-include="'app/main/partials/intro.partial.html'"></div>
 
 
     <h4 ng-if="results.length > 0">Found <b>{{results.length}}</b> APIs</h4>
