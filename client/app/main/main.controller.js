@@ -4,8 +4,8 @@ angular
     .module('mldocsApp')
     .controller('SearchCtrl', ['$scope', '$timeout', 'isOnline', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList', 'offline',
         function($scope, $timeout, isOnline, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList, offline) {
-            
-            console.log('---------- ONLINE: ' + isOnline + '------------');
+
+            console.log('---------- THE APP IS ONLINE: ' + isOnline + '  ------------');
             $scope.intro = true;
             $scope.results = [];
             $scope.modules = modules || [];
@@ -71,15 +71,12 @@ angular
                         return;
                     }
 
-                    //console.log('fuzzySuggestions', fuzzySuggestions);
                     Search.suggest({
                         q: decodeURIComponent(text),
                         facetsOnly: false
                     }).success(function(results) {
                         strictSuggestions = _.compact(results);
-                        //console.log('strictSuggestions', strictSuggestions);
                         $scope.query.suggestions = _.uniq(_.flatten([strictSuggestions, fuzzySuggestions], true));
-                        //console.log('suggestions', $scope.suggestions);
                     }).error(function(error) {
                         console.log('error', error);
                     });
@@ -125,20 +122,6 @@ angular
                 });
             };
 
-            // save for offline access
-            $scope.saveForOffline = function() {
-                Search.search({
-                    q: '',
-                    facetsOnly: false,
-                    perPage: 9999
-                }).success(function(response) {
-                    $scope.forOffline = _.rest(response);
-                    offline.save($scope.forOffline);
-                }).error(function(error) {
-                    console.error('error', error);
-                });
-
-            };
 
             function offlineSearch(searchCriteria) {
                 offline.search(searchCriteria).then(function(results) {
@@ -215,8 +198,8 @@ angular
             });
         }
     ])
-    .controller('NavCtrl', ['$scope', '$mdSidenav',
-        function($scope, $mdSidenav) {
+    .controller('NavCtrl', ['$scope', '$mdSidenav', 'Search', 'offline',
+        function($scope, $mdSidenav, Search, offline) {
             $scope.showSidebar = function() {
                 return !$mdSidenav('left').isLockedOpen();
             }.call();
@@ -225,6 +208,21 @@ angular
             $scope.toggleSideBar = function() {
                 console.log('toggling...');
                 $mdSidenav('left').toggle();
+            };
+
+            // save for offline access
+            $scope.saveForOffline = function() {
+                Search.search({
+                    q: '',
+                    facetsOnly: false,
+                    perPage: 9999
+                }).success(function(response) {
+                    $scope.forOffline = _.rest(response);
+                    offline.save($scope.forOffline);
+                }).error(function(error) {
+                    console.error('error', error);
+                });
+
             };
         }
     ])

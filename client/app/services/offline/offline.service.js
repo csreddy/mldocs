@@ -13,15 +13,12 @@ angular.module('offline.service', [])
             });
 
 
-            var db = new Dexie('offlineDB'); // new Dexie('offlineDB').delete();
+            var db = new Dexie('offlineMLDocs'); // new Dexie('offlineMLDocs').delete();
             db.version(1).stores({
                 apis: '++id,&apiName,isRest,lib,category,subcategory,bucket,summary'
             });
             // *params,*headers,return,usage,*examples
             db.open();
-            db.apis.count(function(count) {
-                console.log('count', count);
-            });
 
 
             function defineDBSchema(version) {
@@ -40,7 +37,7 @@ angular.module('offline.service', [])
                 // db.open();
                 data.forEach(function(item) {
                     db.apis.put(item);
-                    console.log('added api', item.apiName);
+                    console.log('saved api', item.apiName);
                 });
 
 
@@ -149,8 +146,6 @@ angular.module('offline.service', [])
                             count: count
                         });
                     });
-
-
 
                     return modules;
                 });

@@ -29,6 +29,12 @@
             <span style="font-size:30px;">
             <i class="fa fa-book"></i> ML Docs</span>
         </md-button>
+        <span flex></span>
+        <md-button class="md-raised md-warn" ng-click="saveForOffline()"><i class="fa fa-cloud-download"></i> Save
+            <md-tooltip md-direction="bottom" md-autohide="true">
+                save docs for offline access
+            </md-tooltip>
+        </md-button>
         <!--   <form ng-submit="$event.preventDefault()">
             <md-autocomplete md-search-text-change="query.suggest(query.q)" md-search-text="query.q" md-selected-item-change="search(suggest, true)" md-items="suggest in query.suggestions" md-min-length="0" md-autoselect="true" md-autofocus="true" placeholder="search marklogic apis">
                 <md-item-template>
