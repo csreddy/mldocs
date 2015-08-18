@@ -22,6 +22,7 @@
             <i class="fa fa-search"></i> Search </md-button>
     </div>
 </div>
+<div ng-include="'app/main/partials/progress.partial.html'" ng-if="showProgress"></div>
 <div ng-include="'app/main/partials/intro.partial.html'"></div>
 <h4 ng-if="results.length > 0">Found <b>{{results.length}}</b> APIs</h4>
 <md-list>

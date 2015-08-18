@@ -6,7 +6,15 @@ angular.module('offline.service', [])
             var isOnline = true;
 
             // check if db is online evvery 5 sec
-            $interval(function() {
+            checkIsOnline().then(function(response) {
+                isOnline = response.data.isOnline;
+                console.log('app is online', isOnline);
+            }, function(error) {
+                isOnline = false;
+                console.log('app is online', isOnline);
+            });
+            
+            /* $interval(function() {
                 checkIsOnline().then(function(response) {
                 isOnline = response.data.isOnline;
                 console.log('app is online', isOnline);
@@ -15,8 +23,8 @@ angular.module('offline.service', [])
                 console.log('app is online', isOnline);
             });
                 $rootScope.$broadcast('online', isOnline);
-            }, 10000);
-            
+            }, 2000);*/
+
 
 
             var db = new Dexie('offlineMLDocs'); // new Dexie('offlineMLDocs').delete();
@@ -174,11 +182,11 @@ angular.module('offline.service', [])
 
             // get api details
             function get(uri) {
-                
+
                 console.log('uri', uri);
                 return db.apis.where('uri').equals(decodeURIComponent(uri)).first().then(function(api) {
-                  console.log('api', api);
-                  return api;
+                    console.log('api', api);
+                    return api;
                 });
 
                 // .first(function(api) {
@@ -186,7 +194,7 @@ angular.module('offline.service', [])
                 //     return api;
                 // });
 
-                
+
 
             }
 

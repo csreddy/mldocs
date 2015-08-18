@@ -13,9 +13,9 @@ angular
             $scope.modules = modules || [];
             var _apiList = apiList || [];
 
-            $scope.$on('online', function(event, healthcheck) {
-                _isOnline = healthcheck;
-            });
+            // $scope.$on('online', function(event, healthcheck) {
+            //     _isOnline = healthcheck;
+            // });
 
 
             if (!_isOnline) {
@@ -94,6 +94,7 @@ angular
 
             // for search
             $scope.search = function(text, fromSuggest) {
+                $scope.showProgress = true;
                 $scope.intro = false;
                 $scope.query.q = text || $scope.query.q;
                 var prefix = (fromSuggest) ? 'api:' : '';
@@ -108,28 +109,31 @@ angular
                     $state.go('app.search', {
                         q: $scope.query.q
                     });
+                    $scope.showProgress = false;
                     return;
+                } else {
+                    Search.search({
+                        q: prefix + $scope.query.q,
+                        facetsOnly: false,
+                        perPage: 9999
+                    }).success(function(response) {
+                        $scope.showProgress = false;
+                        // remove first item from array
+                        $scope.results = _.rest(response);
+
+                        $state.$current.data = $scope.results;
+                        $state.go('app.search', {
+                            q: $scope.query.q
+                        });
+
+                        // $state.go('app.search.result');
+
+                    }).error(function(error) {
+                        $scope.showProgress = false;
+                        console.error('Error', error);
+                    });
                 }
 
-
-                Search.search({
-                    q: prefix + $scope.query.q,
-                    facetsOnly: false,
-                    perPage: 9999
-                }).success(function(response) {
-                    // remove first item from array
-                    $scope.results = _.rest(response);
-
-                    $state.$current.data = $scope.results;
-                    $state.go('app.search', {
-                        q: $scope.query.q
-                    });
-
-                    // $state.go('app.search.result');
-
-                }).error(function(error) {
-                    console.error('Error', error);
-                });
             };
 
 
@@ -167,16 +171,19 @@ angular
     ])
     .controller('ListCtrl', ['$rootScope', '$scope', '$state', 'isOnline', 'Search', 'offline',
         function($rootScope, $scope, $state, isOnline, Search, offline) {
+            $scope.showProgress = true;
             $scope.getList = function(name) {
                 var _isOnline = $rootScope.isOnline || isOnline;
 
                 if (!_isOnline) {
+                    console.log('showProgress', $scope.showProgress);
                     offline.getApisInModule(name).then(function(list) {
                         console.log('list', list);
                         $scope.list = list;
                     }, function(error) {
                         console.log('error', error);
                     });
+                    $scope.showProgress = false;
                     return;
                 }
 
@@ -184,6 +191,7 @@ angular
                     collection: name,
                     perPage: 9999
                 }).success(function(result) {
+                    $scope.showProgress = false;
                     $scope.list = result;
                     // remove first item from array
                     $scope.list = _.rest(result);
@@ -195,11 +203,15 @@ angular
 
 
                 }).error(function(error) {
+                    $scope.showProgress = false;
                     console.error('Error in list', error);
                 });
             };
 
-            $scope.getList($state.params.lib);
+            $scope.$evalAsync(function() {
+                $scope.getList($state.params.lib);
+            });
+
 
             $scope.addItems = function() {
                 offline.save($scope.list);
@@ -213,33 +225,53 @@ angular
     .controller('DetailCtrl', ['$rootScope', '$scope', '$state', 'isOnline', 'Search', 'offline',
         function($rootScope, $scope, $state, isOnline, Search, offline) {
             // console.log('$state', $state);
+            $scope.showProgress = true;
             var _isOnline = $rootScope.isOnline || isOnline;
-            if (!_isOnline) {
-                offline.get($state.params.uri).then(function(doc) {
-                    $scope.api = doc;
-                });
-                return;
-            }
+            $scope.$evalAsync(function() {
+                if (!_isOnline) {
+                    offline.get($state.params.uri).then(function(doc) {
+                        $scope.api = doc;
+                    });
+                    $scope.showProgress = false;
+                    return;
+                }
 
-            //var url = '/' + $state.params.detail.replace(':', '/') + '.json';
-            Search.get($state.params.uri).success(function(doc) {
-                console.log('calling Search.get()');
-                $scope.api = doc;
-                // console.log('api', $scope.api);
-            }).error(function(error) {
-                console.error('error', error);
+                //var url = '/' + $state.params.detail.replace(':', '/') + '.json';
+                Search.get($state.params.uri).success(function(doc) {
+                    $scope.showProgress = false;
+                    $scope.api = doc;
+                    // console.log('api', $scope.api);
+                }).error(function(error) {
+                    $scope.showProgress = false;
+                    console.error('error', error);
+                });
             });
+
         }
     ])
     .controller('NavCtrl', ['$rootScope', '$scope', '$mdSidenav', '$mdToast', 'Search', 'offline', 'isOnline',
         function($rootScope, $scope, $mdSidenav, $mdToast, Search, offline, isOnline) {
 
             $rootScope.isOnline = isOnline;
-            $scope.$on('online', function(event, healthcheck) {
-                console.log('healthcheck', healthcheck);
-                $rootScope.isOnline = healthcheck;
-            });
+            // $scope.$on('online', function(event, healthcheck) {
+            //     console.log('healthcheck', healthcheck);
+            //     $rootScope.isOnline = healthcheck;
+            // });
 
+             $rootScope.showToast = function() {
+                var toast = $mdToast.simple()
+                    .content('Unable to connect to the internet, switched to offline mode')
+                    .action('OK')
+                    .highlightAction(false)
+                    .position('top left')
+                    .hideDelay(3000);
+                $mdToast.show(toast);
+            };
+
+            if (!$rootScope.isOnline) {
+                $rootScope.showToast();
+            }
+            
             $scope.showSidebar = function() {
                 return !$mdSidenav('left').isLockedOpen();
             }.call();
@@ -264,16 +296,7 @@ angular
                 });
             };
 
-            $rootScope.showToast = function() {
-                var toast = $mdToast.simple()
-                    .content('Unable to connect to the internet, switched to offline mode')
-                    .action('OK')
-                    .highlightAction(false)
-                    .position('top left')
-                    .hideDelay(3000);
-                    $mdToast.show(toast);
-            };
-            $rootScope.showToast();
+
         }
     ])
     .controller('RightCtrl', function($scope, $timeout, $mdSidenav, $log) {

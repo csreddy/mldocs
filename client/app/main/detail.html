@@ -1,2 +1,4 @@
 <div ng-include="'app/main/partials/restapi.detail.partial.html'" ng-if="api.isRest"></div>
 <div ng-include="'app/main/partials/api.detail.partial.html'" ng-if="!api.isRest"></div>
+
+<div ng-include="'app/main/partials/progress.partial.html'" ng-if="showProgress"></div>
