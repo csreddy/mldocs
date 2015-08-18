@@ -26,6 +26,7 @@ angular.module('search.service', []).service('Search', ['$http',
         }
 
         function get(url) {
+            console.log('url', decodeURIComponent(url));
             return $http({
                 method: 'GET',
                 url: '/api/search/get?uri=' + url

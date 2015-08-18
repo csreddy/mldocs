@@ -15,7 +15,7 @@ angular.module('offline.service', [])
 
             var db = new Dexie('offlineMLDocs'); // new Dexie('offlineMLDocs').delete();
             db.version(1).stores({
-                apis: '++id,&apiName,isRest,lib,category,subcategory,bucket,summary'
+                apis: '++id,&apiName,isRest,lib,category,subcategory,bucket,summary,uri'
             });
             // *params,*headers,return,usage,*examples
             db.open();
@@ -134,7 +134,7 @@ angular.module('offline.service', [])
                         });
                     });
                     // bucket
-                     _.forEach(_.uniq(buckets), function(libName) {
+                    _.forEach(_.uniq(buckets), function(libName) {
                         var count = 0;
                         _.forEach(buckets, function(l) {
                             if (libName === l) {
@@ -151,6 +151,38 @@ angular.module('offline.service', [])
                 });
             }
 
+            function getApisInModule(module) {
+                return db.apis.where('lib').anyOf([module]).toArray().then(function(apis) {
+                    var _apis = apis;
+                    _apis = _apis.map(function(api) {
+                        api.uri = (api['http-verb'].length > 0) ?
+                            '/' + api.lib + '/' + api['http-verb'] + '/' + api.apiName + '.json' :
+                            '/' + api.lib + '/' + api.apiName + '.json'
+
+
+                        return _.pick(api, ['apiName', 'lib', 'http-verb', 'summary', 'uri']);
+                    });
+                    return _apis;
+                });
+            }
+
+            // get api details
+            function get(uri) {
+                
+                console.log('uri', uri);
+                return db.apis.where('uri').equals(decodeURIComponent(uri)).first().then(function(api) {
+                  console.log('api', api);
+                  return api;
+                });
+
+                // .first(function(api) {
+                //     console.log('api', api);
+                //     return api;
+                // });
+
+                
+
+            }
 
 
             this.db = db;
@@ -163,5 +195,7 @@ angular.module('offline.service', [])
             this.isOnline = isOnline;
             this.apiList = apiList;
             this.moduleList = moduleList;
+            this.getApisInModule = getApisInModule;
+            this.get = get;
         }
     ]);

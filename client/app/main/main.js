@@ -25,6 +25,17 @@ angular.module('mldocsApp')
                 })
                 .state('app.list', {
                     url: 'list/{lib}',
+                    resolve: {
+                        isOnline: ['offline',
+                            function(offline) {
+                                return offline.checkIsOnline().then(function(response) {
+                                    return response.data.isOnline;
+                                }, function(error) {
+                                    return false;
+                                });
+                            }
+                        ]
+                    },
                     views: {
                         '@': {
                             templateUrl: 'app/main/list.html',
@@ -34,6 +45,17 @@ angular.module('mldocsApp')
                 })
                 .state('app.detail', {
                     url: 'api?uri={detail}',
+                    resolve: {
+                        isOnline: ['offline',
+                            function(offline) {
+                                return offline.checkIsOnline().then(function(response) {
+                                    return response.data.isOnline;
+                                }, function(error) {
+                                    return false;
+                                });
+                            }
+                        ]
+                    },
                     views: {
                         '@': {
                             templateUrl: 'app/main/detail.html',

@@ -13,6 +13,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var multer = require('multer');
+var fs = require('fs');
 
 // Setup server
 var app = express();
@@ -28,26 +29,13 @@ app.use(bodyParser.json({
 
 app.use(cookieParser());
 
-/*app.get("/offline.manifest", function(req, res){
-  res.header("Content-Type", "text/cache-manifest");
-  res.end(
-  	'CACHE MANIFEST\n' +
-  	'/client/index.html\n' +
-  	'/client/app/main/main.html\n' +
-  	'/client/app/main/navbar.html\n' +
-  	'/client/app/main/result.html\n' +
-  	'/client/app/main/search.html\n' +
-  	'/client/app/main/sidebar.html' +
-  	'/client/app/main/list.html\n' +
-  	'/client/app/main/detail.html\n' +
-  	'/client/app/main/main.js\n' + 
-  	'/client/app/app.js\n' + 
-  	'/client/app/main/main.controller.js\n' +  
-  	'/client/app/main/main.css\n'+
-  	'http://fonts.googleapis.com/icon?family=Material+Icons\n' 
-  	);
+app.get("/offline.manifest", function(req, res){
+  fs.readFile(__dirname+'/offline.manifest', 'utf8', function(err, data) {
+  	res.header("Content-Type", "text/cache-manifest");
+  	res.end(data);
+  })
 });
-*/
+
 
 var server = require('http').createServer(app);
 require('./config/express')(app);

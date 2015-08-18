@@ -153,9 +153,19 @@ angular
 
         }
     ])
-    .controller('ListCtrl', ['$scope', '$state', 'Search', 'offline',
-        function($scope, $state, Search, offline) {
+    .controller('ListCtrl', ['$scope', '$state', 'isOnline', 'Search', 'offline',
+        function($scope, $state, isOnline, Search, offline) {
             $scope.getList = function(name) {
+                if (!isOnline) {
+                    offline.getApisInModule(name).then(function(list) {
+                        console.log('list',list);
+                         $scope.list = list;
+                    }, function(error) {
+                        console.log('error', error);
+                    });
+                    return;
+                }
+
                 Search.search({
                     collection: name,
                     perPage: 9999
@@ -186,11 +196,19 @@ angular
             };
         }
     ])
-    .controller('DetailCtrl', ['$scope', '$state', 'Search',
-        function($scope, $state, Search) {
+    .controller('DetailCtrl', ['$scope', '$state', 'isOnline', 'Search', 'offline',
+        function($scope, $state, isOnline, Search, offline) {
             // console.log('$state', $state);
+            if (!isOnline) {
+                offline.get($state.params.uri).then(function(doc) {
+                    $scope.api = doc;
+                });
+                return;
+            }
+
             //var url = '/' + $state.params.detail.replace(':', '/') + '.json';
             Search.get($state.params.uri).success(function(doc) {
+                console.log('calling Search.get()');
                 $scope.api = doc;
                 // console.log('api', $scope.api);
             }).error(function(error) {

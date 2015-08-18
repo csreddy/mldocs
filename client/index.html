@@ -3,8 +3,8 @@
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!-->
-<html class="no-js"> 
- <!-- manifest="./offline.manifest" -->
+<html class="no-js" manifest="/offline.manifest">
+<!-- manifest="./offline.manifest" -->
 <!--<![endif]-->
 
 <head>
@@ -34,6 +34,23 @@
     <!-- endinjector -->
     <!-- endbuild -->
 </head>
+<script>
+// Check if a new cache is available on page load.
+window.addEventListener('load', function(e) {
+
+  window.applicationCache.addEventListener('updateready', function(e) {
+    if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+      // Browser downloaded a new app cache.
+      if (confirm('A new version of this site is available. Load it?')) {
+        window.location.reload();
+      }
+    } else {
+      // Manifest didn't changed. Nothing new to server.
+    }
+  }, false);
+
+}, false);
+</script>
 
 <body ng-app="mldocsApp">
     <!--[if lt IE 7]>
