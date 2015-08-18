@@ -1,16 +1,22 @@
 'use strict';
 
 angular.module('offline.service', [])
-    .service('offline', ['$window', '$http',
-        function($window, $http) {
+    .service('offline', ['$window', '$http', '$interval', '$rootScope',
+        function($window, $http, $interval, $rootScope) {
             var isOnline = true;
 
-            // check if db is online
-            checkIsOnline().then(function(response) {
+            // check if db is online evvery 5 sec
+            $interval(function() {
+                checkIsOnline().then(function(response) {
                 isOnline = response.data.isOnline;
+                console.log('app is online', isOnline);
             }, function(error) {
                 isOnline = false;
+                console.log('app is online', isOnline);
             });
+                $rootScope.$broadcast('online', isOnline);
+            }, 10000);
+            
 
 
             var db = new Dexie('offlineMLDocs'); // new Dexie('offlineMLDocs').delete();

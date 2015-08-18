@@ -2,16 +2,23 @@
 
 angular
     .module('mldocsApp')
-    .controller('SearchCtrl', ['$scope', '$timeout', 'isOnline', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList', 'offline',
-        function($scope, $timeout, isOnline, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList, offline) {
+    .controller('SearchCtrl', ['$rootScope', '$scope', '$timeout', 'isOnline', '$mdSidenav', '$mdUtil', '$log', 'Search', '$state', 'modules', 'apiList', 'offline',
+        function($rootScope, $scope, $timeout, isOnline, $mdSidenav, $mdUtil, $log, Search, $state, modules, apiList, offline) {
 
+
+            var _isOnline = $rootScope.isOnline || isOnline;
             console.log('---------- THE APP IS ONLINE: ' + isOnline + '  ------------');
             $scope.intro = true;
             $scope.results = [];
             $scope.modules = modules || [];
             var _apiList = apiList || [];
 
-            if (!isOnline) {
+            $scope.$on('online', function(event, healthcheck) {
+                _isOnline = healthcheck;
+            });
+
+
+            if (!_isOnline) {
                 //  get api list
                 offline.apiList().then(function(apis) {
                     _apiList = apis;
@@ -66,7 +73,7 @@ angular
 
                     // if app is offline, then get suggestions from fuzzy search only, 
                     // do not call ML suggest api
-                    if (!isOnline) {
+                    if (!_isOnline) {
                         $scope.query.suggestions = fuzzySuggestions;
                         return;
                     }
@@ -92,11 +99,14 @@ angular
                 var prefix = (fromSuggest) ? 'api:' : '';
 
                 // if app offline then use search() provided for offline service
-                if (!isOnline) {
+                if (!_isOnline) {
                     offlineSearch({
                         q: $scope.query.q,
                         facetsOnly: false,
                         perPage: 9999
+                    });
+                    $state.go('app.search', {
+                        q: $scope.query.q
                     });
                     return;
                 }
@@ -125,7 +135,9 @@ angular
 
             function offlineSearch(searchCriteria) {
                 offline.search(searchCriteria).then(function(results) {
-                    $scope.results = results;
+                    $scope.$apply(function() {
+                        $scope.results = results;
+                    });
                     console.log('offline results', $scope.results);
                 }, function(error) {
                     console.log('error in offline search', error);
@@ -153,13 +165,15 @@ angular
 
         }
     ])
-    .controller('ListCtrl', ['$scope', '$state', 'isOnline', 'Search', 'offline',
-        function($scope, $state, isOnline, Search, offline) {
+    .controller('ListCtrl', ['$rootScope', '$scope', '$state', 'isOnline', 'Search', 'offline',
+        function($rootScope, $scope, $state, isOnline, Search, offline) {
             $scope.getList = function(name) {
-                if (!isOnline) {
+                var _isOnline = $rootScope.isOnline || isOnline;
+
+                if (!_isOnline) {
                     offline.getApisInModule(name).then(function(list) {
-                        console.log('list',list);
-                         $scope.list = list;
+                        console.log('list', list);
+                        $scope.list = list;
                     }, function(error) {
                         console.log('error', error);
                     });
@@ -196,10 +210,11 @@ angular
             };
         }
     ])
-    .controller('DetailCtrl', ['$scope', '$state', 'isOnline', 'Search', 'offline',
-        function($scope, $state, isOnline, Search, offline) {
+    .controller('DetailCtrl', ['$rootScope', '$scope', '$state', 'isOnline', 'Search', 'offline',
+        function($rootScope, $scope, $state, isOnline, Search, offline) {
             // console.log('$state', $state);
-            if (!isOnline) {
+            var _isOnline = $rootScope.isOnline || isOnline;
+            if (!_isOnline) {
                 offline.get($state.params.uri).then(function(doc) {
                     $scope.api = doc;
                 });
@@ -216,8 +231,15 @@ angular
             });
         }
     ])
-    .controller('NavCtrl', ['$scope', '$mdSidenav', 'Search', 'offline',
-        function($scope, $mdSidenav, Search, offline) {
+    .controller('NavCtrl', ['$rootScope', '$scope', '$mdSidenav', '$mdToast', 'Search', 'offline', 'isOnline',
+        function($rootScope, $scope, $mdSidenav, $mdToast, Search, offline, isOnline) {
+
+            $rootScope.isOnline = isOnline;
+            $scope.$on('online', function(event, healthcheck) {
+                console.log('healthcheck', healthcheck);
+                $rootScope.isOnline = healthcheck;
+            });
+
             $scope.showSidebar = function() {
                 return !$mdSidenav('left').isLockedOpen();
             }.call();
@@ -240,8 +262,18 @@ angular
                 }).error(function(error) {
                     console.error('error', error);
                 });
-
             };
+
+            $rootScope.showToast = function() {
+                var toast = $mdToast.simple()
+                    .content('Unable to connect to the internet, switched to offline mode')
+                    .action('OK')
+                    .highlightAction(false)
+                    .position('top left')
+                    .hideDelay(3000);
+                    $mdToast.show(toast);
+            };
+            $rootScope.showToast();
         }
     ])
     .controller('RightCtrl', function($scope, $timeout, $mdSidenav, $log) {

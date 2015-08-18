@@ -4,7 +4,7 @@
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!-->
 <html class="no-js" manifest="/offline.manifest">
-<!-- manifest="./offline.manifest" -->
+<!-- manifest="/offline.manifest" -->
 <!--<![endif]-->
 
 <head>
@@ -22,7 +22,6 @@
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
     <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
-    <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css({.tmp,client}) app/app.css -->
@@ -103,7 +102,6 @@ window.addEventListener('load', function(e) {
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/angular/angular.js"></script>
-    <script src="bower_components/angular-resource/angular-resource.js"></script>
     <script src="bower_components/angular-cookies/angular-cookies.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
@@ -119,12 +117,12 @@ window.addEventListener('load', function(e) {
     <!-- injector:js -->
     <script src="app/main/main.controller.js"></script>
     <script src="app/main/main.js"></script>
-    <script src="app/services/search.service.js"></script>
     <script src="app/services/offline/offline.service.js"></script>
+    <script src="app/services/search.service.js"></script>
     <script src="components/modal/modal.service.js"></script>
     <script src="components/navbar/navbar.controller.js"></script>
-    <script src="util/fuse.js"></script>
     <script src="util/dexie.min.js"></script>
+    <script src="util/fuse.js"></script>
     <!-- endinjector -->
     <!-- endbuild -->
 </body>

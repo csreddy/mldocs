@@ -42,7 +42,6 @@ bower_components/angular-material/angular-material.css
 bower_components/font-awesome/fonts/fontawesome-webfont.ttf?v=4.3.0 
 bower_components/jquery/dist/jquery.js
 bower_components/angular/angular.js
-bower_components/angular-resource/angular-resource.js
 bower_components/angular-cookies/angular-cookies.js
 bower_components/angular-sanitize/angular-sanitize.js
 bower_components/angular-bootstrap/ui-bootstrap-tpls.js

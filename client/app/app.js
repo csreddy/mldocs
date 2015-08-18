@@ -2,7 +2,6 @@
 
 angular.module('mldocsApp', [
     'ngCookies',
-    'ngResource',
     'ngSanitize',
     'ui.router',
     'ui.bootstrap',

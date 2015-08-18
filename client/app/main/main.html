@@ -4,47 +4,32 @@
 </md-input-container>
 <md-button class="md-raised md-mini md-primary" md-ripple-size="full" ng-click="search()"> Search </md-button>
 <hr> -->
-
-
 <div layout="row" layout-align="start center">
-  <div flex="66">
-    <form ng-submit="$event.preventDefault()">
-    <md-autocomplete 
-    md-search-text-change="query.suggest(query.q)" 
-    md-search-text="query.q" 
-    md-selected-item-change="search(suggest, true)" 
-    md-items="suggest in query.suggestions" 
-    md-min-length="3" 
-    md-autoselect="true"
-    md-autofocus="true"
-    placeholder="search marklogic apis">
-        <md-item-template>
-            <span md-highlight-text="query.q" md-highlight-flags="^i">{{suggest}}</span>
-        </md-item-template>
-        <md-not-found>
-            No matches found for "{{query.q}}".
-        </md-not-found>
-    </md-autocomplete>
-</form>
-  </div>
-  <div>
-
-    <md-button class="md-raised md-mini md-primary" md-ripple-size="full" ng-click="search()">
-      <md-icon md-font-set="material-icons"> search </md-icon>  </md-button>
-  </div>
+    <div flex="66">
+        <form ng-submit="$event.preventDefault()">
+            <md-autocomplete md-search-text-change="query.suggest(query.q)" md-search-text="query.q" md-selected-item-change="search(suggest, true)" md-items="suggest in query.suggestions" md-min-length="3" md-autoselect="true" md-autofocus="true" placeholder="search marklogic apis">
+                <md-item-template>
+                    <span md-highlight-text="query.q" md-highlight-flags="^i">{{suggest}}</span>
+                </md-item-template>
+                <md-not-found>
+                    No matches found for "{{query.q}}".
+                </md-not-found>
+            </md-autocomplete>
+        </form>
+    </div>
+    <div>
+        <md-button class="md-raised md-mini md-primary" md-ripple-size="full" ng-click="search()">
+            <i class="fa fa-search"></i> Search </md-button>
+    </div>
 </div>
-
-    <div ng-include="'app/main/partials/intro.partial.html'"></div>
-
-
-    <h4 ng-if="results.length > 0">Found <b>{{results.length}}</b> APIs</h4>
-    <md-list>
-        <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
-            <div class="md-list-item-text">
-                <a ui-sref="app.detail({uri:item.uri})"><b>{{::item.lib}}:{{::item.apiName}}</b></a>
-                <small><em>(<a href="/list/{{item.bucket}}">{{::item.bucket}}</a>)</em></small>
-                <p>{{::item.summary | cut:true:220}}</p>
-            </div>
-        </md-list-item>
-    </md-list>
-
+<div ng-include="'app/main/partials/intro.partial.html'"></div>
+<h4 ng-if="results.length > 0">Found <b>{{results.length}}</b> APIs</h4>
+<md-list>
+    <md-list-item class="md-2-line" ng-repeat="item in results track by $index">
+        <div class="md-list-item-text">
+            <a ui-sref="app.detail({uri:item.uri})"><b>{{::item.lib}}:{{::item.apiName}}</b></a>
+            <small><em>(<a href="/list/{{item.bucket}}">{{::item.bucket}}</a>)</em></small>
+            <p>{{::item.summary | cut:true:220}}</p>
+        </div>
+    </md-list-item>
+</md-list>
