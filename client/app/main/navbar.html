@@ -15,21 +15,30 @@
     </md-toolbar>
 </div>
  -->
-
 <md-toolbar class="md-hue-2">
     <div class="md-toolbar-tools">
-            <md-button ng-click="toggleSideBar()" hide-gt-md>
+        <md-button ng-click="toggleSideBar()" hide-gt-md>
             <md-icon md-font-set="material-icons"> <i class="material-icons">menu</i>
-            </md-icon> 
-             <md-tooltip md-direction="bottom" md-autohide="true">
-                    sidebar
-                </md-tooltip>
-            </md-button>
-
-            <md-button href="/">
-           <!--  <i class="material-icons">developer_board</i> -->
-            <span style="font-size:30px;"><i class="fa fa-book"></i> ML Docs</span>
-            </md-button>
+            </md-icon>
+            <md-tooltip md-direction="bottom" md-autohide="true">
+                sidebar
+            </md-tooltip>
+        </md-button>
+        <md-button href="/">
+            <span style="font-size:30px;">
+            <i class="fa fa-book"></i> ML Docs</span><span style="text-transform:lowercase;"><i>lite</i></span>
+        </md-button>
+        <span flex></span>
+         <md-button ng-if="!$parent.isOnline"><i class="fa fa-circle text-danger"></i> in offline mode
+            <md-tooltip md-direction="bottom" md-autohide="true">
+                Don't worry! you can still search apis
+            </md-tooltip>
+        </md-button>
+        <md-button class="md-raised md-warn" ng-click="saveForOffline()"><i class="fa fa-cloud-download"></i> Save
+            <md-tooltip md-direction="bottom" md-autohide="true">
+                save docs for offline access
+            </md-tooltip>
+        </md-button>
         <!--   <form ng-submit="$event.preventDefault()">
             <md-autocomplete md-search-text-change="query.suggest(query.q)" md-search-text="query.q" md-selected-item-change="search(suggest, true)" md-items="suggest in query.suggestions" md-min-length="0" md-autoselect="true" md-autofocus="true" placeholder="search marklogic apis">
                 <md-item-template>

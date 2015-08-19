@@ -15,7 +15,7 @@ exports.index = function(req, res) {
 exports.search = function(req, res) {
     var searchCriteria = [q.collection('docs')];
     var facetOptions = [q.facet('lib', 'lib'), q.facet('bucket', 'bucket')]
-    var resultLimit = req.body.perPage || 1000; // default
+    var resultLimit = req.body.perPage || 100; // default
     if (req.body.facetsOnly) {
         resultLimit = 0;
     }
@@ -53,12 +53,19 @@ exports.search = function(req, res) {
                 if (res.content) {
                     var uri = res.uri
                     res = res.content
+                    // trim strings
+                    res.summary = trimStrings(res.summary)
                     res.uri = uri;
                 }
                 return res
             });
             return res.status(200).json(result);
         }, function(error) {
+            if (error.code === 'ECONNREFUSED') {
+            return res.status(503).json({
+                error: 'database is down'
+            })
+        }
             return res.status(error.statusCode).json({
                 error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
             });
@@ -108,6 +115,12 @@ exports.suggest = function(req, res) {
         .result(function(result) {
             return res.status(200).json(result);
         }, function(error) {
+            if (error.code === 'ECONNREFUSED') {
+            return res.status(503).json({
+                error: 'database is down'
+            })
+        }
+
             return res.status(error.statusCode).json({
                 error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
             });
@@ -137,6 +150,11 @@ exports.all = function(req, res) {
             result = _.compact(result);
             return res.status(200).json(result);
         }, function(error) {
+            if (error.code === 'ECONNREFUSED') {
+            return res.status(503).json({
+                error: 'database is down'
+            })
+        }
             return res.status(error.statusCode).json({
                 error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
             });
@@ -155,12 +173,39 @@ exports.get = function(req, res) {
         }
 
     }, function(error) {
+        if (error.code === 'ECONNREFUSED') {
+            return res.status(503).json({
+                error: 'database is down'
+            })
+        }
+
         return res.status(error.statusCode).json({
             error: error.body.errorResponse.messageCode + ':' + error.body.errorResponse.message
         });
     })
 };
 
+// checks if database is up/down
+exports.checkConnectivity = function(req, res) {
+    db.documents.query(
+        q.where(
+            q.collection('docs')
+        )
+        .slice(0, 0)
+         )
+        .result(function(success) {
+            return res.status(200).json({
+                isOnline: true
+            })
+        }, function(error) {
+            if (error.code === 'ECONNREFUSED') {
+                return res.status(200).json({
+                   isOnline: false
+                })
+            }
+            return res.sendStatus(500)
+        })
+};
 
 function removeEmptyExamples(examplesArray) {
     var examples = [];
@@ -172,4 +217,10 @@ function removeEmptyExamples(examplesArray) {
         })
     }
     return _.compact(examples); // removed undefined items from arrayand returns the clean array
+}
+
+function trimStrings(str) {
+    str =  _.trim(str, '\n');
+    str = _.trim(str);
+    return str;
 }

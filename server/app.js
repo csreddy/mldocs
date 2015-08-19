@@ -13,6 +13,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var multer = require('multer');
+var fs = require('fs');
 
 // Setup server
 var app = express();
@@ -27,6 +28,14 @@ app.use(bodyParser.json({
 }));
 
 app.use(cookieParser());
+
+app.get("/offline.manifest", function(req, res){
+  fs.readFile(__dirname+'/offline.manifest', 'utf8', function(err, data) {
+  	res.header("Content-Type", "text/cache-manifest");
+  	res.end(data);
+  })
+});
+
 
 var server = require('http').createServer(app);
 require('./config/express')(app);

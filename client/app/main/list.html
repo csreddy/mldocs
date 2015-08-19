@@ -1,6 +1,7 @@
+<div ng-include="'app/main/partials/progress.partial.html'" ng-if="showProgress"></div>
 
-<md-content layout-padding>
-<h3 class="md-display-1"><b>{{$state.params.lib}}</b><small>({{list.length}})</small></h4>
+<md-content layout-padding ng-if="list">
+<h3 class="md-display-1"><b>{{$state.params.lib}}</b><small>({{list.length}})</small></h3>
 <md-input-container>
   <input type="text" ng-model="filterApi" placeholder="filter">
 </md-input-container>

@@ -1,0 +1,54 @@
+CACHE MANIFEST
+# html files
+/app/main/main.html
+/app/main/navbar.html
+/app/main/result.html
+/app/main/search.html
+/app/main/sidebar.html
+/app/main/list.html
+/app/main/detail.html
+/app/main/partials/intro.partial.html
+/app/main/partials/api.detail.partial.html
+/app/main/partials/restapi.detail.partial.html
+
+# js files
+/app/app.js
+/app/main/main.js
+/app/main/main.controller.js
+/app/services/offline/offline.service.js
+/app/services/search.service.js
+/util/fuse.js
+/util/dexie.min.js
+components/modal/modal.service.js
+components/navbar/navbar.controller.js
+
+# css files
+/app/app.css
+/app/main/main.css
+components/modal/modal.css
+
+# images
+/favicon.ico
+
+NETWORK:
+*
+http://fonts.googleapis.com/icon?family=Material+Icons
+http://www.google-analytics.com/analytics.js
+
+CACHE:
+bower_components/bootstrap/dist/css/bootstrap.css
+bower_components/font-awesome/css/font-awesome.css
+bower_components/angular-material/angular-material.css
+bower_components/font-awesome/fonts/fontawesome-webfont.ttf?v=4.3.0 
+bower_components/jquery/dist/jquery.js
+bower_components/angular/angular.js
+bower_components/angular-cookies/angular-cookies.js
+bower_components/angular-sanitize/angular-sanitize.js
+bower_components/angular-bootstrap/ui-bootstrap-tpls.js
+bower_components/lodash/dist/lodash.compat.js
+bower_components/angular-ui-router/release/angular-ui-router.js
+bower_components/angular-animate/angular-animate.js
+bower_components/angular-aria/angular-aria.js
+bower_components/angular-material/angular-material.js
+  
+
