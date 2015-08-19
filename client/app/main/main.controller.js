@@ -258,9 +258,9 @@ angular
             //     $rootScope.isOnline = healthcheck;
             // });
 
-             $rootScope.showToast = function() {
+             $rootScope.showToast = function(message) {
                 var toast = $mdToast.simple()
-                    .content('Unable to connect to the internet, switched to offline mode')
+                    .content(message)
                     .action('OK')
                     .highlightAction(false)
                     .position('top left')
@@ -269,7 +269,7 @@ angular
             };
 
             if (!$rootScope.isOnline) {
-                $rootScope.showToast();
+                $rootScope.showToast('Unable to connect to the internet, switched to offline mode');
             }
             
             $scope.showSidebar = function() {
@@ -291,6 +291,7 @@ angular
                 }).success(function(response) {
                     $scope.forOffline = _.rest(response);
                     offline.save($scope.forOffline);
+                    $rootScope.showToast('API docs saved for offline access');
                 }).error(function(error) {
                     console.error('error', error);
                 });

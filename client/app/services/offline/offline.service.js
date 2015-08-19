@@ -3,6 +3,7 @@
 angular.module('offline.service', [])
     .service('offline', ['$window', '$http', '$interval', '$rootScope',
         function($window, $http, $interval, $rootScope) {
+            var db = new Dexie('offlineMLDocs');
             var isOnline = true;
 
             // check if db is online evvery 5 sec
@@ -13,7 +14,7 @@ angular.module('offline.service', [])
                 isOnline = false;
                 console.log('app is online', isOnline);
             });
-            
+
             /* $interval(function() {
                 checkIsOnline().then(function(response) {
                 isOnline = response.data.isOnline;
@@ -27,22 +28,20 @@ angular.module('offline.service', [])
 
 
 
-            var db = new Dexie('offlineMLDocs'); // new Dexie('offlineMLDocs').delete();
-            db.version(1).stores({
-                apis: '++id,&apiName,isRest,lib,category,subcategory,bucket,summary,uri'
-            });
-            // *params,*headers,return,usage,*examples
-            db.open();
-
-
+            // defines db schema
             function defineDBSchema(version) {
                 db.version(version).stores({
                     apis: '++id,isRest,&apiName,lib,category,subcategory,bucket,summary,*params,*headers,return,usage,*examples'
                 });
             }
 
-
+            // saves apis from ml db into browser's indexedDB for offline access
             function saveApis(data) {
+                db.version(1).stores({
+                    apis: '++id,&apiName,isRest,lib,category,subcategory,bucket,summary,uri'
+                });
+                db.open();
+
                 // db.close();
                 // db.delete();
                 // db.version(1).stores({
@@ -182,20 +181,10 @@ angular.module('offline.service', [])
 
             // get api details
             function get(uri) {
-
-                console.log('uri', uri);
                 return db.apis.where('uri').equals(decodeURIComponent(uri)).first().then(function(api) {
                     console.log('api', api);
                     return api;
                 });
-
-                // .first(function(api) {
-                //     console.log('api', api);
-                //     return api;
-                // });
-
-
-
             }
 
 
