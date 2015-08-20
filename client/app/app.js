@@ -1,8 +1,6 @@
 'use strict';
 
 angular.module('mldocsApp', [
-    'ngCookies',
-    'ngSanitize',
     'ui.router',
     'ui.bootstrap',
     'ngMaterial',

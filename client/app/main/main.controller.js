@@ -195,12 +195,8 @@ angular
                     $scope.list = result;
                     // remove first item from array
                     $scope.list = _.rest(result);
-
-                    //console.log('list', $scope.list);
-
-                    // save into indexedDB for offline access
-                    // offline.addApis($scope.list);
-
+                    $scope.list = _.sortBy($scope.list, 'apiName');
+                    
 
                 }).error(function(error) {
                     $scope.showProgress = false;
