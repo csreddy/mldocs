@@ -3,7 +3,7 @@
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!-->
-<html class="no-js" manifest="/offline.manifest">
+<html class="no-js"  manifest="/offline.manifest" >
 <!-- manifest="/offline.manifest" -->
 <!--<![endif]-->
 
@@ -57,7 +57,7 @@ window.addEventListener('load', function(e) {
     <![endif]-->
     <div flex layout="column">
         <section layout="row" flex>
-            <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
+            <md-sidenav id="sidebar" class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
                 <div ui-view="sidebar"></div>
             </md-sidenav>
             <md-content flex>

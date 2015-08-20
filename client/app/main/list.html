@@ -3,19 +3,20 @@
 <md-content layout-padding ng-if="list">
 <h3 class="md-display-1"><b>{{$state.params.lib}}</b><small>({{list.length}})</small></h3>
 <md-input-container>
-  <input type="text" ng-model="filterApi" placeholder="filter">
+  <input type="text" ng-model="api.apiName" placeholder="filter">
 </md-input-container>
 <table>
 	<tr>
 	<th>
 	<md-content layout-padding>
-	    Name
+	    Names
 	</md-content></th>
 	<th><md-content layout-padding>
 	    Description
 	</md-content></th></tr>
 	<tbody>
-		<tr ng-repeat="item in list | filter:filterApi">
+
+		<tr ng-repeat="item in list | filter:api">
 			<td class="col-md-5"><md-content layout-padding>
 			    <a ui-sref="app.detail({uri:item.uri})"><b>{{::item['http-verb']}} {{::item.lib}}:{{::item.apiName}}</b></a>
 			</md-content></td>

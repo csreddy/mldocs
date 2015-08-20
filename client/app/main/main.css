@@ -6,10 +6,15 @@
 }
 
 .gray {
-  background: #f5f5f5; 
+    background: #f5f5f5;
 }
 
 .msg {
-	padding-top:20px; 
-	padding-bottom:20px
+    padding-top: 20px;
+    padding-bottom: 20px
 }
+
+/*#sidebar {
+    max-height: 700px;
+    overflow: scroll;
+}*/

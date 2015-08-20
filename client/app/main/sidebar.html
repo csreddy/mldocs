@@ -1,29 +1,31 @@
-<md-toolbar class="md-hue-2">
-    <div class="md-toolbar-tools">
-        <span class="md-subhead"><i class="fa fa-file-text-o"></i> Modules</span>
+<div layout="column">
+    <div>
+        <md-toolbar class="md-hue-2">
+            <div class="md-toolbar-tools">
+                <span class="md-subhead"><i class="fa fa-file-text-o"></i> Modules</span>
+            </div>
+        </md-toolbar>
     </div>
-</md-toolbar>
-<!--     <md-toast>
-        <span flex><i class="fa fa-circle text-danger"></i> Unable to connect internet, switched to offline mode</span>
-    </md-toast> -->
-
-<md-content layout-padding>
-    <md-input-container>
-        <label>find module</label>
-        <input type="text" ng-model="find">
-    </md-input-container>
-    <md-list ng-repeat="(name, bucket) in modules">
-        <md-list class="md-2-line">
-            <!--   <md-subheader>{{name | uppercase }}</md-subheader> -->
-            <!--You can use md-no-sticky class-->
-            <md-list>
-                <md-list-item class="md-2-line" ng-repeat="facet in bucket | filter:find" style="margin-bottom:-20px;">
-                    <md-button md-ink-ripple href="/list/{{facet.name}}">
-                        <h5>{{facet.name}} <small class="md-caption">({{facet.count}})</small></h5>
-                    </md-button>
-                </md-list-item>
+    <div>
+        <md-content layout-padding>
+            <md-input-container>
+                <label>find module</label>
+                <input type="text" ng-model="find">
+            </md-input-container>
+            <md-list ng-repeat="(name, bucket) in modules">
+                <md-list class="md-2-line">
+                    <!--   <md-subheader>{{name | uppercase }}</md-subheader> -->
+                    <!--You can use md-no-sticky class-->
+                    <md-list>
+                        <md-list-item class="md-2-line" ng-repeat="facet in bucket | filter:find" style="margin-bottom:-20px;">
+                            <md-button md-ink-ripple href="/list/{{facet.name}}">
+                                <h5>{{facet.name}} <small class="md-caption">({{facet.count}})</small></h5>
+                            </md-button>
+                        </md-list-item>
+                    </md-list>
+                    <md-divider></md-divider>
+                </md-list>
             </md-list>
-            <md-divider></md-divider>
-        </md-list>
-    </md-list>
-</md-content>
+        </md-content>
+    </div>
+</div>
