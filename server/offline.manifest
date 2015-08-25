@@ -1,3 +1,5 @@
+# version 1
+
 CACHE MANIFEST
 /app/3df0bb9e.app.css	
 /app/50e3b707.vendor.js	
@@ -13,11 +15,12 @@ bower_components/angular/angular.min.js
 bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js
 bower_components/lodash/dist/lodash.compat.min.js
 bower_components/angular-ui-router/release/angular-ui-router.min.js
+http://fonts.googleapis.com/icon?family=Material+Icons
+http://www.google-analytics.com/analytics.js
 
 NETWORK:
 *
-http://fonts.googleapis.com/icon?family=Material+Icons
-http://www.google-analytics.com/analytics.js
+
 
 
 

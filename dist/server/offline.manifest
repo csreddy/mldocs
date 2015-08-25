@@ -1,8 +1,10 @@
+# version 1
+
 CACHE MANIFEST
-/dist/public/app/7878b2da.app.js
-/dist/public/app/c8d5270e.vendor.js
-/dist/public/app/ebda609f.vendor.css
-/dist/public/app/fc1c5422.app.css
+/app/3df0bb9e.app.css	
+/app/50e3b707.vendor.js	
+/app/9d7c6538.app.js		
+/app/ebda609f.vendor.css
 
 bower_components/bootstrap/dist/css/bootstrap.min.css
 bower_components/font-awesome/css/font-awesome.min.css
@@ -13,11 +15,12 @@ bower_components/angular/angular.min.js
 bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js
 bower_components/lodash/dist/lodash.compat.min.js
 bower_components/angular-ui-router/release/angular-ui-router.min.js
+http://fonts.googleapis.com/icon?family=Material+Icons
+http://www.google-analytics.com/analytics.js
 
 NETWORK:
 *
-http://fonts.googleapis.com/icon?family=Material+Icons
-http://www.google-analytics.com/analytics.js
+
 
 
 
