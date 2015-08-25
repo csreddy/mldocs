@@ -7,16 +7,6 @@ CACHE MANIFEST
 /app/c8d5270e.vendor.js	
 /app/7878b2da.app.js		
 /app/ebda609f.vendor.css
-
-bower_components/bootstrap/dist/css/bootstrap.min.css
-bower_components/font-awesome/css/font-awesome.min.css
-bower_components/angular-material/angular-material.min.css
-bower_components/font-awesome/fonts/fontawesome-webfont.ttf?v=4.3.0 
-bower_components/jquery/dist/jquery.min.js
-bower_components/angular/angular.min.js
-bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js
-bower_components/lodash/dist/lodash.compat.min.js
-bower_components/angular-ui-router/release/angular-ui-router.min.js
 http://fonts.googleapis.com/icon?family=Material+Icons
 http://www.google-analytics.com/analytics.js
 
