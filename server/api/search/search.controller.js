@@ -15,7 +15,7 @@ exports.index = function(req, res) {
 exports.search = function(req, res) {
     var searchCriteria = [q.collection('docs')];
     var facetOptions = [q.facet('lib', 'lib'), q.facet('bucket', 'bucket')]
-    var resultLimit = req.body.perPage || 100; // default
+    var resultLimit = req.body.perPage || 9999; // default
     if (req.body.facetsOnly) {
         resultLimit = 0;
     }
@@ -131,7 +131,7 @@ exports.suggest = function(req, res) {
 
 // returns list of api names
 exports.all = function(req, res) {
-    var resultLimit = 100; // default
+    var resultLimit = 9999; // default
     console.log('req.body', req.body);
 
     db.documents.query(

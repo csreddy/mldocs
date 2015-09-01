@@ -3,13 +3,13 @@ CACHE MANIFEST
 # for production env              #
 ###################################
 
-#version 33
+#version 34
 
 /index.html
 /app/ebda609f.vendor.css
 /app/fc1c5422.app.css
-/app/57174ab6.app.js
 /app/c8d5270e.vendor.js
+/app/cfd8eed7.app.js
 
 bower_components/bootstrap/dist/css/bootstrap.min.css
 bower_components/font-awesome/css/font-awesome.min.css

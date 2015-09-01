@@ -53,7 +53,10 @@
                     </td>
                     <td>
                         <md-content layout-padding>
-                            {{::param.required}}
+                            <div ng-if="param.required">
+                                <i class="fa fa-check"></i>
+                            </div>
+                           <!--  {{::param.required}} -->
                         </md-content>
                     </td>
                     <td>

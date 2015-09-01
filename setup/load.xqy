@@ -1,5 +1,5 @@
 declare namespace a="http://marklogic.com/xdmp/apidoc";
-   let $files := xdmp:filesystem-directory("/Users/sreddy/space/MarkLogic_8_pubs/pubs/raw/apidoc2/")/*:entry
+   let $files := xdmp:filesystem-directory("/Users/sreddy/space/angularjs/mldocs/setup/apidoc")/*:entry
      let $paths :=  for $file in $files
                     return if($file/*:type/text() eq 'file' 
                     and $file/*:filename/text() ne '.DS_Store'
@@ -30,18 +30,19 @@ declare namespace a="http://marklogic.com/xdmp/apidoc";
       let $subcategory := $f/@subcategory
       let $subcategory := if(fn:empty($subcategory)) then "" else text {$subcategory}
       let $summary := $f/a:summary
-      let $params := 
+       let $params := 
             for $p in $f/a:params/*
             let $name := text {$p/@name}
             let $name := if(fn:empty($name)) then "" else text {$name}
             let $type := text {$p/@type}
             let $type := if(fn:empty($type)) then "" else text {$type}
-            let $required := if(fn:not(fn:empty($p/@optional/text()))) then boolean-node {fn:not($p/@optional)} else fn:true()
+            let $required := fn:not($p/@optional/data())
             let $desc := text {$p}
             return object-node{
             "name": $name,
-            "type": $type, (: omitted $required because I cant extarct if its required or optional:)
-            "description":$desc
+            "type": $type,
+            "description":$desc,
+            "required": $required
             }
          let $headers := 
             for $p in $f/a:headers/*
@@ -49,11 +50,10 @@ declare namespace a="http://marklogic.com/xdmp/apidoc";
             let $name := if(fn:empty($name)) then "" else text {$name}
             let $type := text {$p/@type}
             let $type := if(fn:empty($type)) then "" else text {$type}
-            let $required := if(fn:not(fn:empty($p/@optional/text()))) then boolean-node {fn:not($p/@optional)} else fn:true()
             let $desc := text {$p}
             return object-node{
             "name": $name,
-            "type": $type, (: omitted $required because I cant extarct if its required or optional:)
+            "type": $type, 
             "description":$desc
             }    
       let $return := $f/a:return 

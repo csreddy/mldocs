@@ -83,7 +83,9 @@ angular
                         facetsOnly: false
                     }).success(function(results) {
                         strictSuggestions = _.compact(results);
-                        $scope.query.suggestions = _.uniq(_.flatten([strictSuggestions, fuzzySuggestions], true));
+                       // console.log('strict suggestions', strictSuggestions);
+                       // console.log('fuzzy suggestions', fuzzySuggestions);
+                        $scope.query.suggestions = _.uniq(_.flatten([strictSuggestions, fuzzySuggestions], true)).splice(0, 10);
                     }).error(function(error) {
                         console.log('error', error);
                     });
