@@ -16,7 +16,7 @@
 	</md-content></th></tr>
 	<tbody>
 
-		<tr ng-repeat="item in list | filter:api">
+		<tr ng-repeat="item in list | filter:api track by $index">
 			<td class="col-md-5"><md-content layout-padding>
 			    <a ui-sref="app.detail({uri:item.uri})"><b>{{::item['http-verb']}} {{::item.lib}}:{{::item.apiName}}</b></a>
 			</md-content></td>

@@ -74,7 +74,7 @@ angular
                     // if app is offline, then get suggestions from fuzzy search only, 
                     // do not call ML suggest api
                     if (!_isOnline) {
-                        $scope.query.suggestions = fuzzySuggestions;
+                        $scope.query.suggestions = _.uniq(fuzzySuggestions);
                         return;
                     }
 
@@ -179,7 +179,10 @@ angular
                     console.log('showProgress', $scope.showProgress);
                     offline.getApisInModule(name).then(function(list) {
                         console.log('list', list);
-                        $scope.list = list;
+                        $scope.$apply(function() {
+                            $scope.list = list;
+                        });
+
                     }, function(error) {
                         console.log('error', error);
                     });
@@ -196,7 +199,7 @@ angular
                     // remove first item from array
                     $scope.list = _.rest(result);
                     $scope.list = _.sortBy($scope.list, 'apiName');
-                    
+
 
                 }).error(function(error) {
                     $scope.showProgress = false;
@@ -221,12 +224,17 @@ angular
     .controller('DetailCtrl', ['$rootScope', '$scope', '$state', 'isOnline', 'Search', 'offline',
         function($rootScope, $scope, $state, isOnline, Search, offline) {
             // console.log('$state', $state);
+
+
             $scope.showProgress = true;
             var _isOnline = $rootScope.isOnline || isOnline;
             $scope.$evalAsync(function() {
                 if (!_isOnline) {
                     offline.get($state.params.uri).then(function(doc) {
-                        $scope.api = doc;
+                        $scope.$apply(function() {
+                            $scope.api = doc;
+                        });
+
                     });
                     $scope.showProgress = false;
                     return;
@@ -245,8 +253,8 @@ angular
 
         }
     ])
-    .controller('NavCtrl', ['$rootScope', '$scope', '$mdSidenav', '$mdToast', 'Search', 'offline', 'isOnline',
-        function($rootScope, $scope, $mdSidenav, $mdToast, Search, offline, isOnline) {
+    .controller('NavCtrl', ['$rootScope', '$scope', '$window', '$mdSidenav', '$mdToast', '$mdDialog', 'Search', 'offline', 'isOnline',
+        function($rootScope, $scope, $window, $mdSidenav, $mdToast, $mdDialog, Search, offline, isOnline) {
 
             $rootScope.isOnline = isOnline;
             // $scope.$on('online', function(event, healthcheck) {
@@ -254,7 +262,7 @@ angular
             //     $rootScope.isOnline = healthcheck;
             // });
 
-             $rootScope.showToast = function(message) {
+            $rootScope.showToast = function(message) {
                 var toast = $mdToast.simple()
                     .content(message)
                     .action('OK')
@@ -267,7 +275,7 @@ angular
             if (!$rootScope.isOnline) {
                 $rootScope.showToast('Unable to connect to the internet, switched to offline mode');
             }
-            
+
             $scope.showSidebar = function() {
                 return !$mdSidenav('left').isLockedOpen();
             }.call();
@@ -279,21 +287,46 @@ angular
             };
 
             // save for offline access
-            $scope.saveForOffline = function() {
-                Search.search({
-                    q: '',
-                    facetsOnly: false,
-                    perPage: 9999
-                }).success(function(response) {
-                    $scope.forOffline = _.rest(response);
-                    offline.save($scope.forOffline);
-                    $rootScope.showToast('API docs saved for offline access');
-                }).error(function(error) {
-                    console.error('error', error);
-                });
+            $scope.saveForOffline = function(ev) {
+               // if the browser is not chrome then show dialog
+                if (!window.navigator.userAgent.includes('Chrome')) {
+                    var confirm = $mdDialog.confirm()
+                        .title('Please note!')
+                        .content('Offline access works best on Chrome. Other browsers may not work well')
+                        .ariaLabel('Alert Dialog')
+                        .ok('Save')
+                        .cancel('Cancel')
+                        .targetEvent(ev);
+                    $mdDialog.show(confirm).then(function() {
+                        Search.search({
+                            q: '',
+                            facetsOnly: false,
+                            perPage: 9999
+                        }).success(function(response) {
+                            $scope.forOffline = _.rest(response);
+                            offline.save($scope.forOffline);
+                            $rootScope.showToast('API docs saved for offline access');
+                        }).error(function(error) {
+                            console.error('error', error);
+                        });
+                    }, function() {
+                        $rootScope.showToast('You did the right thing!');
+                    });
+
+                } else {
+                    Search.search({
+                        q: '',
+                        facetsOnly: false,
+                        perPage: 9999
+                    }).success(function(response) {
+                        $scope.forOffline = _.rest(response);
+                        offline.save($scope.forOffline);
+                        $rootScope.showToast('API docs saved for offline access');
+                    }).error(function(error) {
+                        console.error('error', error);
+                    });
+                }
             };
-
-
         }
     ])
     .controller('RightCtrl', function($scope, $timeout, $mdSidenav, $log) {

@@ -1,15 +1,21 @@
-# version 1
-
 CACHE MANIFEST
-/app/3df0bb9e.app.css	
-/app/50e3b707.vendor.js	
-/app/9d7c6538.app.js		
+###################################
+# for production env              #
+###################################
+
+#version 33
+
+/index.html
 /app/ebda609f.vendor.css
+/app/fc1c5422.app.css
+/app/c8d5270e.vendor.js
+/app/d972a900.app.js
 
 bower_components/bootstrap/dist/css/bootstrap.min.css
 bower_components/font-awesome/css/font-awesome.min.css
 bower_components/angular-material/angular-material.min.css
-bower_components/font-awesome/fonts/fontawesome-webfont.ttf?v=4.3.0 
+bower_components/font-awesome/fonts/fontawesome-webfont.ttf?v=4.3.0
+bower_components/font-awesome/fonts/fontawesome-webfont.ttf?v=4.1.0 
 bower_components/jquery/dist/jquery.min.js
 bower_components/angular/angular.min.js
 bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js
@@ -20,6 +26,60 @@ http://www.google-analytics.com/analytics.js
 
 NETWORK:
 *
+
+
+###################################
+# for development env             #
+###################################
+## html files
+#/app/main/main.html
+#/app/main/navbar.html
+#/app/main/result.html
+#/app/main/search.html
+#/app/main/sidebar.html
+#/app/main/list.html
+#/app/main/detail.html
+#/app/main/partials/intro.partial.html
+#/app/main/partials/api.detail.partial.html
+#/app/main/partials/restapi.detail.partial.html
+#
+## js files
+#/app/app.js
+#/app/main/main.js
+#/app/main/main.controller.js
+#/app/services/offline/offline.service.js
+#/app/services/search.service.js
+#/util/fuse.min.js
+#/util/dexie.min.js
+#components/modal/modal.service.js
+#components/navbar/navbar.controller.js
+#
+## css files
+#/app/app.css
+#/app/main/main.css
+#components/modal/modal.css
+#
+## images
+#/favicon.ico
+#
+#NETWORK:
+#*
+#
+#CACHE:
+#http://fonts.googleapis.com/icon?family=Material+Icons
+#http://www.google-analytics.com/analytics.js
+#bower_components/bootstrap/dist/css/bootstrap.css
+#bower_components/font-awesome/css/font-awesome.css
+#bower_components/angular-material/angular-material.css
+#bower_components/font-awesome/fonts/fontawesome-webfont.ttf?v=4.3.0 
+#bower_components/jquery/dist/jquery.js
+#bower_components/angular/angular.js
+#bower_components/angular-bootstrap/ui-bootstrap-tpls.js
+#bower_components/lodash/dist/lodash.compat.js
+#bower_components/angular-ui-router/release/angular-ui-router.js
+#bower_components/angular-animate/angular-animate.js
+#bower_components/angular-aria/angular-aria.js
+#bower_components/angular-material/angular-material.js 
 
 
 

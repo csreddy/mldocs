@@ -5,6 +5,9 @@ angular.module('offline.service', [])
         function($window, $http, $interval, $rootScope) {
             var db = new Dexie('offlineMLDocs');
             var isOnline = true;
+            db.version(2).stores({
+                    apis: '++id,apiName,isRest,lib,category,subcategory,bucket,summary,uri'
+                }).upgrade();
 
             // check if db is online evvery 5 sec
             checkIsOnline().then(function(response) {
@@ -14,6 +17,7 @@ angular.module('offline.service', [])
                 isOnline = false;
                 console.log('app is online', isOnline);
             });
+
 
             /* $interval(function() {
                 checkIsOnline().then(function(response) {
@@ -31,30 +35,31 @@ angular.module('offline.service', [])
             // defines db schema
             function defineDBSchema(version) {
                 db.version(version).stores({
-                    apis: '++id,isRest,&apiName,lib,category,subcategory,bucket,summary,*params,*headers,return,usage,*examples'
+                    apis: '++id,apiName,isRest,lib,category,subcategory,bucket,summary,uri'
                 });
             }
 
+            function firstDBShemaVersion(){
+                db.version(1).stores({
+                    apis: '++id,apiName,isRest,lib,category,subcategory,bucket,summary,uri'
+                });
+            }
+
+
             // saves apis from ml db into browser's indexedDB for offline access
             function saveApis(data) {
-                db.version(1).stores({
-                    apis: '++id,&apiName,isRest,lib,category,subcategory,bucket,summary,uri'
-                });
+               
+               defineDBSchema(2);
+               firstDBShemaVersion(1);
                 db.open();
 
-                // db.close();
-                // db.delete();
-                // db.version(1).stores({
-                //     apis: '++id,isRest,apiName,lib,category,subcategory,bucket,summary'
-                // });
-                // db.open();
-                data.forEach(function(item) {
+              /*  data.forEach(function(item) {
                     db.apis.put(item);
                     console.log('saved api', item.apiName);
                 });
+                */
 
-
-                /*db.transaction('rw', db.apis, function() {
+                db.transaction('rw', db.apis, function() {
                     data.forEach(function(item) {
                         db.apis.put(item);
                         console.log('added api from txn', item.apiName);
@@ -62,16 +67,16 @@ angular.module('offline.service', [])
                 }).catch(function(error) {
                     console.error('error', error);
                 });
-*/
+                
 
                 // .finally(function() {
-                //     db.close();
+                //     db.close(); 
                 // });
             }
 
             function getDBSchema(table) {
                 db.tables.forEach(function(table) {
-                    console.log("Schema of " + table.name + ": " + JSON.stringify(table.schema));
+                    console.log('Schema of ' + table.name + ': ' + JSON.stringify(table.schema));
                 });
             }
 
@@ -118,6 +123,10 @@ angular.module('offline.service', [])
 
             function apiList() {
                 console.log('offline api list...');
+                if (!db.isOpen()) {
+                 defineDBSchema(2);
+                    db.open();
+                }
                 var collection = db.apis;
                 return collection.toArray().then(function(apis) {
                     return _.pluck(apis, 'apiName');
@@ -126,6 +135,10 @@ angular.module('offline.service', [])
 
             function moduleList() {
                 console.log('offline module list...');
+                if (!db.isOpen()) {
+                   defineDBSchema(2);
+                    db.open();
+                }
                 var modules = {
                     lib: [],
                     bucket: []
@@ -182,7 +195,7 @@ angular.module('offline.service', [])
             // get api details
             function get(uri) {
                 return db.apis.where('uri').equals(decodeURIComponent(uri)).first().then(function(api) {
-                    console.log('api', api);
+                    //console.log('api', api);
                     return api;
                 });
             }
