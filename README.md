@@ -1,7 +1,7 @@
 ### **ML Docs**<sup>_lite_</sup>
 
 [MarkLogic](http://www.marklogic.com/) has over 3000 apis, its very hard to quicky and accurately find the api you are looking for. More often than not you just want to lookup the api, learn about it and get back to work.
-**ML Docs**<sup>_lite_</sup> is light weight and clean interface, that’ll enable you to quickly and accurately locate the api at lightning speed, whether you are online or __offline!__
+**ML Docs**<sup>_lite_</sup> is light weight app with clean interface, that’ll enable you to quickly and accurately locate the api at lightning speed, whether you are online or __offline!__
 
 #####highlights
 
